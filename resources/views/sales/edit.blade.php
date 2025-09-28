@@ -66,7 +66,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div id="cash_amount_group" class="col-md-6 mb-3">
                         <label for="cash_amount" class="form-label">المبلغ النقدي</label>
                         <input type="number" step="0.01" class="form-control @error('cash_amount') is-invalid @enderror"
                             id="cash_amount" name="cash_amount" value="{{ old('cash_amount', $sale->cash_amount) }}" required>
@@ -75,7 +75,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div id="app_amount_group" class="col-md-6 mb-3">
                         <label for="app_amount" class="form-label">مبلغ التطبيق</label>
                         <input type="number" step="0.01" class="form-control @error('app_amount') is-invalid @enderror"
                             id="app_amount" name="app_amount" value="{{ old('app_amount', $sale->app_amount) }}" required>
@@ -106,30 +106,51 @@
 
 @push('scripts')
 <script>
-document.getElementById('payment_method').addEventListener('change', function() {
+(function() {
+    const paymentSelect = document.getElementById('payment_method');
     const cashInput = document.getElementById('cash_amount');
     const appInput = document.getElementById('app_amount');
+    const cashGroup = document.getElementById('cash_amount_group');
+    const appGroup = document.getElementById('app_amount_group');
 
-    switch(this.value) {
-        case 'cash':
-            cashInput.removeAttribute('readonly');
-            appInput.value = '0';
-            appInput.setAttribute('readonly', 'readonly');
-            break;
-        case 'app':
-        case 'card':
-            cashInput.value = '0';
-            cashInput.setAttribute('readonly', 'readonly');
-            appInput.removeAttribute('readonly');
-            break;
-        case 'mixed':
-            cashInput.removeAttribute('readonly');
-            appInput.removeAttribute('readonly');
-            break;
-        default:
-            cashInput.removeAttribute('readonly');
-            appInput.removeAttribute('readonly');
+    function show(el) { el.classList.remove('d-none'); }
+    function hide(el) { el.classList.add('d-none'); }
+
+    function updateAmountFields() {
+        const method = paymentSelect.value;
+        switch (method) {
+            case 'cash':
+                show(cashGroup);
+                hide(appGroup);
+                cashInput.removeAttribute('readonly');
+                appInput.value = '0';
+                appInput.setAttribute('readonly', 'readonly');
+                break;
+            case 'app':
+            case 'card':
+                show(appGroup);
+                hide(cashGroup);
+                appInput.removeAttribute('readonly');
+                cashInput.value = '0';
+                cashInput.setAttribute('readonly', 'readonly');
+                break;
+            case 'mixed':
+                show(cashGroup);
+                show(appGroup);
+                cashInput.removeAttribute('readonly');
+                appInput.removeAttribute('readonly');
+                break;
+            default:
+                show(cashGroup);
+                show(appGroup);
+                cashInput.removeAttribute('readonly');
+                appInput.removeAttribute('readonly');
+        }
     }
-});
+
+    paymentSelect.addEventListener('change', updateAmountFields);
+    document.addEventListener('DOMContentLoaded', updateAmountFields);
+    updateAmountFields();
+})();
 </script>
 @endpush

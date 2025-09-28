@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->string('payment_method', 20)->change();
-        });
+        if (Schema::hasTable('sales') && Schema::hasColumn('sales', 'payment_method')) {
+            Schema::table('sales', function (Blueprint $table) {
+                $table->string('payment_method', 20)->change();
+            });
+        }
     }
 
     public function down()
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->string('payment_method', 10)->change();
-        });
+        if (Schema::hasTable('sales') && Schema::hasColumn('sales', 'payment_method')) {
+            Schema::table('sales', function (Blueprint $table) {
+                $table->string('payment_method', 10)->change();
+            });
+        }
     }
 };

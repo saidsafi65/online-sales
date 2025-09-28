@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Purchase extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'purchases';
+
+    protected $fillable = [
+        'item',
+        'type',
+        'quantity',
+        'payment_method',
+        'amount',
+        'purchase_date',
+        'supplier_name',
+        'phone',
+        'id_image',
+        'is_returned',
+        'issue',
+        'return_date',
+        'notes',
+    ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+        'amount' => 'decimal:2',
+        'purchase_date' => 'datetime',
+        'return_date' => 'datetime',
+        'is_returned' => 'boolean',
+    ];
+}

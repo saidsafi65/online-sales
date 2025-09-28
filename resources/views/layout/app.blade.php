@@ -30,7 +30,7 @@
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo-img me-2">
+                    <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo" class="logo-img me-2">
                     <span class="brand-text">نظام المبيعات</span>
                 </a>
 
@@ -52,6 +52,18 @@
                             <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" href="{{ route('sales.index') }}">
                                 <i class="fas fa-shopping-cart me-1"></i>
                                 المبيعات
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}" href="{{ route('purchases.index') }}">
+                                <i class="fas fa-shopping-bag me-1"></i>
+                                المشتريات
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('repairs.*') ? 'active' : '' }}" href="{{ route('repairs.index') }}">
+                                <i class="fas fa-tools me-1"></i>
+                                الصيانة
                             </a>
                         </li>
                         <li class="nav-item">
@@ -168,7 +180,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="footer-info">
-                        <img src="{{ asset('images/logo-white.png') }}" alt="Logo" class="footer-logo me-2">
+                        <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo" class="footer-logo me-2">
                         <span>&copy; {{ date('Y') }} نظام إدارة المبيعات. جميع الحقوق محفوظة.</span>
                     </div>
                 </div>

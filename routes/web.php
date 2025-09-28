@@ -1,13 +1,15 @@
 <?php
 
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PurchasesController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('sales.index');
+    return view('home');
 })->name('dashboard');
 
 Route::get('/settings', function () {
@@ -44,6 +46,22 @@ Route::get('/sales/monthly-income', [SalesController::class, 'monthlyIncome'])->
 
 // إرجاع عملية بيع
 Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
+
+// Repairs routes
+Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
+Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
+Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
+Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
+Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
+Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])->name('repairs.destroy');
+
+// Purchases routes
+Route::get('/purchases', [PurchasesController::class, 'index'])->name('purchases.index');
+Route::get('/purchases/create', [PurchasesController::class, 'create'])->name('purchases.create');
+Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
+Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
+Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
+Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
 
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');

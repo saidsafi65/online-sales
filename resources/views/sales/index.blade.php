@@ -64,7 +64,7 @@
             <div class="stats-icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
-            <div class="stats-number">{{ $totalSales ?? 0 }}</div>
+            <div class="stats-number">{{ $statistics['totalSales'] ?? 0 }}</div>
             <div class="stats-label">إجمالي المبيعات</div>
         </div>
     </div>
@@ -74,7 +74,7 @@
             <div class="stats-icon">
                 <i class="fas fa-money-bill-wave"></i>
             </div>
-            <div class="stats-number">{{ number_format($totalRevenue ?? 0, 2) }}</div>
+            <div class="stats-number">{{ number_format($statistics['totalRevenue'] ?? 0, 2) }}</div>
             <div class="stats-label">إجمالي الإيرادات</div>
         </div>
     </div>
@@ -84,7 +84,7 @@
             <div class="stats-icon">
                 <i class="fas fa-calendar-day"></i>
             </div>
-            <div class="stats-number">{{ $todaySales ?? 0 }}</div>
+            <div class="stats-number">{{ $statistics['todaySales'] ?? 0 }}</div>
             <div class="stats-label">مبيعات اليوم</div>
         </div>
     </div>
@@ -94,7 +94,7 @@
             <div class="stats-icon">
                 <i class="fas fa-undo"></i>
             </div>
-            <div class="stats-number">{{ $returnedSales ?? 0 }}</div>
+            <div class="stats-number">{{ $statistics['returnedSales'] ?? 0 }}</div>
             <div class="stats-label">المبيعات المرتجعة</div>
         </div>
     </div>

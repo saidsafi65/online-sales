@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('product'); // اسم المنتج
             $table->string('type'); // النوع أو الموديل
             $table->dateTime('sale_date'); // تاريخ ووقت البيع
-            $table->enum('payment_method', ['cash', 'app', 'cash_app']); // طريقة الدفع
+            $table->string('payment_method', 20); // طريقة الدفع
             $table->decimal('cash_amount', 10, 2)->nullable(); // مبلغ الكاش
             $table->decimal('app_amount', 10, 2)->nullable(); // مبلغ الدفع عبر التطبيق
             $table->boolean('is_returned')->default(false); // هل هي عملية مرجعة أم لا
