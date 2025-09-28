@@ -25,8 +25,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="product" class="form-label">اسم المنتج</label>
-                            <input type="text" class="form-control @error('product') is-invalid @enderror" id="product"
-                                name="product" value="{{ old('product') }}" required>
+                            <select class="form-select @error('product') is-invalid @enderror" id="product" name="product" required>
+                                <option value="">اختر المنتج</option>
+                                @foreach(($products ?? collect())->keys() as $product)
+                                    <option value="{{ $product }}" {{ old('product') == $product ? 'selected' : '' }}>{{ $product }}</option>
+                                @endforeach
+                            </select>
                             @error('product')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -34,8 +38,9 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="type" class="form-label">النوع / الموديل</label>
-                            <input type="text" class="form-control @error('type') is-invalid @enderror" id="type"
-                                name="type" value="{{ old('type') }}" required>
+                            <select class="form-select @error('type') is-invalid @enderror" id="type" name="type" required>
+                                <option value="">اختر النوع / الموديل</option>
+                            </select>
                             @error('type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -129,6 +134,35 @@
 
 @push('scripts')
     <script>
+        // ربط قائمة الأنواع مع المنتج المختار
+        (function(){
+            const products = @json(($products ?? collect())->map->pluck('type'));
+            const productSelect = document.getElementById('product');
+            const typeSelect = document.getElementById('type');
+
+            function fillTypes(selectedProduct){
+                typeSelect.innerHTML = '<option value="">اختر النوع / الموديل</option>';
+                const types = products[selectedProduct] || [];
+                types.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = t;
+                    if (t === @json(old('type'))) opt.selected = true;
+                    typeSelect.appendChild(opt);
+                });
+            }
+
+            productSelect.addEventListener('change', function(){ fillTypes(this.value); });
+
+            document.addEventListener('DOMContentLoaded', function(){
+                const initial = productSelect.value || @json(old('product')) || '';
+                if (initial){
+                    productSelect.value = initial;
+                    fillTypes(initial);
+                }
+            });
+        })();
+    </script>
         (function() {
             const paymentSelect = document.getElementById('payment_method');
             const cashInput = document.getElementById('cash_amount');

@@ -67,7 +67,10 @@ class SalesController extends Controller
      */
     public function create(): View
     {
-        return view('sales.create');
+        // جلب كتالوج المنتجات لتعبئة القوائم
+        $catalog = \App\Models\CatalogItem::orderBy('product')->orderBy('type')->get();
+        $products = $catalog->groupBy('product');
+        return view('sales.create', compact('products'));
     }
 
     /**

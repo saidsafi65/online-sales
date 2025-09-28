@@ -5,6 +5,7 @@ use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\CatalogController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -62,6 +63,12 @@ Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchase
 Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
 Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
 Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
+
+// Catalog routes
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
+Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
+Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
 
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');

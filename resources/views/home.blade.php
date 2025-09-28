@@ -54,6 +54,21 @@
                 </div>
             </a>
         </div>
+
+        <!-- الكتالوج -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('catalog.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm h-100 border-0 hover-shadow">
+                    <div class="card-body text-center py-5">
+                        <div class="display-5 text-info mb-3">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <h5 class="card-title mb-2">كتالوج المنتجات</h5>
+                        <p class="card-text text-muted">إضافة وإدارة أسماء المنتجات والأنواع</p>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 </div>
 @endsection
