@@ -14,5 +14,7 @@ class CatalogItem extends Model
     protected $fillable = [
         'product',
         'type',
+        'quantity',
+        'wholesale_price',
     ];
 }

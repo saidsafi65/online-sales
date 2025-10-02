@@ -30,7 +30,7 @@
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
-                    <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo" class="logo-img me-2">
+                    <i class="fa fa-home me-2"></i>
                     <span class="brand-text">نظام المبيعات</span>
                 </a>
 
@@ -41,7 +41,7 @@
 
                 <!-- Navigation -->
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
+                    <ul class="navbar-nav me-auto ">
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                                 <i class="fas fa-home me-1"></i>

@@ -26,6 +26,8 @@ class CatalogController extends Controller
         $validator = Validator::make($request->all(), [
             'product' => 'required|string|max:120',
             'type' => 'required|string|max:120',
+            'quantity' => 'required|integer|min:1',
+            'wholesale_price' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -35,6 +37,8 @@ class CatalogController extends Controller
         CatalogItem::firstOrCreate([
             'product' => $request->product,
             'type' => $request->type,
+            'quantity' => $request->quantity,
+            'wholesale_price' => $request->wholesale_price,
         ]);
 
         return redirect()->route('catalog.index')->with('success', 'تمت الإضافة إلى الكتالوج');
