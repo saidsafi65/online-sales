@@ -76,82 +76,101 @@ class SalesController extends Controller
     /**
      * Store a newly created sale
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $rules = [
-            'product' => 'required|string|max:255',
-            'type' => 'required|string|max:100',
-            'sale_date' => 'required|date',
-            'payment_method' => 'required|in:cash,card,app,mixed',
-            'notes' => 'nullable|string|max:1000',
-        ];
+    // في دالة store
 
-        // Validate amounts based on payment method
-        switch ($request->payment_method) {
-            case 'cash':
-                $rules['cash_amount'] = 'required|numeric|min:0.01';
-                $rules['app_amount'] = 'required|numeric|in:0';
-                break;
-            case 'card':
-            case 'app':
-                $rules['app_amount'] = 'required|numeric|min:0.01';
-                $rules['cash_amount'] = 'required|numeric|in:0';
-                break;
-            case 'mixed':
-                $rules['cash_amount'] = 'required|numeric|min:0.01';
-                $rules['app_amount'] = 'required|numeric|min:0.01';
-                break;
-            default:
-                $rules['cash_amount'] = 'required|numeric|min:0';
-                $rules['app_amount'] = 'required|numeric|min:0';
+public function store(Request $request): RedirectResponse
+{
+    $rules = [
+        'product' => 'required|string|max:255',
+        'type' => 'required|string|max:100',
+        'sale_date' => 'required|date',
+        'payment_method' => 'required|in:cash,card,app,mixed',
+        'notes' => 'nullable|string|max:1000',
+    ];
+
+    // Validate amounts based on payment method
+    switch ($request->payment_method) {
+        case 'cash':
+            $rules['cash_amount'] = 'required|numeric|min:0.01';
+            $rules['app_amount'] = 'required|numeric|in:0';
+            break;
+        case 'card':
+        case 'app':
+            $rules['app_amount'] = 'required|numeric|min:0.01';
+            $rules['cash_amount'] = 'required|numeric|in:0';
+            break;
+        case 'mixed':
+            $rules['cash_amount'] = 'required|numeric|min:0.01';
+            $rules['app_amount'] = 'required|numeric|min:0.01';
+            break;
+        default:
+            $rules['cash_amount'] = 'required|numeric|min:0';
+            $rules['app_amount'] = 'required|numeric|min:0';
+    }
+
+    $validator = Validator::make($request->all(), $rules, [
+        'cash_amount.min' => 'المبلغ النقدي يجب أن يكون أكبر من صفر',
+        'app_amount.min' => 'مبلغ التطبيق يجب أن يكون أكبر من صفر',
+        'cash_amount.in' => 'المبلغ النقدي يجب أن يكون صفر مع طريقة الدفع المختارة',
+        'app_amount.in' => 'مبلغ التطبيق يجب أن يكون صفر مع طريقة الدفع المختارة',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+                       ->withErrors($validator)
+                       ->withInput();
+    }
+
+    if ($request->cash_amount == 0 && $request->app_amount == 0) {
+        return redirect()->back()
+                       ->withErrors(['amount' => 'يجب إدخال مبلغ للدفع'])
+                       ->withInput();
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // تحقق من الكمية المتوفرة في جدول catalog_items
+        $catalogItem = \App\Models\CatalogItem::where('product', $request->product)
+                                              ->where('type', $request->type)
+                                              ->first();
+
+        // إذا لم تكن الكمية متوفرة أو أقل من 1، ارجع بخطأ
+        if (!$catalogItem || $catalogItem->quantity < 1) {
+            return redirect()->back()
+                             ->withErrors(['quantity' => 'المنتج غير متوفر أو الكمية غير كافية'])
+                             ->withInput();
         }
 
-        $validator = Validator::make($request->all(), $rules, [
-            'cash_amount.min' => 'المبلغ النقدي يجب أن يكون أكبر من صفر',
-            'app_amount.min' => 'مبلغ التطبيق يجب أن يكون أكبر من صفر',
-            'cash_amount.in' => 'المبلغ النقدي يجب أن يكون صفر مع طريقة الدفع المختارة',
-            'app_amount.in' => 'مبلغ التطبيق يجب أن يكون صفر مع طريقة الدفع المختارة',
+        // تحديث الكمية بعد عملية البيع
+        $catalogItem->decrement('quantity', 1);
+
+        // إنشاء عملية البيع
+        $sale = Sale::create([
+            'product' => $request->product,
+            'type' => $request->type,
+            'sale_date' => $request->sale_date,
+            'payment_method' => $request->payment_method,
+            'cash_amount' => $request->cash_amount,
+            'app_amount' => $request->app_amount,
+            'is_returned' => false,
+            'notes' => $request->notes,
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput();
-        }
+        DB::commit();
 
-        if ($request->cash_amount == 0 && $request->app_amount == 0) {
-            return redirect()->back()
-                           ->withErrors(['amount' => 'يجب إدخال مبلغ للدفع'])
-                           ->withInput();
-        }
+        return redirect()->route('sales.index')
+                       ->with('success', 'تم إضافة المبيعة بنجاح');
 
-        try {
-            DB::beginTransaction();
+    } catch (\Exception $e) {
+        DB::rollBack();
 
-            $sale = Sale::create([
-                'product' => $request->product,
-                'type' => $request->type,
-                'sale_date' => $request->sale_date,
-                'payment_method' => $request->payment_method,
-                'cash_amount' => $request->cash_amount,
-                'app_amount' => $request->app_amount,
-                'is_returned' => false,
-                'notes' => $request->notes,
-            ]);
-
-            DB::commit();
-
-            return redirect()->route('sales.index')
-                           ->with('success', 'تم إضافة المبيعة بنجاح');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                           ->with('error', 'حدث خطأ أثناء إضافة المبيعة: ' . $e->getMessage())
-                           ->withInput();
-        }
+        return redirect()->back()
+                       ->with('error', 'حدث خطأ أثناء إضافة المبيعة: ' . $e->getMessage())
+                       ->withInput();
     }
+}
+
 
     /**
      * Display the specified sale

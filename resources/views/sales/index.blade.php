@@ -177,6 +177,7 @@
                             </div>
                         </td>
                     </tr>
+
                     @empty
                     <tr>
                         <td colspan="10" class="text-center py-4">
@@ -191,6 +192,11 @@
                         </td>
                     </tr>
                     @endforelse
+                    <tr>
+                        <td><a href="{{ route('sales.create') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>إضافة مبيعة جديدة
+                                </a></td>
+                    </tr>
                 </tbody>
             </table>
         </div>

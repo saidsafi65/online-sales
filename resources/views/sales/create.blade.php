@@ -25,10 +25,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="product" class="form-label">اسم المنتج</label>
-                            <select class="form-select @error('product') is-invalid @enderror" id="product" name="product" required>
+                            <select class="form-select @error('product') is-invalid @enderror" id="product" name="product"
+                                required>
                                 <option value="">اختر المنتج</option>
-                                @foreach(($products ?? collect())->keys() as $product)
-                                    <option value="{{ $product }}" {{ old('product') == $product ? 'selected' : '' }}>{{ $product }}</option>
+                                @foreach (($products ?? collect())->keys() as $product)
+                                    <option value="{{ $product }}" {{ old('product') == $product ? 'selected' : '' }}>
+                                        {{ $product }}</option>
                                 @endforeach
                             </select>
                             @error('product')
@@ -38,7 +40,8 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="type" class="form-label">النوع / الموديل</label>
-                            <select class="form-select @error('type') is-invalid @enderror" id="type" name="type" required>
+                            <select class="form-select @error('type') is-invalid @enderror" id="type" name="type"
+                                required>
                                 <option value="">اختر النوع / الموديل</option>
                             </select>
                             @error('type')
@@ -135,12 +138,12 @@
 @push('scripts')
     <script>
         // ربط قائمة الأنواع مع المنتج المختار
-        (function(){
+        (function() {
             const products = @json(($products ?? collect())->map->pluck('type'));
             const productSelect = document.getElementById('product');
             const typeSelect = document.getElementById('type');
 
-            function fillTypes(selectedProduct){
+            function fillTypes(selectedProduct) {
                 typeSelect.innerHTML = '<option value="">اختر النوع / الموديل</option>';
                 const types = products[selectedProduct] || [];
                 types.forEach(t => {
@@ -152,17 +155,18 @@
                 });
             }
 
-            productSelect.addEventListener('change', function(){ fillTypes(this.value); });
+            productSelect.addEventListener('change', function() {
+                fillTypes(this.value);
+            });
 
-            document.addEventListener('DOMContentLoaded', function(){
+            document.addEventListener('DOMContentLoaded', function() {
                 const initial = productSelect.value || @json(old('product')) || '';
-                if (initial){
+                if (initial) {
                     productSelect.value = initial;
                     fillTypes(initial);
                 }
             });
         })();
-    </script>
         (function() {
             const paymentSelect = document.getElementById('payment_method');
             const cashInput = document.getElementById('cash_amount');
@@ -170,8 +174,13 @@
             const cashGroup = document.getElementById('cash_amount_group');
             const appGroup = document.getElementById('app_amount_group');
 
-            function show(el) { el.classList.remove('d-none'); }
-            function hide(el) { el.classList.add('d-none'); }
+            function show(el) {
+                el.classList.remove('d-none');
+            }
+
+            function hide(el) {
+                el.classList.add('d-none');
+            }
 
             function updateAmountFields() {
                 const method = paymentSelect.value;
@@ -214,5 +223,7 @@
             // استدعاء فوري لضبط الحالة عند الفتح
             updateAmountFields();
         })();
+    </script>
+
     </script>
 @endpush

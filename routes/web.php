@@ -8,9 +8,52 @@ use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\CatalogController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MaintenanceDepositController;
+use App\Http\Controllers\ReportsController;
+use App\Models\Sale;
+use App\Models\Repair;
+use App\Models\CatalogItem;
+use App\Models\Purchase;
+use Illuminate\Support\Facades\DB;
+
+// Route::get('/', function () {
+//     return view('home');
+// })->name('dashboard');
 
 Route::get('/', function () {
-    return view('home');
+
+    // عدد الصيانات المسلمة
+    $deliveredRepairs = Repair::whereNotNull('delivery_date')->count();
+
+    // عدد الصيانات المعلقة (قبل الخصم)
+    $pendingRepairsRaw = Repair::where('status', 'pending')->count();
+
+     // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة)
+    $monthlySales = Sale::whereMonth('created_at', now()->month)
+        ->whereYear('created_at', now()->year)
+        ->where('is_returned', false)
+        ->sum(DB::raw('cash_amount + app_amount'));
+
+    // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
+    $monthlyPurchases = Purchase::whereMonth('purchase_date', now()->month)
+        ->whereYear('purchase_date', now()->year)
+        ->where('is_returned', false)
+        ->sum('amount');
+
+    // ✅ صافي الدخل = المبيعات - المشتريات
+    $netRevenue = $monthlySales - $monthlyPurchases;
+
+
+    return view('home', [
+        'todaySales' => Sale::whereDate('created_at', today())->count(),
+        'pendingRepairs' => Repair::where('status', 'pending')->count(),
+        // خصم عدد التسليمات من الصيانات المعلقة
+        'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
+        // عدد العملاء = عدد الأسماء الفريدة + عدد الصيانات المسلمة
+        'totalCustomers' => Repair::count(),
+        'totalProducts' => CatalogItem::count(),
+        'monthlyRevenue' => $netRevenue,
+    ]);
 })->name('dashboard');
 
 Route::get('/settings', function () {
@@ -69,6 +112,15 @@ Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index
 Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
 Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
 Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
+
+// Maintenance Deposit routes
+Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('deposits.index');
+Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
+Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
+Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])->name('deposits.destroy');
+
+// Reports routes
+Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');
