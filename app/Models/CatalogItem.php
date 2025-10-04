@@ -16,5 +16,6 @@ class CatalogItem extends Model
         'type',
         'quantity',
         'wholesale_price',
+        'sale_price',
     ];
 }

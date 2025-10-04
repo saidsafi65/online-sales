@@ -17,9 +17,9 @@
                     <p><strong>طريقة الدفع:</strong> {{ $sale->payment_method }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>المبلغ النقدي:</strong> {{ number_format($sale->cash_amount, 2) }} ر.س</p>
-                    <p><strong>مبلغ التطبيق:</strong> {{ number_format($sale->app_amount, 2) }} ر.س</p>
-                    <p><strong>الإجمالي:</strong> {{ number_format($sale->total_amount, 2) }} ر.س</p>
+                    <p><strong>المبلغ النقدي:</strong> {{ number_format($sale->cash_amount, 2) }} شيكل</p>
+                    <p><strong>مبلغ التطبيق:</strong> {{ number_format($sale->app_amount, 2) }} شيكل</p>
+                    <p><strong>الإجمالي:</strong> {{ number_format($sale->total_amount, 2) }} شيكل</p>
                     <p><strong>الحالة:</strong>
                         @if($sale->is_returned)
                             <span class="badge bg-danger">مرتجع</span>

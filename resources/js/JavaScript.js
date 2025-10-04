@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Utility functions
 const Utils = {
     // Format currency
-    formatCurrency: function(amount, currency = 'ر.س') {
+    formatCurrency: function(amount, currency = 'شيكل') {
         return parseFloat(amount).toLocaleString('ar-SA', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2

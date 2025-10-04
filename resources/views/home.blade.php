@@ -88,10 +88,36 @@
             </div>
         </a>
     </div>
+
+        <!-- التزامات المحل الشهرية -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a href="{{ route('obligations.index') }}" class="text-decoration-none">
+            <div class="service-card card-primary">
+                <div class="service-icon">
+                    <i class="fas fa-clipboard-list"></i> <!-- يمكنك تغيير الأيقونة هنا -->
+                </div>
+                <h3 class="service-title">التزامات المحل الشهرية</h3>
+                <p class="service-description">إدارة التزامات المحل الشهرية مثل الرواتب والإيجار والمصروفات الشهرية</p>
+            </div>
+        </a>
+    </div>
+    <!-- الفواتير -->
+    <div class="col-12 col-sm-6 col-lg-4">
+        <a href="{{ route('invoices.index') }}" class="text-decoration-none">
+            <div class="service-card card-info">
+                <div class="service-icon">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <h3 class="service-title">الفواتير</h3>
+                <p class="service-description">عرض الفواتير، تتبع المدفوعات، وإدارة الحسابات</p>
+            </div>
+        </a>
+    </div>
+
+
 </div>
 
 <!-- Quick Stats Section (Optional) -->
-<!-- Quick Stats Section (مكمل ومنسق) -->
 <div class="row g-4 mt-5">
     <div class="col-12">
         <div style="background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">

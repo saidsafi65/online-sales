@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->string('type', 120);    // النوع / الموديل
             $table->string('quantity', 120);    // الكمية
             $table->string('wholesale_price', 120);    // سعر الجملة
+            $table->string('sale_price', 120);    // سعر البيع
             // إنشاء فهرس مركب على product و type لضمان عدم التكرار
             $table->unique(['product', 'type']);
             $table->timestamps();

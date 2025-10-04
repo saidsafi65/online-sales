@@ -15,6 +15,8 @@ use App\Models\Repair;
 use App\Models\CatalogItem;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ObligationController;
+use App\Http\Controllers\InvoiceController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -122,6 +124,21 @@ Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy']
 // Reports routes
 Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
+// Obligation routes
+Route::get('/obligations', [ObligationController::class, 'index'])->name('obligations.index');
+Route::get('/obligations/create', [ObligationController::class, 'create'])->name('obligations.create');
+Route::post('/obligations', [ObligationController::class, 'store'])->name('obligations.store');
+
+// Invoices routes
+Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
+Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
+Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+
+// Clear config cache route
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');
     Artisan::call('cache:clear');
