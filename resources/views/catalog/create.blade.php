@@ -35,6 +35,10 @@
                     <label class="form-label">سعر الجملة</label>
                     <input type="number" name="wholesale_price" class="form-control" value="{{ old('wholesale_price') }}" required>
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">سعر البيع</label>
+                    <input type="number" name="sale_price" class="form-control" value="{{ old('sale_price') }}" required>
+                </div>
                 <div class="col-12 text-end">
                     <a href="{{ route('catalog.index') }}" class="btn btn-secondary">إلغاء</a>
                     <button class="btn btn-primary" type="submit">حفظ</button>

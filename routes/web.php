@@ -17,6 +17,7 @@ use App\Models\Purchase;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ObligationController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LaptopCompatibilityController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -138,6 +139,36 @@ Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('i
 Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
 Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
+// صفحة المتطابقات الرئيسية
+Route::get('/compatibility', [LaptopCompatibilityController::class, 'index'])
+    ->name('compatibility.index');
+
+// عرض تفاصيل جهاز معين
+Route::get('/compatibility/laptop/{id}', [LaptopCompatibilityController::class, 'show'])
+    ->name('compatibility.show');
+
+// API للحصول على الأجهزة المتوافقة
+Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::class, 'getCompatibleLaptops'])
+    ->name('compatibility.get-compatible');
+     // إدارة الأجهزة
+    Route::get('/compatibility/manage', [LaptopCompatibilityController::class, 'manageLaptops'])
+        ->name('compatibility.manage');
+    
+    Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
+        ->name('compatibility.store-laptop');
+    
+    // ربط قطعة بجهاز
+    Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
+        ->name('compatibility.attach-part');
+    
+    // إضافة/حذف توافق
+    Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
+        ->name('compatibility.add');
+    
+    Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
+        ->name('compatibility.remove');
+
+    
 // Clear config cache route
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');

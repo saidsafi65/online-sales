@@ -40,7 +40,7 @@ class CatalogController extends Controller
             'type' => $request->type,
             'quantity' => $request->quantity,
             'wholesale_price' => $request->wholesale_price,
-            'sale_price' => $request->wholesale_price,
+            'sale_price' => $request->sale_price,
         ]);
 
         return redirect()->route('catalog.index')->with('success', 'تمت الإضافة إلى الكتالوج');

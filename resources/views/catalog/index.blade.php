@@ -23,6 +23,7 @@
                         <th>النوع / الموديل</th>
                         <th>الكمية</th>
                         <th>سعر الجملة</th>
+                        <th>سعر البيع</th>
                         <th>إجراءات</th>
                     </tr>
                 </thead>
@@ -34,6 +35,7 @@
                             <td>{{ $item->type }}</td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ $item->wholesale_price }}</td>
+                            <td>{{ $item->sale_price }}</td>
                             <td>
                                 <form action="{{ route('catalog.destroy', $item) }}" method="POST" onsubmit="return confirm('تأكيد الحذف؟');">
                                     @csrf
@@ -43,7 +45,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center">لا توجد بيانات</td></tr>
+                        <tr><td colspan="7" class="text-center">لا توجد بيانات</td></tr>
                     @endforelse
                 </tbody>
             </table>
