@@ -126,7 +126,18 @@
                 </div>
             </a>
         </div>
-
+        <!-- طلبات الزبائن -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('customer-orders.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-box"></i> <!-- يمكنك استخدام أي أيقونة تناسب طلبات الزبائن -->
+                    </div>
+                    <h3 class="service-title">طلبات الزبائن</h3>
+                    <p class="service-description">إدارة طلبات الزبائن، إضافة طلب جديد، وتعديل الطلبات</p>
+                </div>
+            </a>
+        </div>
 
     </div>
 

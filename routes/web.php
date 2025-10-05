@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ObligationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LaptopCompatibilityController;
+use App\Http\Controllers\CustomerOrderController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -71,6 +72,8 @@ Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
 
 // صفحة إضافة عملية بيع جديدة
 Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
+// حذف عملية بيع
+Route::delete('/sales/{sale}', [SaleController::class, 'destroy']);
 
 // تخزين عملية البيع
 Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
@@ -93,6 +96,8 @@ Route::get('/sales/monthly-income', [SalesController::class, 'monthlyIncome'])->
 
 // إرجاع عملية بيع
 Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
+
+
 
 // Repairs routes
 Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
@@ -168,7 +173,17 @@ Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::cla
     Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
         ->name('compatibility.remove');
 
-    
+// Customer Orders routes
+Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
+    Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
+    Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
+    Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
+    Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
+    Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
+    Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
+    Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
+});
+        
 // Clear config cache route
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');
