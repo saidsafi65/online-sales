@@ -51,7 +51,7 @@
                     @if(in_array(request('type', 'all'), ['all', 'sales']))
                     <tr>
                         <td>إجمالي المبيعات</td>
-                        <td>{{ number_format($totalSales ?? 0, 2) }} ₪</td>
+                        <td>{{ number_format($totalSales ?? 0, 2) }} شيكل</td>
                     </tr>
                     @endif
 
@@ -65,7 +65,7 @@
                     @if(in_array(request('type', 'all'), ['all', 'purchases']))
                     <tr>
                         <td>إجمالي المشتريات</td>
-                        <td>{{ number_format($totalPurchases ?? 0, 2) }} ₪</td>
+                        <td>{{ number_format($totalPurchases ?? 0, 2) }} شيكل</td>
                     </tr>
                     @endif
 

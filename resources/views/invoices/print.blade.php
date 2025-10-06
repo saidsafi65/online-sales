@@ -473,7 +473,7 @@
                     
                     <tr class="total-row">
                         <td colspan="4" style="text-align: left; padding-right: 20px;">إجمالي المطلوب</td>
-                        <td>{{ number_format($invoice->total_amount, 2) }} ₪</td>
+                        <td>{{ number_format($invoice->total_amount, 2) }} شيكل</td>
                     </tr>
                 </tbody>
             </table>

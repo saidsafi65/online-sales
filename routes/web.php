@@ -19,6 +19,8 @@ use App\Http\Controllers\ObligationController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LaptopCompatibilityController;
 use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\DailyHandoverController;
+use App\Http\Controllers\ReturnedGoodController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -183,7 +185,28 @@ Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
     Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
     Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
 });
-        
+
+// Daily Handovers routes
+Route::prefix('daily-handovers')->name('daily-handovers.')->group(function () {
+    Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
+    Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
+    Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
+    Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
+    Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
+    Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
+    Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
+});
+
+Route::prefix('returned-goods')->name('returned-goods.')->group(function () {
+    Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
+    Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
+    Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
+    Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
+    Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
+    Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
+    Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
+});
+
 // Clear config cache route
 Route::get('/fix-config', function () {
     Artisan::call('config:clear');

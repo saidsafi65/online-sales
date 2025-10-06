@@ -138,6 +138,31 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('daily-handovers.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-handshake"></i> <!-- استخدم أي أيقونة تناسب عملية التسليم اليومي -->
+                    </div>
+                    <h3 class="service-title">التسليمات اليومية</h3>
+                    <p class="service-description">إدارة التسليمات اليومية، إضافة تسليم جديد، وتعديل التسليمات</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('returned-goods.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-undo-alt"></i> <!-- استخدم أي أيقونة تناسب البضائع المرجعة -->
+                    </div>
+                    <h3 class="service-title">البضائع المرجعة</h3>
+                    <p class="service-description">إدارة البضائع المرجعة، إضافة بضاعة مرجعة جديدة، وتعديل السجلات الحالية
+                    </p>
+                </div>
+            </a>
+        </div>
+
 
     </div>
 
@@ -157,7 +182,7 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 15px;">
                             <div style="font-size: 2rem; font-weight: 900; color: #0ea5e9; margin-bottom: 0.5rem;">
-                                {{ $monthlyRevenue ?? '0' }} ₪
+                                {{ $monthlyRevenue ?? '0' }} شيكل
                             </div>
                             <div style="color: #64748b; font-weight: 500;">دخل الشهر</div>
                         </div>

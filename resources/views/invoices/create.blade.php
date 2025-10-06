@@ -153,7 +153,7 @@
                                     الإجمالي الكلي:
                                 </td>
                                 <td colspan="2" style="padding: 1.25rem; font-weight: 700; font-size: 1.5rem; color: #10b981;" id="grandTotal">
-                                    0.00 ₪
+                                    0.00 شيكل
                                 </td>
                             </tr>
                         </tfoot>
@@ -265,7 +265,7 @@
             const rowTotal = parseFloat(row.querySelector('.item-total').value) || 0;
             grandTotal += rowTotal;
         });
-        document.getElementById('grandTotal').textContent = grandTotal.toFixed(2) + ' ₪';
+        document.getElementById('grandTotal').textContent = grandTotal.toFixed(2) + ' شيكل';
     }
 
     function attachCalculationListeners() {

@@ -500,7 +500,7 @@
                                         <div class="part-price">
                                             <div class="price-label">السعر</div>
                                             <div class="price-value">
-                                                {{ number_format($compatData['part']->price, 2) }} ₪
+                                                {{ number_format($compatData['part']->price, 2) }} شيكل
                                             </div>
                                         </div>
                                     @endif
