@@ -43,10 +43,18 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">المبلغ</label>
-                        <input type="number" step="0.01" name="amount" class="form-control" value="{{ old('amount', $purchase->amount) }}" required>
+                        <label class="form-label">مبلغ كاش</label>
+                        <input type="number" step="0.01" name="amount_cash" class="form-control" value="{{ old('amount_cash', $purchase->amount_cash ?? 0) }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label">مبلغ بنك</label>
+                        <input type="number" step="0.01" name="amount_bank" class="form-control" value="{{ old('amount_bank', $purchase->amount_bank ?? 0) }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">الإجمالي</label>
+                        <input type="text" id="total_amount" class="form-control" value="{{ number_format(($purchase->amount_cash ?? 0) + ($purchase->amount_bank ?? 0), 2) }}" readonly disabled>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">التاريخ</label>
                         <input type="datetime-local" name="purchase_date" class="form-control" value="{{ old('purchase_date', optional($purchase->purchase_date)->format('Y-m-d\TH:i')) }}" required>
                     </div>
@@ -108,13 +116,32 @@
 (function() {
     const isReturnedSelect = document.getElementById('is_returned');
     const returnFields = document.getElementById('return_fields');
+    const amountCash = document.querySelector('input[name="amount_cash"]');
+    const amountBank = document.querySelector('input[name="amount_bank"]');
+    const totalAmount = document.getElementById('total_amount');
+
     function updateReturnVisibility(){
         if (isReturnedSelect.value === '1') returnFields.classList.remove('d-none');
         else returnFields.classList.add('d-none');
     }
+
+    function calculateTotal(){
+        const cash = parseFloat(amountCash.value) || 0;
+        const bank = parseFloat(amountBank.value) || 0;
+        totalAmount.value = (cash + bank).toFixed(2);
+    }
+
     isReturnedSelect.addEventListener('change', updateReturnVisibility);
-    document.addEventListener('DOMContentLoaded', updateReturnVisibility);
+    amountCash.addEventListener('input', calculateTotal);
+    amountBank.addEventListener('input', calculateTotal);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateReturnVisibility();
+        calculateTotal();
+    });
+    
     updateReturnVisibility();
+    calculateTotal();
 })();
 </script>
 @endpush

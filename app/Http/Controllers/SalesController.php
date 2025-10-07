@@ -274,38 +274,59 @@ public function store(Request $request): RedirectResponse
      * Return a sale
      */
     public function returnSale(Sale $sale): JsonResponse
-    {
-        if ($sale->is_returned) {
-            return response()->json([
-                'success' => false,
-                'message' => 'هذه المبيعة مرتجعة بالفعل'
-            ], 400);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $sale->update([
-                'is_returned' => true,
-                'notes' => ($sale->notes ? $sale->notes . ' - ' : '') . 'تم الإرجاع في ' . now()->format('Y-m-d H:i:s')
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'تم إرجاع المبيعة بنجاح'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ أثناء إرجاع المبيعة: ' . $e->getMessage()
-            ], 500);
-        }
+{
+    if ($sale->is_returned) {
+        return response()->json([
+            'success' => false,
+            'message' => 'هذه المبيعة مرتجعة بالفعل'
+        ], 400);
     }
+
+    try {
+        DB::beginTransaction();
+
+        // تحديث حالة المبيعة
+        $sale->update([
+            'is_returned' => true,
+            'notes' => ($sale->notes ? $sale->notes . ' - ' : '') . 'تم الإرجاع في ' . now()->format('Y-m-d H:i:s')
+        ]);
+
+        // البحث عن العنصر المرتبط بالمبيعة
+        $catalogItem = \App\Models\CatalogItem::where('product', $sale->product)
+                                              ->where('type', $sale->type)
+                                              ->first();
+
+        if ($catalogItem) {
+            // تحويل الكمية من string إلى int ثم زيادتها بمقدار 1
+            $currentQuantity = (int) $catalogItem->quantity;
+            $catalogItem->update([
+                'quantity' => $currentQuantity + 1
+            ]);
+        } else {
+            // إذا لم يتم العثور على العنصر، يمكنك إرجاع خطأ أو إنشاء سجل جديد حسب الحاجة
+            return response()->json([
+                'success' => false,
+                'message' => 'العنصر غير موجود في الكاتالوج'
+            ], 404);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إرجاع المبيعة بنجاح'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'حدث خطأ أثناء إرجاع المبيعة: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 
     /**
      * Get sales statistics

@@ -41,10 +41,18 @@ Route::get('/', function () {
         ->sum(DB::raw('cash_amount + app_amount'));
 
     // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
-    $monthlyPurchases = Purchase::whereMonth('purchase_date', now()->month)
-        ->whereYear('purchase_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('amount');
+    $cashTotal = Purchase::whereMonth('purchase_date', now()->month)
+    ->whereYear('purchase_date', now()->year)
+    ->where('is_returned', false)
+    ->sum('amount_cash');
+
+    $bankTotal = Purchase::whereMonth('purchase_date', now()->month)
+    ->whereYear('purchase_date', now()->year)
+    ->where('is_returned', false)
+    ->sum('amount_bank');
+
+    $monthlyPurchases = $cashTotal + $bankTotal;
+    
 
     // ✅ صافي الدخل = المبيعات - المشتريات
     $netRevenue = $monthlySales - $monthlyPurchases;
@@ -116,6 +124,8 @@ Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchase
 Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
 Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
 Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
+Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
+Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
 
 // Catalog routes
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
