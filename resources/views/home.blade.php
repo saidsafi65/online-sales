@@ -162,6 +162,17 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('store.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-arrow-up"></i> <!-- استخدم الأيقونة التي تناسب الوضع -->
+                    </div>
+                    <h3 class="service-title">البضائع في المخزن الخارجي</h3>
+                    <p class="service-description">إدارة البضائع في المخزن، إضافة بضاعة جديدة، وتعديل السجلات الحالية.</p>
+                </div>
+            </a>
+        </div>
 
 
     </div>

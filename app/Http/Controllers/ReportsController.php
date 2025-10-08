@@ -57,8 +57,11 @@ class ReportsController extends Controller
             } else {
                 $queryPurchases->whereBetween('purchase_date', [$dateStart, $dateEnd]);
             }
-            $totalPurchases = $queryPurchases->sum('amount');
+            
+            // جمع المبالغ من الأعمدة الجديدة (amount_cash و amount_bank)
+            $totalPurchases = $queryPurchases->sum(DB::raw('amount_cash + amount_bank'));
         }
+
 
         return view('reports.index', compact('totalSales', 'totalRepairs', 'totalPurchases', 'totalCustomers'));
     }

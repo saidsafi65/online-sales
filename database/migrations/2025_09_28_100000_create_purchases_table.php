@@ -13,7 +13,9 @@ return new class extends Migration {
             $table->string('type'); // النوع
             $table->unsignedInteger('quantity')->default(1); // الكمية
             $table->enum('payment_method', ['cash', 'app', 'mixed']); // الدفع
-            $table->decimal('amount', 10, 2)->default(0); // المبلغ الإجمالي
+            // $table->decimal('amount', 10, 2)->default(0); // المبلغ الإجمالي
+            $table->decimal('amount_cash', 10, 2)->default(0);
+            $table->decimal('amount_bank', 10, 2)->default(0);
             $table->dateTime('purchase_date')->nullable(); // التاريخ
             $table->string('supplier_name')->nullable(); // اسم المورد
             $table->string('phone')->nullable(); // رقم الجوال

@@ -17,7 +17,8 @@ class Purchase extends Model
         'type',
         'quantity',
         'payment_method',
-        'amount',
+        'amount_cash',
+        'amount_bank',
         'purchase_date',
         'supplier_name',
         'phone',
@@ -30,7 +31,8 @@ class Purchase extends Model
 
     protected $casts = [
         'quantity' => 'integer',
-        'amount' => 'decimal:2',
+        'amount_cash' => 'decimal:2',
+        'amount_bank' => 'decimal:2',
         'purchase_date' => 'datetime',
         'return_date' => 'datetime',
         'is_returned' => 'boolean',

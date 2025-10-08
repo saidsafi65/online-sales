@@ -21,6 +21,7 @@ use App\Http\Controllers\LaptopCompatibilityController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
 use App\Http\Controllers\ReturnedGoodController;
+use App\Http\Controllers\StoreController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -41,10 +42,18 @@ Route::get('/', function () {
         ->sum(DB::raw('cash_amount + app_amount'));
 
     // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
-    $monthlyPurchases = Purchase::whereMonth('purchase_date', now()->month)
-        ->whereYear('purchase_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('amount');
+    $cashTotal = Purchase::whereMonth('purchase_date', now()->month)
+    ->whereYear('purchase_date', now()->year)
+    ->where('is_returned', false)
+    ->sum('amount_cash');
+
+    $bankTotal = Purchase::whereMonth('purchase_date', now()->month)
+    ->whereYear('purchase_date', now()->year)
+    ->where('is_returned', false)
+    ->sum('amount_bank');
+
+    $monthlyPurchases = $cashTotal + $bankTotal;
+    
 
     // ✅ صافي الدخل = المبيعات - المشتريات
     $netRevenue = $monthlySales - $monthlyPurchases;
@@ -116,6 +125,8 @@ Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchase
 Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
 Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
 Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
+Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
+Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
 
 // Catalog routes
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
@@ -175,37 +186,46 @@ Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::cla
     Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
         ->name('compatibility.remove');
 
-// Customer Orders routes
-Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
-    Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
-    Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
-    Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
-    Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
-    Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
-    Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
-    Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
-});
+    // Customer Orders routes
+    Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
+        Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
+        Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
+        Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
+        Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
+        Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
+        Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
+    });
 
-// Daily Handovers routes
-Route::prefix('daily-handovers')->name('daily-handovers.')->group(function () {
-    Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
-    Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
-    Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
-    Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
-    Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
-    Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
-    Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
-});
+    // Daily Handovers routes
+    Route::prefix('daily-handovers')->name('daily-handovers.')->group(function () {
+        Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
+        Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
+        Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
+        Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
+        Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
+        Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
+        Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
+    });
 
-Route::prefix('returned-goods')->name('returned-goods.')->group(function () {
-    Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
-    Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
-    Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
-    Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
-    Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
-    Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
-    Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
-});
+    Route::prefix('returned-goods')->name('returned-goods.')->group(function () {
+        Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
+        Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
+        Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
+        Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
+        Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
+        Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
+        Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('store')->group(function() {
+        Route::get('/', [StoreController::class, 'index'])->name('store.index');
+        Route::get('/create', [StoreController::class, 'create'])->name('store.create');
+        Route::post('/', [StoreController::class, 'store'])->name('store.store');
+        Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
+        Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
+        Route::delete('/{id}', [StoreController::class, 'destroy'])->name('store.destroy');
+    });
 
 // Clear config cache route
 Route::get('/fix-config', function () {
