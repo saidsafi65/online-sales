@@ -22,6 +22,7 @@ use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
 use App\Http\Controllers\ReturnedGoodController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\DebtController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -225,6 +226,15 @@ Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::cla
         Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
         Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
         Route::delete('/{id}', [StoreController::class, 'destroy'])->name('store.destroy');
+    });
+    // Debts routes
+    Route::prefix('debts')->name('debts.')->group(function () {
+    Route::get('/', [DebtController::class, 'index'])->name('index');    // عرض جميع الديون
+    Route::get('/create', [DebtController::class, 'create'])->name('create');  // عرض نموذج إضافة دين جديد
+    Route::post('/', [DebtController::class, 'store'])->name('store');   // حفظ دين جديد
+    Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
+    Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
+    Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
     });
 
 // Clear config cache route

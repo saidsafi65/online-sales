@@ -173,6 +173,17 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('debts.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-hand-holding-usd"></i> <!-- أيقونة تناسب الديون مثل المال -->
+                    </div>
+                    <h3 class="service-title">إدارة الديون</h3>
+                    <p class="service-description">إدارة سجلات الديون، إضافة دين جديد، وتعديل السجلات الحالية.</p>
+                </div>
+            </a>
+        </div>
 
 
     </div>
