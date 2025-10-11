@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invoices', function (Blueprint $table) {
-        $table->id();
-        $table->string('customer_name');
-        $table->date('invoice_date');
-        $table->string('invoice_number')->unique();
-        $table->text('notes')->nullable();
-        $table->decimal('total_amount', 10, 2)->default(0);
-        $table->timestamps();
+            $table->id();
+            $table->string('customer_name');
+            $table->date('invoice_date');
+            $table->string('invoice_number')->unique();
+            $table->text('notes')->nullable();
+            $table->decimal('total_amount', 10, 2)->default(0);
+            $table->timestamps();
         });
     }
 

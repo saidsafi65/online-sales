@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class PurchasesController extends Controller
 {
@@ -19,23 +19,23 @@ class PurchasesController extends Controller
             $query->where('payment_method', $request->payment_method);
         }
         if ($request->filled('is_returned')) {
-            $query->where('is_returned', (bool)$request->is_returned);
+            $query->where('is_returned', (bool) $request->is_returned);
         }
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('item', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhere('supplier_name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhere('supplier_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
             });
         }
 
         $purchases = $query->orderByDesc('purchase_date')
-                            ->orderByDesc('created_at')
-                            ->paginate(25)
-                            ->withQueryString();
+            ->orderByDesc('created_at')
+            ->paginate(25)
+            ->withQueryString();
 
         return view('purchases.index', compact('purchases'));
     }
@@ -76,18 +76,18 @@ class PurchasesController extends Controller
             if ($request->hasFile('id_image')) {
                 $file = $request->file('id_image');
                 $destinationPath = public_path('uploads/purchases');
-                if (!is_dir($destinationPath)) {
+                if (! is_dir($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
-                $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+                $filename = time().'_'.preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
                 $file->move($destinationPath, $filename);
-                $idImagePath = 'uploads/purchases/' . $filename; // relative to public
+                $idImagePath = 'uploads/purchases/'.$filename; // relative to public
             }
 
             Purchase::create([
                 'item' => $request->item,
                 'type' => $request->type,
-                'quantity' => (int)$request->quantity,
+                'quantity' => (int) $request->quantity,
                 'payment_method' => $request->payment_method,
                 'amount_cash' => $request->amount_cash,
                 'amount_bank' => $request->amount_bank,
@@ -95,17 +95,19 @@ class PurchasesController extends Controller
                 'supplier_name' => $request->supplier_name,
                 'phone' => $request->phone,
                 'id_image' => $idImagePath,
-                'is_returned' => (bool)$request->is_returned,
+                'is_returned' => (bool) $request->is_returned,
                 'issue' => $request->issue,
                 'return_date' => $request->return_date,
                 'notes' => $request->notes,
             ]);
 
             DB::commit();
+
             return redirect()->route('purchases.index')->with('success', 'تم إضافة عملية الشراء بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الشراء: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الشراء: '.$e->getMessage())->withInput();
         }
     }
 
@@ -145,18 +147,18 @@ class PurchasesController extends Controller
             if ($request->hasFile('id_image')) {
                 $file = $request->file('id_image');
                 $destinationPath = public_path('uploads/purchases');
-                if (!is_dir($destinationPath)) {
+                if (! is_dir($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
-                $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+                $filename = time().'_'.preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
                 $file->move($destinationPath, $filename);
-                $idImagePath = 'uploads/purchases/' . $filename;
+                $idImagePath = 'uploads/purchases/'.$filename;
             }
 
             $purchase->update([
                 'item' => $request->item,
                 'type' => $request->type,
-                'quantity' => (int)$request->quantity,
+                'quantity' => (int) $request->quantity,
                 'payment_method' => $request->payment_method,
                 'amount_cash' => $request->amount_cash,
                 'amount_bank' => $request->amount_bank,
@@ -164,23 +166,26 @@ class PurchasesController extends Controller
                 'supplier_name' => $request->supplier_name,
                 'phone' => $request->phone,
                 'id_image' => $idImagePath,
-                'is_returned' => (bool)$request->is_returned,
+                'is_returned' => (bool) $request->is_returned,
                 'issue' => $request->issue,
                 'return_date' => $request->return_date,
                 'notes' => $request->notes,
             ]);
 
             DB::commit();
+
             return redirect()->route('purchases.index')->with('success', 'تم تحديث عملية الشراء بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'حدث خطأ أثناء تحديث الشراء: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'حدث خطأ أثناء تحديث الشراء: '.$e->getMessage())->withInput();
         }
     }
 
     public function destroy(Purchase $purchase): RedirectResponse
     {
         $purchase->delete();
+
         return redirect()->route('purchases.index')->with('success', 'تم حذف عملية الشراء');
     }
 
@@ -223,19 +228,19 @@ class PurchasesController extends Controller
             if ($request->hasFile('id_image')) {
                 $file = $request->file('id_image');
                 $destinationPath = public_path('uploads/purchases');
-                if (!is_dir($destinationPath)) {
+                if (! is_dir($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
-                $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+                $filename = time().'_'.preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
                 $file->move($destinationPath, $filename);
-                $idImagePath = 'uploads/purchases/' . $filename;
+                $idImagePath = 'uploads/purchases/'.$filename;
             }
 
             // 1. إضافة السجل في جدول المشتريات
             $purchase = Purchase::create([
                 'item' => $request->item,
                 'type' => $request->type,
-                'quantity' => (int)$request->quantity,
+                'quantity' => (int) $request->quantity,
                 'payment_method' => $request->payment_method,
                 'amount_cash' => $request->amount_cash,
                 'amount_bank' => $request->amount_bank,
@@ -243,7 +248,7 @@ class PurchasesController extends Controller
                 'supplier_name' => $request->supplier_name,
                 'phone' => $request->phone,
                 'id_image' => $idImagePath,
-                'is_returned' => (bool)$request->is_returned,
+                'is_returned' => (bool) $request->is_returned,
                 'issue' => $request->issue,
                 'return_date' => $request->return_date,
                 'notes' => $request->notes,
@@ -257,14 +262,14 @@ class PurchasesController extends Controller
 
             if ($catalogItem) {
                 // المنتج موجود: تحديث الكمية والأسعار
-                $newQuantity = (int)$catalogItem->quantity + (int)$request->quantity;
+                $newQuantity = (int) $catalogItem->quantity + (int) $request->quantity;
                 DB::table('catalog_items')
                     ->where('product', $request->item)
                     ->where('type', $request->type)
                     ->update([
-                        'quantity' => (string)$newQuantity,
-                        'wholesale_price' => (string)$request->wholesale_price,
-                        'sale_price' => (string)$request->sale_price,
+                        'quantity' => (string) $newQuantity,
+                        'wholesale_price' => (string) $request->wholesale_price,
+                        'sale_price' => (string) $request->sale_price,
                         'updated_at' => now(),
                     ]);
             } else {
@@ -272,24 +277,25 @@ class PurchasesController extends Controller
                 DB::table('catalog_items')->insert([
                     'product' => $request->item,
                     'type' => $request->type,
-                    'quantity' => (string)$request->quantity,
-                    'wholesale_price' => (string)$request->wholesale_price,
-                    'sale_price' => (string)$request->sale_price,
+                    'quantity' => (string) $request->quantity,
+                    'wholesale_price' => (string) $request->wholesale_price,
+                    'sale_price' => (string) $request->sale_price,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
             }
 
             DB::commit();
+
             return redirect()->route('purchases.index')
                 ->with('success', 'تم إضافة عملية الشراء بنجاح وتحديث الكتالوج');
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()
-                ->with('error', 'حدث خطأ أثناء الحفظ: ' . $e->getMessage())
+                ->with('error', 'حدث خطأ أثناء الحفظ: '.$e->getMessage())
                 ->withInput();
         }
     }
-
 }

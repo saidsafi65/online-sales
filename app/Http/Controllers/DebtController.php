@@ -10,6 +10,7 @@ class DebtController extends Controller
     public function index()
     {
         $debts = Debt::latest()->paginate(10);
+
         return view('debt.index', compact('debts'));
     }
 
@@ -28,7 +29,7 @@ class DebtController extends Controller
             'bank_amount' => 'nullable|numeric|min:0',
             'reason' => 'required|string',
             'debt_date' => 'required|date',
-            'payment_date' => 'nullable|date|after_or_equal:debt_date'
+            'payment_date' => 'nullable|date|after_or_equal:debt_date',
         ]);
 
         Debt::create($validated);
@@ -52,7 +53,7 @@ class DebtController extends Controller
             'bank_amount' => 'nullable|numeric|min:0',
             'reason' => 'required|string',
             'debt_date' => 'required|date',
-            'payment_date' => 'nullable|date|after_or_equal:debt_date'
+            'payment_date' => 'nullable|date|after_or_equal:debt_date',
         ]);
 
         $debt->update($validated);

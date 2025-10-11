@@ -29,7 +29,7 @@ class CustomerOrder extends Model
      */
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'قيد الانتظار',
             'in_progress' => 'قيد التنفيذ',
             'completed' => 'مكتمل',
@@ -43,7 +43,7 @@ class CustomerOrder extends Model
      */
     public function getStatusColorAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'warning',
             'in_progress' => 'info',
             'completed' => 'success',

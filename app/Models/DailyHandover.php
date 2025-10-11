@@ -32,7 +32,7 @@ class DailyHandover extends Model
      */
     public function getFormattedCashAttribute()
     {
-        return number_format($this->cash, 2) . ' شيكل';
+        return number_format($this->cash, 2).' شيكل';
     }
 
     /**
@@ -40,7 +40,7 @@ class DailyHandover extends Model
      */
     public function getFormattedBankAttribute()
     {
-        return number_format($this->bank, 2) . ' شيكل';
+        return number_format($this->bank, 2).' شيكل';
     }
 
     /**

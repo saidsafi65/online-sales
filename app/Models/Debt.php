@@ -17,14 +17,14 @@ class Debt extends Model
         'bank_amount',
         'reason',
         'debt_date',
-        'payment_date'
+        'payment_date',
     ];
 
     protected $casts = [
         'debt_date' => 'date',
         'payment_date' => 'date',
         'cash_amount' => 'decimal:2',
-        'bank_amount' => 'decimal:2'
+        'bank_amount' => 'decimal:2',
     ];
 
     // حساب المبلغ الإجمالي

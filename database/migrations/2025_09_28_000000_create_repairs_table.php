@@ -19,7 +19,8 @@ return new class extends Migration
             $table->text('issue'); // المشكلة / العطل
             $table->string('phone', 20); // رقم الجوال
             $table->dateTime('received_date'); // تاريخ الاستلام
-            $table->decimal('cost', 10, 2)->default(0); // ا��تكلفة
+            $table->decimal('cost_cash', 10, 2)->default(0); // ا��تكلفة
+            $table->decimal('cost_bank', 10, 2)->default(0); // ا��تكلفة
             $table->string('payment_method', 20); // الدفع: cash/app/mixed
             $table->dateTime('delivery_date')->nullable(); // تاريخ التسليم
             $table->string('received_by'); // الموظف المستلم

@@ -46,18 +46,22 @@
                         <input type="datetime-local" name="received_date" class="form-control" value="{{ old('received_date', optional($repair->received_date)->format('Y-m-d\TH:i')) }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">التكلفة</label>
-                        <input type="number" step="0.01" name="cost" class="form-control" value="{{ old('cost', $repair->cost) }}" required>
-                    </div>
-                    <div class="col-md-6">
                         <label class="form-label">طريقة الدفع</label>
                         <select id="payment_method" name="payment_method" class="form-select" required>
                             <option value="">اختر</option>
                             <option value="cash" {{ old('payment_method', $repair->payment_method)=='cash'?'selected':'' }}>نقدي</option>
-                            <option value="card" {{ old('payment_method', $repair->payment_method)=='card'?'selected':'' }}>بطاقة</option>
+                            {{-- <option value="card" {{ old('payment_method', $repair->payment_method)=='card'?'selected':'' }}>بطاقة</option> --}}
                             <option value="app" {{ old('payment_method', $repair->payment_method)=='app'?'selected':'' }}>تطبيق</option>
                             <option value="mixed" {{ old('payment_method', $repair->payment_method)=='mixed'?'selected':'' }}>مختلط</option>
                         </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">التكلفة نقدي</label>
+                        <input type="number" step="0.01" name="cost_cash" class="form-control" value="{{ old('cost_bank', $repair->cost_cash) }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">التكلفة بنكي</label>
+                        <input type="number" step="0.01" name="cost_bank" class="form-control" value="{{ old('cost_bank', $repair->cost_bank) }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">تاريخ التسليم</label>

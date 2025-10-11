@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('verified')->default(false); // تم التحقق من التوافق
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['part_id', 'compatible_laptop_id']);
         });
     }

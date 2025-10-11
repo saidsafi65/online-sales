@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class SalesController extends Controller
 {
@@ -43,18 +43,18 @@ class SalesController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('product', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
             });
         }
 
         // Get paginated results
         $sales = $query->orderBy('sale_date', 'desc')
-                      ->orderBy('created_at', 'desc')
-                      ->paginate(25)
-                      ->withQueryString();
+            ->orderBy('created_at', 'desc')
+            ->paginate(25)
+            ->withQueryString();
 
         // Calculate statistics
         $statistics = $this->calculateStatistics();
@@ -70,6 +70,7 @@ class SalesController extends Controller
         // جلب كتالوج المنتجات لتعبئة القوائم
         $catalog = \App\Models\CatalogItem::orderBy('product')->orderBy('type')->get();
         $products = $catalog->groupBy('product');
+
         return view('sales.create', compact('products'));
     }
 
@@ -78,99 +79,98 @@ class SalesController extends Controller
      */
     // في دالة store
 
-public function store(Request $request): RedirectResponse
-{
-    $rules = [
-        'product' => 'required|string|max:255',
-        'type' => 'required|string|max:100',
-        'sale_date' => 'required|date',
-        'payment_method' => 'required|in:cash,card,app,mixed',
-        'notes' => 'nullable|string|max:1000',
-    ];
+    public function store(Request $request): RedirectResponse
+    {
+        $rules = [
+            'product' => 'required|string|max:255',
+            'type' => 'required|string|max:100',
+            'sale_date' => 'required|date',
+            'payment_method' => 'required|in:cash,card,app,mixed',
+            'notes' => 'nullable|string|max:1000',
+        ];
 
-    // Validate amounts based on payment method
-    switch ($request->payment_method) {
-        case 'cash':
-            $rules['cash_amount'] = 'required|numeric|min:0.01';
-            $rules['app_amount'] = 'required|numeric|in:0';
-            break;
-        case 'card':
-        case 'app':
-            $rules['app_amount'] = 'required|numeric|min:0.01';
-            $rules['cash_amount'] = 'required|numeric|in:0';
-            break;
-        case 'mixed':
-            $rules['cash_amount'] = 'required|numeric|min:0.01';
-            $rules['app_amount'] = 'required|numeric|min:0.01';
-            break;
-        default:
-            $rules['cash_amount'] = 'required|numeric|min:0';
-            $rules['app_amount'] = 'required|numeric|min:0';
-    }
-
-    $validator = Validator::make($request->all(), $rules, [
-        'cash_amount.min' => 'المبلغ النقدي يجب أن يكون أكبر من صفر',
-        'app_amount.min' => 'مبلغ التطبيق يجب أن يكون أكبر من صفر',
-        'cash_amount.in' => 'المبلغ النقدي يجب أن يكون صفر مع طريقة الدفع المختارة',
-        'app_amount.in' => 'مبلغ التطبيق يجب أن يكون صفر مع طريقة الدفع المختارة',
-    ]);
-
-    if ($validator->fails()) {
-        return redirect()->back()
-                       ->withErrors($validator)
-                       ->withInput();
-    }
-
-    if ($request->cash_amount == 0 && $request->app_amount == 0) {
-        return redirect()->back()
-                       ->withErrors(['amount' => 'يجب إدخال مبلغ للدفع'])
-                       ->withInput();
-    }
-
-    try {
-        DB::beginTransaction();
-
-        // تحقق من الكمية المتوفرة في جدول catalog_items
-        $catalogItem = \App\Models\CatalogItem::where('product', $request->product)
-                                              ->where('type', $request->type)
-                                              ->first();
-
-        // إذا لم تكن الكمية متوفرة أو أقل من 1، ارجع بخطأ
-        if (!$catalogItem || $catalogItem->quantity < 1) {
-            return redirect()->back()
-                             ->withErrors(['quantity' => 'المنتج غير متوفر أو الكمية غير كافية'])
-                             ->withInput();
+        // Validate amounts based on payment method
+        switch ($request->payment_method) {
+            case 'cash':
+                $rules['cash_amount'] = 'required|numeric|min:0.01';
+                $rules['app_amount'] = 'required|numeric|in:0';
+                break;
+            case 'card':
+            case 'app':
+                $rules['app_amount'] = 'required|numeric|min:0.01';
+                $rules['cash_amount'] = 'required|numeric|in:0';
+                break;
+            case 'mixed':
+                $rules['cash_amount'] = 'required|numeric|min:0.01';
+                $rules['app_amount'] = 'required|numeric|min:0.01';
+                break;
+            default:
+                $rules['cash_amount'] = 'required|numeric|min:0';
+                $rules['app_amount'] = 'required|numeric|min:0';
         }
 
-        // تحديث الكمية بعد عملية البيع
-        $catalogItem->decrement('quantity', 1);
-
-        // إنشاء عملية البيع
-        $sale = Sale::create([
-            'product' => $request->product,
-            'type' => $request->type,
-            'sale_date' => $request->sale_date,
-            'payment_method' => $request->payment_method,
-            'cash_amount' => $request->cash_amount,
-            'app_amount' => $request->app_amount,
-            'is_returned' => false,
-            'notes' => $request->notes,
+        $validator = Validator::make($request->all(), $rules, [
+            'cash_amount.min' => 'المبلغ النقدي يجب أن يكون أكبر من صفر',
+            'app_amount.min' => 'مبلغ التطبيق يجب أن يكون أكبر من صفر',
+            'cash_amount.in' => 'المبلغ النقدي يجب أن يكون صفر مع طريقة الدفع المختارة',
+            'app_amount.in' => 'مبلغ التطبيق يجب أن يكون صفر مع طريقة الدفع المختارة',
         ]);
 
-        DB::commit();
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        return redirect()->route('sales.index')
-                       ->with('success', 'تم إضافة المبيعة بنجاح');
+        if ($request->cash_amount == 0 && $request->app_amount == 0) {
+            return redirect()->back()
+                ->withErrors(['amount' => 'يجب إدخال مبلغ للدفع'])
+                ->withInput();
+        }
 
-    } catch (\Exception $e) {
-        DB::rollBack();
+        try {
+            DB::beginTransaction();
 
-        return redirect()->back()
-                       ->with('error', 'حدث خطأ أثناء إضافة المبيعة: ' . $e->getMessage())
-                       ->withInput();
+            // تحقق من الكمية المتوفرة في جدول catalog_items
+            $catalogItem = \App\Models\CatalogItem::where('product', $request->product)
+                ->where('type', $request->type)
+                ->first();
+
+            // إذا لم تكن الكمية متوفرة أو أقل من 1، ارجع بخطأ
+            if (! $catalogItem || $catalogItem->quantity < 1) {
+                return redirect()->back()
+                    ->withErrors(['quantity' => 'المنتج غير متوفر أو الكمية غير كافية'])
+                    ->withInput();
+            }
+
+            // تحديث الكمية بعد عملية البيع
+            $catalogItem->decrement('quantity', 1);
+
+            // إنشاء عملية البيع
+            $sale = Sale::create([
+                'product' => $request->product,
+                'type' => $request->type,
+                'sale_date' => $request->sale_date,
+                'payment_method' => $request->payment_method,
+                'cash_amount' => $request->cash_amount,
+                'app_amount' => $request->app_amount,
+                'is_returned' => false,
+                'notes' => $request->notes,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('sales.index')
+                ->with('success', 'تم إضافة المبيعة بنجاح');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'حدث خطأ أثناء إضافة المبيعة: '.$e->getMessage())
+                ->withInput();
+        }
     }
-}
-
 
     /**
      * Display the specified sale
@@ -205,15 +205,15 @@ public function store(Request $request): RedirectResponse
 
         if ($validator->fails()) {
             return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         // Validate that at least one amount is greater than 0
         if ($request->cash_amount == 0 && $request->app_amount == 0) {
             return redirect()->back()
-                           ->withErrors(['amount' => 'يجب أن يكون إجمالي المبلغ أكبر من صفر'])
-                           ->withInput();
+                ->withErrors(['amount' => 'يجب أن يكون إجمالي المبلغ أكبر من صفر'])
+                ->withInput();
         }
 
         try {
@@ -232,14 +232,14 @@ public function store(Request $request): RedirectResponse
             DB::commit();
 
             return redirect()->route('sales.index')
-                           ->with('success', 'تم تحديث المبيعة بنجاح');
+                ->with('success', 'تم تحديث المبيعة بنجاح');
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             return redirect()->back()
-                           ->with('error', 'حدث خطأ أثناء تحديث المبيعة: ' . $e->getMessage())
-                           ->withInput();
+                ->with('error', 'حدث خطأ أثناء تحديث المبيعة: '.$e->getMessage())
+                ->withInput();
         }
     }
 
@@ -257,7 +257,7 @@ public function store(Request $request): RedirectResponse
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم حذف المبيعة بنجاح'
+                'message' => 'تم حذف المبيعة بنجاح',
             ]);
 
         } catch (\Exception $e) {
@@ -265,7 +265,7 @@ public function store(Request $request): RedirectResponse
 
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ أثناء حذف المبيعة: ' . $e->getMessage()
+                'message' => 'حدث خطأ أثناء حذف المبيعة: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -274,59 +274,58 @@ public function store(Request $request): RedirectResponse
      * Return a sale
      */
     public function returnSale(Sale $sale): JsonResponse
-{
-    if ($sale->is_returned) {
-        return response()->json([
-            'success' => false,
-            'message' => 'هذه المبيعة مرتجعة بالفعل'
-        ], 400);
-    }
-
-    try {
-        DB::beginTransaction();
-
-        // تحديث حالة المبيعة
-        $sale->update([
-            'is_returned' => true,
-            'notes' => ($sale->notes ? $sale->notes . ' - ' : '') . 'تم الإرجاع في ' . now()->format('Y-m-d H:i:s')
-        ]);
-
-        // البحث عن العنصر المرتبط بالمبيعة
-        $catalogItem = \App\Models\CatalogItem::where('product', $sale->product)
-                                              ->where('type', $sale->type)
-                                              ->first();
-
-        if ($catalogItem) {
-            // تحويل الكمية من string إلى int ثم زيادتها بمقدار 1
-            $currentQuantity = (int) $catalogItem->quantity;
-            $catalogItem->update([
-                'quantity' => $currentQuantity + 1
-            ]);
-        } else {
-            // إذا لم يتم العثور على العنصر، يمكنك إرجاع خطأ أو إنشاء سجل جديد حسب الحاجة
+    {
+        if ($sale->is_returned) {
             return response()->json([
                 'success' => false,
-                'message' => 'العنصر غير موجود في الكاتالوج'
-            ], 404);
+                'message' => 'هذه المبيعة مرتجعة بالفعل',
+            ], 400);
         }
 
-        DB::commit();
+        try {
+            DB::beginTransaction();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم إرجاع المبيعة بنجاح'
-        ]);
+            // تحديث حالة المبيعة
+            $sale->update([
+                'is_returned' => true,
+                'notes' => ($sale->notes ? $sale->notes.' - ' : '').'تم الإرجاع في '.now()->format('Y-m-d H:i:s'),
+            ]);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
+            // البحث عن العنصر المرتبط بالمبيعة
+            $catalogItem = \App\Models\CatalogItem::where('product', $sale->product)
+                ->where('type', $sale->type)
+                ->first();
 
-        return response()->json([
-            'success' => false,
-            'message' => 'حدث خطأ أثناء إرجاع المبيعة: ' . $e->getMessage()
-        ], 500);
+            if ($catalogItem) {
+                // تحويل الكمية من string إلى int ثم زيادتها بمقدار 1
+                $currentQuantity = (int) $catalogItem->quantity;
+                $catalogItem->update([
+                    'quantity' => $currentQuantity + 1,
+                ]);
+            } else {
+                // إذا لم يتم العثور على العنصر، يمكنك إرجاع خطأ أو إنشاء سجل جديد حسب الحاجة
+                return response()->json([
+                    'success' => false,
+                    'message' => 'العنصر غير موجود في الكاتالوج',
+                ], 404);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم إرجاع المبيعة بنجاح',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إرجاع المبيعة: '.$e->getMessage(),
+            ], 500);
+        }
     }
-}
-
 
     /**
      * Get sales statistics
@@ -387,10 +386,10 @@ public function store(Request $request): RedirectResponse
         $startDate = Carbon::now()->subDays($days);
 
         $dailySales = Sale::select(
-                DB::raw('DATE(sale_date) as date'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(cash_amount + app_amount) as total')
-            )
+            DB::raw('DATE(sale_date) as date'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(cash_amount + app_amount) as total')
+        )
             ->where('sale_date', '>=', $startDate)
             ->where('is_returned', false)
             ->groupBy('date')
@@ -413,7 +412,7 @@ public function store(Request $request): RedirectResponse
         return response()->json([
             'labels' => $labels,
             'counts' => $counts,
-            'totals' => $totals
+            'totals' => $totals,
         ]);
     }
 
@@ -433,7 +432,7 @@ public function store(Request $request): RedirectResponse
             'cash' => '#10B981',
             'card' => '#3B82F6',
             'app' => '#8B5CF6',
-            'mixed' => '#F59E0B'
+            'mixed' => '#F59E0B',
         ];
 
         foreach ($paymentMethods as $method) {
@@ -444,7 +443,7 @@ public function store(Request $request): RedirectResponse
         return response()->json([
             'labels' => $labels,
             'data' => $data,
-            'colors' => array_values($colors)
+            'colors' => array_values($colors),
         ]);
     }
 
@@ -498,14 +497,14 @@ public function store(Request $request): RedirectResponse
      */
     private function exportToCsv($sales)
     {
-        $filename = 'sales_' . date('Y-m-d_H-i-s') . '.csv';
+        $filename = 'sales_'.date('Y-m-d_H-i-s').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $callback = function() use ($sales) {
+        $callback = function () use ($sales) {
             $file = fopen('php://output', 'w');
 
             // Add BOM for UTF-8
@@ -522,7 +521,7 @@ public function store(Request $request): RedirectResponse
                 'مبلغ التطبيق',
                 'الإجمالي',
                 'الحالة',
-                'الملاحظات'
+                'الملاحظات',
             ]);
 
             // Data
@@ -537,7 +536,7 @@ public function store(Request $request): RedirectResponse
                     $sale->app_amount,
                     $sale->total_amount,
                     $sale->is_returned ? 'مرتجع' : 'مكتمل',
-                    $sale->notes
+                    $sale->notes,
                 ]);
             }
 
@@ -566,7 +565,7 @@ public function store(Request $request): RedirectResponse
             'cash' => 'نقدي',
             'card' => 'بطاقة',
             'app' => 'تطبيق',
-            'mixed' => 'مختلط'
+            'mixed' => 'مختلط',
         ];
 
         return $labels[$method] ?? $method;
@@ -583,7 +582,7 @@ public function store(Request $request): RedirectResponse
         if (empty($saleIds)) {
             return response()->json([
                 'success' => false,
-                'message' => 'لم يتم تحديد أي مبيعات'
+                'message' => 'لم يتم تحديد أي مبيعات',
             ], 400);
         }
 
@@ -601,7 +600,7 @@ public function store(Request $request): RedirectResponse
                         ->where('is_returned', false)
                         ->update([
                             'is_returned' => true,
-                            'notes' => DB::raw("CONCAT(COALESCE(notes, ''), ' - تم الإرجاع في " . now()->format('Y-m-d H:i:s') . "')")
+                            'notes' => DB::raw("CONCAT(COALESCE(notes, ''), ' - تم الإرجاع في ".now()->format('Y-m-d H:i:s')."')"),
                         ]);
                     $message = 'تم إرجاع المبيعات المحددة بنجاح';
                     break;
@@ -609,7 +608,7 @@ public function store(Request $request): RedirectResponse
                 default:
                     return response()->json([
                         'success' => false,
-                        'message' => 'عملية غير مدعومة'
+                        'message' => 'عملية غير مدعومة',
                     ], 400);
             }
 
@@ -617,7 +616,7 @@ public function store(Request $request): RedirectResponse
 
             return response()->json([
                 'success' => true,
-                'message' => $message
+                'message' => $message,
             ]);
 
         } catch (\Exception $e) {
@@ -625,7 +624,7 @@ public function store(Request $request): RedirectResponse
 
             return response()->json([
                 'success' => false,
-                'message' => 'حدث خطأ أثناء تنفيذ العملية: ' . $e->getMessage()
+                'message' => 'حدث خطأ أثناء تنفيذ العملية: '.$e->getMessage(),
             ], 500);
         }
     }

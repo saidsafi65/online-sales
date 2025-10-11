@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
@@ -11,7 +10,7 @@ class ProfileController extends Controller
     public function edit()
     {
         return view('profile.edit', [
-            'user' => auth()->user()
+            'user' => auth()->user(),
         ]);
     }
 
@@ -19,7 +18,7 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
+            'email' => 'required|string|email|max:255|unique:users,email,'.auth()->id(),
             'current_password' => 'nullable|required_with:password',
             'password' => 'nullable|min:8|confirmed',
         ]);
@@ -30,7 +29,7 @@ class ProfileController extends Controller
         $user->email = $request->email;
 
         if ($request->password) {
-            if (!Hash::check($request->current_password, $user->password)) {
+            if (! Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'كلمة المرور الحالية غير صحيحة']);
             }
             $user->password = Hash::make($request->password);

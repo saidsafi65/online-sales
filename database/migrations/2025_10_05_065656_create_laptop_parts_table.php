@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('is_original')->default(true); // هل القطعة أصلية للجهاز
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             // منع التكرار
             $table->unique(['laptop_id', 'part_id']);
         });

@@ -29,14 +29,14 @@ class Laptop extends Model
     // الأجهزة المتوافقة (عبر القطع المشتركة)
     public function getCompatibleLaptops($partTypeId = null)
     {
-        $query = self::whereHas('parts', function($q) {
+        $query = self::whereHas('parts', function ($q) {
             $q->whereIn('part_id', $this->parts->pluck('id'));
         })->where('id', '!=', $this->id);
 
         if ($partTypeId) {
-            $query->whereHas('parts', function($q) use ($partTypeId) {
+            $query->whereHas('parts', function ($q) use ($partTypeId) {
                 $q->where('part_type_id', $partTypeId)
-                  ->whereIn('part_id', $this->parts->where('part_type_id', $partTypeId)->pluck('id'));
+                    ->whereIn('part_id', $this->parts->where('part_type_id', $partTypeId)->pluck('id'));
             });
         }
 

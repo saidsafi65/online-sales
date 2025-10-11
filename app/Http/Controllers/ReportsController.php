@@ -5,64 +5,75 @@ namespace App\Http\Controllers;
 use App\Models\Purchase;
 use App\Models\Repair;
 use App\Models\Sale;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
     public function index()
     {
         $request = request();
-        $date = $request->input('date');  // 'YYYY-MM-DD' أو null
+        $date = $request->input('date');
         $type = $request->input('type', 'all');
 
-        // جاهز نحدد التاريخ لو معطى، وإذا لا نأخذ الشهر الحالي
-        $dateStart = $date ? \Carbon\Carbon::parse($date)->startOfDay() : now()->startOfMonth();
-        $dateEnd = $date ? \Carbon\Carbon::parse($date)->endOfDay() : now()->endOfMonth();
+        // تحديد بداية ونهاية الفترة
+        $dateStart = $date ? Carbon::parse($date)->startOfDay() : now()->startOfMonth();
+        $dateEnd = $date ? Carbon::parse($date)->endOfDay() : now()->endOfMonth();
 
         // المبيعات
-        $totalSales = null;
-        if ($type == 'all' || $type == 'sales') {
-            $query = Sale::where('is_returned', false);
-            if ($date) {
-                // بحث بيوم محدد
-                $query->whereBetween('created_at', [$dateStart, $dateEnd]);
-            } else {
-                // بحث بالشهر الحالي
-                $query->whereBetween('created_at', [$dateStart, $dateEnd]);
-            }
-            $totalSales = $query->sum(DB::raw('cash_amount + app_amount'));
+        $monthlySales = $monthlySalesCash = $monthlySalesAppAmount = null;
+        if (in_array($type, ['all', 'sales'])) {
+            $salesQuery = Sale::where('is_returned', false)
+                ->whereBetween('created_at', [$dateStart, $dateEnd]);
+
+            $monthlySalesCash = $salesQuery->sum('cash_amount');
+            $monthlySalesAppAmount = $salesQuery->sum('app_amount');
+            $monthlySales = $monthlySalesCash + $monthlySalesAppAmount;
         }
 
         // الصيانات
-        $totalRepairs = null;
-        $totalCustomers = null;
-        if ($type == 'all' || $type == 'repairs') {
-            $queryRepairs = Repair::query();
-            if ($date) {
-                $queryRepairs->whereBetween('received_date', [$dateStart, $dateEnd]);
-            } else {
-                $queryRepairs->whereBetween('received_date', [$dateStart, $dateEnd]);
-            }
-            $totalRepairs = $queryRepairs->count();
-            $totalCustomers = $queryRepairs->count();  // هنا تعتمد على احتساب العملاء بنفس الصيانات
+        $totalRepairs = $totalCustomers = $monthlycost_cashRepair = $monthlycost_bankRepair = null;
+        if (in_array($type, ['all', 'repairs'])) {
+            $repairsQuery = Repair::whereBetween('received_date', [$dateStart, $dateEnd]);
+
+            $totalRepairs = $repairsQuery->count();
+            $totalCustomers = $repairsQuery->count(); // بإمكانك تغييره لاحقًا لحساب العملاء الفعليين
+
+            $purchasesForRepairs = Purchase::where('is_returned', false)
+                ->whereBetween('purchase_date', [$dateStart, $dateEnd]);
+            $repairsQuery = Repair::where('is_returned', false)
+            ->whereBetween('delivery_date', [$dateStart, $dateEnd]);
+
+            $monthlycost_cashRepair = $repairsQuery->sum('cost_cash');
+            $monthlycost_bankRepair = $repairsQuery->sum('cost_bank');
+            // $monthlycost_cashRepair = $purchasesForRepairs->sum('amount_cash');
+            // $monthlycost_bankRepair = $purchasesForRepairs->sum('amount_bank');
         }
 
         // المشتريات
-        $totalPurchases = null;
-        if ($type == 'all' || $type == 'purchases') {
-            $queryPurchases = Purchase::where('is_returned', false);
-            if ($date) {
-                $queryPurchases->whereBetween('purchase_date', [$dateStart, $dateEnd]);
-            } else {
-                $queryPurchases->whereBetween('purchase_date', [$dateStart, $dateEnd]);
-            }
-            
-            // جمع المبالغ من الأعمدة الجديدة (amount_cash و amount_bank)
-            $totalPurchases = $queryPurchases->sum(DB::raw('amount_cash + amount_bank'));
+        $cashTotal = $bankTotal = $monthlyPurchases = null;
+        if (in_array($type, ['all', 'purchases'])) {
+            $purchasesQuery = Purchase::where('is_returned', false)
+                ->whereBetween('purchase_date', [$dateStart, $dateEnd]);
+
+            $cashTotal = $purchasesQuery->sum('amount_cash');
+            $bankTotal = $purchasesQuery->sum('amount_bank');
+            $monthlyPurchases = $cashTotal + $bankTotal;
         }
+        $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
 
+        return view('reports.index', compact(
+            'monthlySales',
+            'monthlySalesCash',
+            'monthlySalesAppAmount',
+            'monthlycost_cashRepair',
+            'monthlycost_bankRepair',
+            'monthlycostRepair',
+            'cashTotal',
+            'bankTotal',
+            'monthlyPurchases',
+            'totalRepairs',
+            'totalCustomers'
+        ));
 
-        return view('reports.index', compact('totalSales', 'totalRepairs', 'totalPurchases', 'totalCustomers'));
     }
 }

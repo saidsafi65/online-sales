@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('repairs', function (Blueprint $table) {
             //
-                    $table->dropColumn('status');
+            $table->dropColumn('status');
         });
     }
 };

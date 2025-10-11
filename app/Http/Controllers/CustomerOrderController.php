@@ -13,6 +13,7 @@ class CustomerOrderController extends Controller
     public function index()
     {
         $orders = CustomerOrder::latest()->paginate(15);
+
         return view('customer-orders.index', compact('orders'));
     }
 

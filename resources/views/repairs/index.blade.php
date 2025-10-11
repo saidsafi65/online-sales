@@ -57,8 +57,9 @@
                             <th>المشكلة</th>
                             <th>الجوال</th>
                             <th>تاريخ الاستلام</th>
-                            <th>التكلفة</th>
                             <th>الدفع</th>
+                            <th>التكلفة نقدي</th>
+                            <th>التكلفة بنكي</th>
                             <th>تاريخ التسليم</th>
                             <th>الموظف</th>
                             <th>مرجع</th>
@@ -75,8 +76,9 @@
                                 <td>{{ Str::limit($repair->issue, 30) }}</td>
                                 <td>{{ $repair->phone }}</td>
                                 <td>{{ optional($repair->received_date)->format('Y-m-d H:i') }}</td>
-                                <td>{{ number_format($repair->cost, 2) }}</td>
                                 <td><span class="badge bg-secondary">{{ $repair->payment_method }}</span></td>
+                                <td>{{ number_format($repair->cost_cash, 2) }}</td>
+                                <td>{{ number_format($repair->cost_bank, 2) }}</td>
                                 <td>{{ optional($repair->delivery_date)->format('Y-m-d H:i') }}</td>
                                 <td>{{ $repair->received_by }}</td>
                                 <td>

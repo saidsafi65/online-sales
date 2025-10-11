@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Repair extends Model
@@ -19,7 +19,8 @@ class Repair extends Model
         'issue',
         'phone',
         'received_date',
-        'cost',
+        'cost_cash',
+        'cost_bank',
         'payment_method',
         'delivery_date',
         'received_by',
@@ -36,7 +37,8 @@ class Repair extends Model
         'delivery_date' => 'datetime',
         'return_date' => 'datetime',
         'return_delivery_date' => 'datetime',
-        'cost' => 'decimal:2',
+        'cost_cash' => 'decimal:2',
+        'cost_bank' => 'decimal:2',
         'return_cost' => 'decimal:2',
         'is_returned' => 'boolean',
     ];

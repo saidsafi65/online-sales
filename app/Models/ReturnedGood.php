@@ -29,7 +29,7 @@ class ReturnedGood extends Model
      */
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'قيد الانتظار',
             'returned' => 'تم الإرجاع',
             'replaced' => 'تم الاستبدال',
@@ -43,7 +43,7 @@ class ReturnedGood extends Model
      */
     public function getStatusColorAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'warning',
             'returned' => 'info',
             'replaced' => 'success',

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Repair;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class RepairsController extends Controller
 {
@@ -19,24 +19,24 @@ class RepairsController extends Controller
             $query->where('payment_method', $request->payment_method);
         }
         if ($request->filled('is_returned')) {
-            $query->where('is_returned', (bool)$request->is_returned);
+            $query->where('is_returned', (bool) $request->is_returned);
         }
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('device_name', 'like', "%{$search}%")
-                  ->orWhere('model', 'like', "%{$search}%")
-                  ->orWhere('issue', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
+                    ->orWhere('device_name', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%")
+                    ->orWhere('issue', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
             });
         }
 
         $repairs = $query->orderByDesc('received_date')
-                          ->orderByDesc('created_at')
-                          ->paginate(25)
-                          ->withQueryString();
+            ->orderByDesc('created_at')
+            ->paginate(25)
+            ->withQueryString();
 
         return view('repairs.index', compact('repairs'));
     }
@@ -55,7 +55,8 @@ class RepairsController extends Controller
             'issue' => 'required|string',
             'phone' => 'required|string|max:20',
             'received_date' => 'required|date',
-            'cost' => 'required|numeric|min:0',
+            'cost_cash' => 'required|numeric|min:0',
+            'cost_bank' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,card,app,mixed',
             'delivery_date' => 'nullable|date',
             'received_by' => 'required|string|max:255',
@@ -82,11 +83,12 @@ class RepairsController extends Controller
                 'issue' => $request->issue,
                 'phone' => $request->phone,
                 'received_date' => $request->received_date,
-                'cost' => $request->cost,
+                'cost_cash' => $request->cost_cash,
+                'cost_bank' => $request->cost_bank,
                 'payment_method' => $request->payment_method,
                 'delivery_date' => $request->delivery_date,
                 'received_by' => $request->received_by,
-                'is_returned' => (bool)$request->is_returned,
+                'is_returned' => (bool) $request->is_returned,
                 'return_reason' => $request->return_reason,
                 'return_date' => $request->return_date,
                 'return_cost' => $request->return_cost,
@@ -95,10 +97,12 @@ class RepairsController extends Controller
             ]);
 
             DB::commit();
+
             return redirect()->route('repairs.index')->with('success', 'تم إضافة الصيانة بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الصيانة: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الصيانة: '.$e->getMessage())->withInput();
         }
     }
 
@@ -116,7 +120,8 @@ class RepairsController extends Controller
             'issue' => 'required|string',
             'phone' => 'required|string|max:20',
             'received_date' => 'required|date',
-            'cost' => 'required|numeric|min:0',
+            'cost_cash' => 'required|numeric|min:0',
+            'cost_bank' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,card,app,mixed',
             'delivery_date' => 'nullable|date',
             'received_by' => 'required|string|max:255',
@@ -143,11 +148,12 @@ class RepairsController extends Controller
                 'issue' => $request->issue,
                 'phone' => $request->phone,
                 'received_date' => $request->received_date,
-                'cost' => $request->cost,
+                'cost_cash' => $request->cost_cash,
+                'cost_bank' => $request->cost_bank,
                 'payment_method' => $request->payment_method,
                 'delivery_date' => $request->delivery_date,
                 'received_by' => $request->received_by,
-                'is_returned' => (bool)$request->is_returned,
+                'is_returned' => (bool) $request->is_returned,
                 'return_reason' => $request->return_reason,
                 'return_date' => $request->return_date,
                 'return_cost' => $request->return_cost,
@@ -156,16 +162,19 @@ class RepairsController extends Controller
             ]);
 
             DB::commit();
+
             return redirect()->route('repairs.index')->with('success', 'تم تحديث بيانات الصيانة بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'حدث خطأ ��ثناء تحديث بيانات الصيانة: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'حدث خطأ ��ثناء تحديث بيانات الصيانة: '.$e->getMessage())->withInput();
         }
     }
 
     public function destroy(Repair $repair): RedirectResponse
     {
         $repair->delete();
+
         return redirect()->route('repairs.index')->with('success', 'تم حذف عملية الصيانة');
     }
 }

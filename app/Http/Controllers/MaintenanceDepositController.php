@@ -41,28 +41,28 @@ class MaintenanceDepositController extends Controller
         // إعادة التوجيه مع رسالة نجاح
         return redirect()->route('deposits.index')->with('success', 'تم إضافة الأمانة بنجاح');
     }
+
     // عرض نموذج تعديل الأمانة
     public function update(Request $request, $id)
-{
-    // التحقق من البيانات المدخلة
-    $validated = $request->validate([
-        'piece' => 'required|string|max:255',
-        'type' => 'required|string|max:255',
-        'reason' => 'required|string|max:255',
-        'taken_at' => 'required|date',
-        'returned_at' => 'nullable|date',
-    ]);
+    {
+        // التحقق من البيانات المدخلة
+        $validated = $request->validate([
+            'piece' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'reason' => 'required|string|max:255',
+            'taken_at' => 'required|date',
+            'returned_at' => 'nullable|date',
+        ]);
 
-    // إيجاد الأمانة
-    $deposit = MaintenanceDeposit::findOrFail($id);
+        // إيجاد الأمانة
+        $deposit = MaintenanceDeposit::findOrFail($id);
 
-    // تحديث الأمانة
-    $deposit->update($validated);
+        // تحديث الأمانة
+        $deposit->update($validated);
 
-    // إعادة التوجيه مع رسالة نجاح
-    return redirect()->route('deposits.index')->with('success', 'تم تعديل الأمانة بنجاح');
-}
-
+        // إعادة التوجيه مع رسالة نجاح
+        return redirect()->route('deposits.index')->with('success', 'تم تعديل الأمانة بنجاح');
+    }
 
     // حذف الأمانة
     public function destroy($id)

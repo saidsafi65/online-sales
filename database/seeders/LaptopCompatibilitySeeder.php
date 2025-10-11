@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Laptop;
-use App\Models\PartType;
 use App\Models\Part;
+use App\Models\PartType;
+use Illuminate\Database\Seeder;
 
 class LaptopCompatibilitySeeder extends Seeder
 {
@@ -31,19 +31,19 @@ class LaptopCompatibilitySeeder extends Seeder
         $hp250g6 = Laptop::create([
             'brand' => 'HP',
             'model' => '250 G6',
-            'description' => 'جهاز HP للأعمال والدراسة'
+            'description' => 'جهاز HP للأعمال والدراسة',
         ]);
 
         $lenovoIdeapad110 = Laptop::create([
             'brand' => 'Lenovo',
             'model' => 'Ideapad 110',
-            'description' => 'جهاز Lenovo متعدد الاستخدامات'
+            'description' => 'جهاز Lenovo متعدد الاستخدامات',
         ]);
 
         $dellInspirion15 = Laptop::create([
             'brand' => 'Dell',
             'model' => 'Inspiron 15 3000',
-            'description' => 'جهاز Dell موثوق'
+            'description' => 'جهاز Dell موثوق',
         ]);
 
         // إنشاء شاشة متوافقة بين HP و Lenovo
@@ -53,21 +53,21 @@ class LaptopCompatibilitySeeder extends Seeder
             'specifications' => json_encode([
                 'size' => '15.6 inch',
                 'resolution' => '1366x768',
-                'type' => 'LED'
+                'type' => 'LED',
             ]),
-            'price' => 150.00
+            'price' => 150.00,
         ]);
 
         // ربط الشاشة بـ HP 250 G6 (أصلية)
         $hp250g6->parts()->attach($screen1->id, [
             'is_original' => true,
-            'notes' => 'الشاشة الأصلية للجهاز'
+            'notes' => 'الشاشة الأصلية للجهاز',
         ]);
 
         // ربط الشاشة بـ Lenovo Ideapad 110 (متوافقة)
         $lenovoIdeapad110->parts()->attach($screen1->id, [
             'is_original' => false,
-            'notes' => 'متوافقة تماماً - نفس المقاس والموصل'
+            'notes' => 'متوافقة تماماً - نفس المقاس والموصل',
         ]);
 
         // إنشاء بطارية متوافقة
@@ -77,15 +77,15 @@ class LaptopCompatibilitySeeder extends Seeder
             'specifications' => json_encode([
                 'capacity' => '41Wh',
                 'voltage' => '14.6V',
-                'cells' => '4-cell'
+                'cells' => '4-cell',
             ]),
-            'price' => 80.00
+            'price' => 80.00,
         ]);
 
         $hp250g6->parts()->attach($battery1->id, ['is_original' => true]);
         $lenovoIdeapad110->parts()->attach($battery1->id, [
             'is_original' => false,
-            'notes' => 'نفس السعة والفولت'
+            'notes' => 'نفس السعة والفولت',
         ]);
 
         // إنشاء قطعة WiFi متوافقة مع الثلاثة أجهزة
@@ -95,9 +95,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'specifications' => json_encode([
                 'chipset' => 'Realtek RTL8821CE',
                 'speed' => '433Mbps',
-                'bands' => 'Dual Band'
+                'bands' => 'Dual Band',
             ]),
-            'price' => 25.00
+            'price' => 25.00,
         ]);
 
         $hp250g6->parts()->attach($wifi1->id, ['is_original' => true]);
@@ -110,9 +110,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'part_number' => 'KB-HP-250-AR',
             'specifications' => json_encode([
                 'layout' => 'Arabic/English',
-                'backlight' => 'No'
+                'backlight' => 'No',
             ]),
-            'price' => 35.00
+            'price' => 35.00,
         ]);
 
         $hp250g6->parts()->attach($keyboard1->id, ['is_original' => true]);
@@ -124,9 +124,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'specifications' => json_encode([
                 'type' => 'DDR4',
                 'capacity' => '8GB',
-                'speed' => '2400MHz'
+                'speed' => '2400MHz',
             ]),
-            'price' => 60.00
+            'price' => 60.00,
         ]);
 
         $hp250g6->parts()->attach($ram1->id, ['is_original' => true]);
@@ -140,9 +140,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'specifications' => json_encode([
                 'capacity' => '1TB',
                 'speed' => '5400RPM',
-                'interface' => 'SATA III'
+                'interface' => 'SATA III',
             ]),
-            'price' => 90.00
+            'price' => 90.00,
         ]);
 
         $hp250g6->parts()->attach($hdd1->id, ['is_original' => true]);
@@ -154,9 +154,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'part_number' => 'MB-HP-250-G6-i5',
             'specifications' => json_encode([
                 'cpu_socket' => 'Intel i5-7200U',
-                'chipset' => 'Intel HM175'
+                'chipset' => 'Intel HM175',
             ]),
-            'price' => 200.00
+            'price' => 200.00,
         ]);
 
         $hp250g6->parts()->attach($motherboard1->id, ['is_original' => true]);
@@ -167,9 +167,9 @@ class LaptopCompatibilitySeeder extends Seeder
             'part_number' => 'CASE-HP-250-G6-BOTTOM',
             'specifications' => json_encode([
                 'color' => 'Black',
-                'material' => 'Plastic'
+                'material' => 'Plastic',
             ]),
-            'price' => 45.00
+            'price' => 45.00,
         ]);
 
         $hp250g6->parts()->attach($case1->id, ['is_original' => true]);

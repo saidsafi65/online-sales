@@ -17,16 +17,16 @@ class StoreController extends Controller
         // البحث
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('product_name', 'LIKE', "%{$search}%")
-                  ->orWhere('supplier_name', 'LIKE', "%{$search}%");
+                    ->orWhere('supplier_name', 'LIKE', "%{$search}%");
             });
         }
 
         // ترتيب حسب التاريخ (الأحدث أولاً)
         $items = $query->orderBy('date_added', 'desc')
-                       ->orderBy('created_at', 'desc')
-                       ->paginate(15);
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
 
         // حساب الإجماليات
         $totalCash = Store::sum('cash_amount');
@@ -80,25 +80,25 @@ class StoreController extends Controller
         // التحقق من منطق طريقة الدفع
         if ($validated['payment_method'] == 'نقدي' && $validated['bank_amount'] != 0) {
             return back()->withErrors(['bank_amount' => 'عند اختيار نقدي، المبلغ البنكي يجب أن يكون صفر'])
-                        ->withInput();
+                ->withInput();
         }
 
         if ($validated['payment_method'] == 'بنكي' && $validated['cash_amount'] != 0) {
             return back()->withErrors(['cash_amount' => 'عند اختيار بنكي، المبلغ النقدي يجب أن يكون صفر'])
-                        ->withInput();
+                ->withInput();
         }
 
-        if ($validated['payment_method'] == 'مختلط' && 
+        if ($validated['payment_method'] == 'مختلط' &&
             ($validated['cash_amount'] == 0 && $validated['bank_amount'] == 0)) {
             return back()->withErrors(['payment_method' => 'عند اختيار مختلط، يجب إدخال قيمة لكل من النقدي والبنكي'])
-                        ->withInput();
+                ->withInput();
         }
 
         // إنشاء المنتج
         Store::create($validated);
 
         return redirect()->route('store.index')
-                        ->with('success', 'تم إضافة المنتج بنجاح');
+            ->with('success', 'تم إضافة المنتج بنجاح');
     }
 
     /**
@@ -107,6 +107,7 @@ class StoreController extends Controller
     public function edit($id)
     {
         $item = Store::findOrFail($id);
+
         return view('store.edit', compact('item'));
     }
 
@@ -149,25 +150,25 @@ class StoreController extends Controller
         // التحقق من منطق طريقة الدفع
         if ($validated['payment_method'] == 'نقدي' && $validated['bank_amount'] != 0) {
             return back()->withErrors(['bank_amount' => 'عند اختيار نقدي، المبلغ البنكي يجب أن يكون صفر'])
-                        ->withInput();
+                ->withInput();
         }
 
         if ($validated['payment_method'] == 'بنكي' && $validated['cash_amount'] != 0) {
             return back()->withErrors(['cash_amount' => 'عند اختيار بنكي، المبلغ النقدي يجب أن يكون صفر'])
-                        ->withInput();
+                ->withInput();
         }
 
-        if ($validated['payment_method'] == 'مختلط' && 
+        if ($validated['payment_method'] == 'مختلط' &&
             ($validated['cash_amount'] == 0 && $validated['bank_amount'] == 0)) {
             return back()->withErrors(['payment_method' => 'عند اختيار مختلط، يجب إدخال قيمة لكل من النقدي والبنكي'])
-                        ->withInput();
+                ->withInput();
         }
 
         // تحديث المنتج
         $item->update($validated);
 
         return redirect()->route('store.index')
-                        ->with('success', 'تم تحديث المنتج بنجاح');
+            ->with('success', 'تم تحديث المنتج بنجاح');
     }
 
     /**
@@ -179,6 +180,6 @@ class StoreController extends Controller
         $item->delete();
 
         return redirect()->route('store.index')
-                        ->with('success', 'تم حذف المنتج بنجاح');
+            ->with('success', 'تم حذف المنتج بنجاح');
     }
 }

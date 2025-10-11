@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
@@ -14,10 +13,11 @@ class InvoiceController extends Controller
     public function index()
     {
         $invoices = Invoice::orderBy('created_at', 'desc')->paginate(15);
-         // تحويل جميع تواريخ الفواتير إلى كائنات Carbon
+        // تحويل جميع تواريخ الفواتير إلى كائنات Carbon
         foreach ($invoices as $invoice) {
             $invoice->invoice_date = Carbon::parse($invoice->invoice_date);
         }
+
         return view('invoices.index', compact('invoices'));
     }
 
@@ -25,7 +25,8 @@ class InvoiceController extends Controller
     public function create()
     {
         // إنشاء رقم فاتورة تلقائي
-        $invoiceNumber = 'INV-' . date('Ymd') . rand(1000, 9999);
+        $invoiceNumber = 'INV-'.date('Ymd').rand(1000, 9999);
+
         return view('invoices.create', compact('invoiceNumber'));
     }
 
@@ -50,7 +51,7 @@ class InvoiceController extends Controller
         $items = [];
 
         for ($i = 0; $i < count($request->description); $i++) {
-            if (!empty($request->description[$i])) {
+            if (! empty($request->description[$i])) {
                 $quantity = floatval($request->quantity[$i]);
                 $price = floatval($request->price[$i]);
                 $itemTotal = $quantity * $price;
@@ -88,6 +89,7 @@ class InvoiceController extends Controller
     public function show($id)
     {
         $invoice = Invoice::with('items')->findOrFail($id);
+
         return view('invoices.show', compact('invoice'));
     }
 
@@ -95,8 +97,9 @@ class InvoiceController extends Controller
     public function print($id)
     {
         $invoice = Invoice::with('items')->findOrFail($id);
-         // تحويل تاريخ الفاتورة إلى كائن Carbon
+        // تحويل تاريخ الفاتورة إلى كائن Carbon
         $invoice->invoice_date = Carbon::parse($invoice->invoice_date);
+
         return view('invoices.print', compact('invoice'));
     }
 
@@ -104,11 +107,11 @@ class InvoiceController extends Controller
     public function downloadPdf($id)
     {
         $invoice = Invoice::with('items')->findOrFail($id);
-        
+
         $pdf = Pdf::loadView('invoices.pdf', compact('invoice'))
             ->setPaper('a4', 'portrait');
-        
-        return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+
+        return $pdf->download('invoice-'.$invoice->invoice_number.'.pdf');
     }
 
     // حذف الفاتورة

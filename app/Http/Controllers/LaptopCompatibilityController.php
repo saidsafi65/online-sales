@@ -14,7 +14,7 @@ class LaptopCompatibilityController extends Controller
     {
         $laptops = Laptop::with('parts.partType')->get();
         $partTypes = PartType::all();
-        
+
         return view('compatibility.index', compact('laptops', 'partTypes'));
     }
 
@@ -23,7 +23,7 @@ class LaptopCompatibilityController extends Controller
     {
         $laptop = Laptop::with(['parts.partType', 'parts.laptops'])->findOrFail($id);
         $partTypes = PartType::all();
-        
+
         // الحصول على الأجهزة المتوافقة لكل نوع قطعة
         $compatibilityData = [];
         foreach ($partTypes as $partType) {
@@ -31,11 +31,11 @@ class LaptopCompatibilityController extends Controller
             if ($part) {
                 $compatibilityData[$partType->id] = [
                     'part' => $part,
-                    'compatible_laptops' => $part->allCompatibleLaptops()
+                    'compatible_laptops' => $part->allCompatibleLaptops(),
                 ];
             }
         }
-        
+
         return view('compatibility.show', compact('laptop', 'partTypes', 'compatibilityData'));
     }
 
@@ -44,23 +44,23 @@ class LaptopCompatibilityController extends Controller
     {
         $laptopId = $request->laptop_id;
         $partTypeId = $request->part_type_id;
-        
+
         $laptop = Laptop::findOrFail($laptopId);
         $part = $laptop->getPartByType($partTypeId);
-        
-        if (!$part) {
+
+        if (! $part) {
             return response()->json([
                 'success' => false,
-                'message' => 'لا توجد قطعة من هذا النوع في الجهاز'
+                'message' => 'لا توجد قطعة من هذا النوع في الجهاز',
             ]);
         }
-        
+
         $compatibleLaptops = $part->allCompatibleLaptops();
-        
+
         return response()->json([
             'success' => true,
             'part' => $part,
-            'compatible_laptops' => $compatibleLaptops
+            'compatible_laptops' => $compatibleLaptops,
         ]);
     }
 
@@ -71,21 +71,21 @@ class LaptopCompatibilityController extends Controller
             'laptop_id' => 'required|exists:laptops,id',
             'part_id' => 'required|exists:parts,id',
             'compatible_laptop_id' => 'required|exists:laptops,id',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
         $part = Part::findOrFail($request->part_id);
-        
+
         $part->compatibleLaptops()->syncWithoutDetaching([
             $request->compatible_laptop_id => [
                 'verified' => false,
-                'notes' => $request->notes
-            ]
+                'notes' => $request->notes,
+            ],
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إضافة التوافق بنجاح'
+            'message' => 'تم إضافة التوافق بنجاح',
         ]);
     }
 
@@ -94,7 +94,7 @@ class LaptopCompatibilityController extends Controller
     {
         $request->validate([
             'part_id' => 'required|exists:parts,id',
-            'compatible_laptop_id' => 'required|exists:laptops,id'
+            'compatible_laptop_id' => 'required|exists:laptops,id',
         ]);
 
         $part = Part::findOrFail($request->part_id);
@@ -102,7 +102,7 @@ class LaptopCompatibilityController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف التوافق بنجاح'
+            'message' => 'تم حذف التوافق بنجاح',
         ]);
     }
 
@@ -111,7 +111,7 @@ class LaptopCompatibilityController extends Controller
     {
         $laptops = Laptop::with('parts')->paginate(20);
         $partTypes = PartType::all();
-        
+
         return view('compatibility.manage_laptops', compact('laptops', 'partTypes'));
     }
 
@@ -122,11 +122,11 @@ class LaptopCompatibilityController extends Controller
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048'
+            'image' => 'nullable|image|max:2048',
         ]);
 
         $data = $request->only(['brand', 'model', 'description']);
-        
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('laptops', 'public');
         }
@@ -143,21 +143,21 @@ class LaptopCompatibilityController extends Controller
             'laptop_id' => 'required|exists:laptops,id',
             'part_id' => 'required|exists:parts,id',
             'is_original' => 'boolean',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
         $laptop = Laptop::findOrFail($request->laptop_id);
-        
+
         $laptop->parts()->syncWithoutDetaching([
             $request->part_id => [
                 'is_original' => $request->is_original ?? true,
-                'notes' => $request->notes
-            ]
+                'notes' => $request->notes,
+            ],
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'تم ربط القطعة بالجهاز بنجاح'
+            'message' => 'تم ربط القطعة بالجهاز بنجاح',
         ]);
     }
 }

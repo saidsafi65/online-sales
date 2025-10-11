@@ -4,31 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\ReturnedGood;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ReturnedGoodController extends Controller
 {
     public function index()
     {
         $returnedGoods = ReturnedGood::latest()->paginate(15);
-        
+
         $pendingCount = ReturnedGood::where('status', 'pending')->count();
         $returnedCount = ReturnedGood::where('status', 'returned')->count();
         $resolvedCount = ReturnedGood::whereIn('status', ['replaced', 'refunded'])->count();
 
         return view('returned-goods.index', compact(
-            'returnedGoods', 
-            'pendingCount', 
-            'returnedCount', 
+            'returnedGoods',
+            'pendingCount',
+            'returnedCount',
             'resolvedCount'
         ));
     }
 
     public function create()
     {
-         // جلب المنتجات التي الكمية لها أكبر من صفر
+        // جلب المنتجات التي الكمية لها أكبر من صفر
         $availableProducts = \App\Models\CatalogItem::where('quantity', '>', 0)->get();
-        
+
         // تمريرها إلى الـ View
         return view('returned-goods.create', compact('availableProducts'));
     }
@@ -70,7 +69,6 @@ class ReturnedGoodController extends Controller
         return redirect()->route('returned-goods.index')
             ->with('success', 'تم إضافة البضاعة المرجعة بنجاح');
     }
-
 
     public function edit(ReturnedGood $returnedGood)
     {
