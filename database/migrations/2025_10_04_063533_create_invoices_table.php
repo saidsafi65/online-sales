@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('invoice_number')->unique();
             $table->text('notes')->nullable();
             $table->decimal('total_amount', 10, 2)->default(0);
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->decimal('afterDiscount_amount', 10, 2)->default(0);
             $table->timestamps();
         });
     }

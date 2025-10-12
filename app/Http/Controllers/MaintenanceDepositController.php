@@ -63,6 +63,16 @@ class MaintenanceDepositController extends Controller
         // إعادة التوجيه مع رسالة نجاح
         return redirect()->route('deposits.index')->with('success', 'تم تعديل الأمانة بنجاح');
     }
+    // عرض نموذج تعديل الأمانة
+        public function edit($id)
+    {
+        // جلب الأمانة من قاعدة البيانات باستخدام الـ ID
+        $deposit = MaintenanceDeposit::findOrFail($id);
+
+        // إعادة عرض صفحة التعديل مع بيانات الأمانة
+        return view('deposits.edit', compact('deposit'));
+    }
+
 
     // حذف الأمانة
     public function destroy($id)

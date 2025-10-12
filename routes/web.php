@@ -159,6 +159,8 @@ Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('d
 Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
 Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
 Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])->name('deposits.destroy');
+Route::get('/deposits/{id}/edit', [MaintenanceDepositController::class, 'edit'])->name('deposits.edit');
+Route::put('/deposits/{id}', [MaintenanceDepositController::class, 'update'])->name('deposits.update');
 
 // Reports routes
 Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');

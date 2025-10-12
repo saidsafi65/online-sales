@@ -148,9 +148,40 @@
                             </tr>
                         </tbody>
                         <tfoot>
+                            <tr style="background: #f8fafc;">
+                                <td colspan="4" style="padding: 1rem; text-align: left; font-weight: 600; font-size: 1.1rem; color: #1e293b;">
+                                    الإجمالي قبل الخصم:
+                                </td>
+                                <td colspan="2" style="padding: 1rem; font-weight: 700; font-size: 1.3rem; color: #64748b;" id="subtotal">
+                                    0.00 شيكل
+                                </td>
+                            </tr>
+                            <tr style="background: #fef3c7;">
+                                <td colspan="4" style="padding: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <label style="font-weight: 600; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fas fa-percentage" style="color: #f59e0b;"></i>
+                                            مبلغ الخصم:
+                                        </label>
+                                        <input type="number" 
+                                               name="discount_amount" 
+                                               id="discountInput"
+                                               class="form-control" 
+                                               value="{{ old('discount_amount', 0) }}"
+                                               step="0.01"
+                                               min="0"
+                                               placeholder="0.00"
+                                               style="width: 200px; border: 2px solid #fbbf24; border-radius: 8px; padding: 0.6rem; font-weight: 600;">
+                                    </div>
+                                </td>
+                                <td colspan="2" style="padding: 1rem; font-weight: 700; font-size: 1.2rem; color: #f59e0b;" id="discountDisplay">
+                                    0.00 شيكل
+                                </td>
+                            </tr>
                             <tr style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
                                 <td colspan="4" style="padding: 1.25rem; text-align: left; font-weight: 700; font-size: 1.2rem; color: #1e293b;">
-                                    الإجمالي الكلي:
+                                    <i class="fas fa-money-bill-wave" style="color: #10b981; margin-left: 0.5rem;"></i>
+                                    الإجمالي النهائي:
                                 </td>
                                 <td colspan="2" style="padding: 1.25rem; font-weight: 700; font-size: 1.5rem; color: #10b981;" id="grandTotal">
                                     0.00 شيكل
@@ -234,7 +265,7 @@
         setTimeout(() => {
             row.remove();
             updateItemNumbers();
-            calculateGrandTotal();
+            calculateTotals();
         }, 300);
     }
 
@@ -256,15 +287,21 @@
         const price = parseFloat(row.querySelector('.price-input').value) || 0;
         const total = quantity * price;
         row.querySelector('.item-total').value = total.toFixed(2);
-        calculateGrandTotal();
+        calculateTotals();
     }
 
-    function calculateGrandTotal() {
-        let grandTotal = 0;
+    function calculateTotals() {
+        let subtotal = 0;
         document.querySelectorAll('.item-row').forEach(row => {
             const rowTotal = parseFloat(row.querySelector('.item-total').value) || 0;
-            grandTotal += rowTotal;
+            subtotal += rowTotal;
         });
+
+        const discount = parseFloat(document.getElementById('discountInput').value) || 0;
+        const grandTotal = subtotal - discount;
+
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2) + ' شيكل';
+        document.getElementById('discountDisplay').textContent = discount.toFixed(2) + ' شيكل';
         document.getElementById('grandTotal').textContent = grandTotal.toFixed(2) + ' شيكل';
     }
 
@@ -279,9 +316,11 @@
             qtyInput.addEventListener('input', () => calculateRowTotal(row));
             priceInput.addEventListener('input', () => calculateRowTotal(row));
         });
+
+        const discountInput = document.getElementById('discountInput');
+        discountInput.addEventListener('input', calculateTotals);
     }
 
-    // Initialize
     attachCalculationListeners();
 </script>
 @endpush
@@ -321,6 +360,11 @@
 
     .table tbody tr:hover {
         background: #f8fafc;
+    }
+
+    #discountInput:focus {
+        border-color: #f59e0b !important;
+        box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.15) !important;
     }
 </style>
 @endpush

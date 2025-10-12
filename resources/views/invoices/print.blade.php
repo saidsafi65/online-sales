@@ -106,46 +106,6 @@
             background: white;
         }
 
-        .laptop-icon {
-            width: 80px;
-            height: 60px;
-            position: relative;
-        }
-
-        .laptop-screen {
-            width: 70px;
-            height: 45px;
-            border: 3px solid #333;
-            border-radius: 3px 3px 0 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            position: relative;
-        }
-
-        .laptop-screen::before {
-            content: '⚙';
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 16px;
-            color: #FF4757;
-        }
-
-        .laptop-screen::after {
-            content: '🔧';
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-            font-size: 14px;
-        }
-
-        .laptop-base {
-            width: 80px;
-            height: 8px;
-            background: #333;
-            border-radius: 0 0 3px 3px;
-            margin-top: 2px;
-        }
-
         .store-name-section {
             text-align: center;
         }
@@ -161,12 +121,6 @@
             color: #FF4757;
             font-weight: bold;
             letter-spacing: 3px;
-        }
-
-        .store-subtitle {
-            font-size: 12px;
-            color: #666;
-            font-weight: normal;
         }
 
         .invoice-title-box {
@@ -242,16 +196,39 @@
             background: #e8f4f8;
         }
 
-        /* صف الإجمالي */
+        /* صفوف الحسابات */
+        .subtotal-row {
+            background: #f8f9fa !important;
+        }
+
+        .subtotal-row td {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c3e50;
+            border: 2px solid #e0e0e0;
+        }
+
+        .discount-row {
+            background: #fff9e6 !important;
+        }
+
+        .discount-row td {
+            font-weight: bold;
+            font-size: 16px;
+            color: #f39c12;
+            border: 2px solid #f39c12;
+        }
+
         .total-row {
-            background: #fff5f5 !important;
+            background: #e8f5e9 !important;
         }
 
         .total-row td {
             font-weight: bold;
-            font-size: 18px;
-            color: #FF4757;
-            border: 2px solid #FF4757;
+            font-size: 20px;
+            color: #27ae60;
+            border: 3px solid #27ae60;
+            padding: 15px 10px;
         }
 
         /* الملاحظات */
@@ -466,7 +443,7 @@
                     @endforeach
 
                     @php
-                        $emptyRows = 10 - $invoice->items->count();
+                        $emptyRows = 8 - $invoice->items->count();
                     @endphp
 
                     @for ($i = 0; $i < $emptyRows; $i++)
@@ -479,9 +456,26 @@
                         </tr>
                     @endfor
 
-                    <tr class="total-row">
-                        <td colspan="4" style="text-align: left; padding-right: 20px;">إجمالي المطلوب</td>
+                    <!-- الإجمالي قبل الخصم -->
+                    <tr class="subtotal-row">
+                        <td colspan="4" style="text-align: left; padding-right: 20px;">الإجمالي قبل الخصم</td>
                         <td>{{ number_format($invoice->total_amount, 2) }} شيكل</td>
+                    </tr>
+
+                    <!-- الخصم -->
+                    @if($invoice->discount_amount > 0)
+                    <tr class="discount-row">
+                        <td colspan="4" style="text-align: left; padding-right: 20px;">الخصم</td>
+                        <td>{{ number_format($invoice->discount_amount, 2) }} شيكل</td>
+                    </tr>
+                    @endif
+
+                    <!-- الإجمالي النهائي -->
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: left; padding-right: 20px;">
+                            <span style="font-size: 22px;">💰</span> إجمالي المطلوب
+                        </td>
+                        <td>{{ number_format($invoice->afterDiscount_amount, 2) }} شيكل</td>
                     </tr>
                 </tbody>
             </table>

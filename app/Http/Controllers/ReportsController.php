@@ -41,7 +41,7 @@ class ReportsController extends Controller
             $purchasesForRepairs = Purchase::where('is_returned', false)
                 ->whereBetween('purchase_date', [$dateStart, $dateEnd]);
             $repairsQuery = Repair::where('is_returned', false)
-            ->whereBetween('delivery_date', [$dateStart, $dateEnd]);
+                ->whereBetween('delivery_date', [$dateStart, $dateEnd]);
 
             $monthlycost_cashRepair = $repairsQuery->sum('cost_cash');
             $monthlycost_bankRepair = $repairsQuery->sum('cost_bank');

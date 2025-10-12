@@ -79,11 +79,32 @@
                 </div>
             </div>
 
-            <!-- Total Amount -->
+            <!-- Amounts Section -->
             <div style="margin-top: auto; padding-top: 1.5rem; border-top: 2px dashed #e2e8f0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <span style="color: #64748b; font-weight: 500;">الإجمالي:</span>
-                    <span style="font-size: 1.8rem; font-weight: 700; color: #10b981;">{{ number_format($invoice->total_amount, 2) }} شيكل</span>
+                <!-- الإجمالي قبل الخصم -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: #f8fafc; border-radius: 8px;">
+                    <span style="color: #64748b; font-weight: 500; font-size: 0.9rem;">الإجمالي قبل الخصم:</span>
+                    <span style="font-size: 1.1rem; font-weight: 600; color: #475569;">{{ number_format($invoice->total_amount, 2) }} ₪</span>
+                </div>
+
+                <!-- الخصم -->
+                @if($invoice->discount_amount > 0)
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: #fef3c7; border-radius: 8px;">
+                    <span style="color: #b45309; font-weight: 500; font-size: 0.9rem;">
+                        <i class="fas fa-tag" style="margin-left: 0.25rem;"></i>
+                        الخصم:
+                    </span>
+                    <span style="font-size: 1.1rem; font-weight: 600; color: #f59e0b;">- {{ number_format($invoice->discount_amount, 2) }} ₪</span>
+                </div>
+                @endif
+
+                <!-- المبلغ النهائي -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 10px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);">
+                    <span style="color: #065f46; font-weight: 600; font-size: 1rem;">
+                        <i class="fas fa-money-bill-wave" style="margin-left: 0.25rem;"></i>
+                        المبلغ النهائي:
+                    </span>
+                    <span style="font-size: 1.8rem; font-weight: 700; color: #10b981;">{{ number_format($invoice->afterDiscount_amount, 2) }} ₪</span>
                 </div>
 
                 <!-- Actions -->

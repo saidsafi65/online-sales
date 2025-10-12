@@ -38,6 +38,7 @@ class InvoiceController extends Controller
             'invoice_date' => 'required|date',
             'invoice_number' => 'required|string|unique:invoices,invoice_number',
             'notes' => 'nullable|string',
+            'discount_amount' => 'nullable|numeric|min:0',
             'description' => 'required|array',
             'description.*' => 'required|string',
             'quantity' => 'required|array',
@@ -67,6 +68,17 @@ class InvoiceController extends Controller
             }
         }
 
+        // حساب مبلغ الخصم والإجمالي بعد الخصم
+        $discountAmount = floatval($request->discount_amount ?? 0);
+        $afterDiscountAmount = $total - $discountAmount;
+
+        // التأكد من أن المبلغ بعد الخصم لا يكون سالباً
+        if ($afterDiscountAmount < 0) {
+            return back()
+                ->withErrors(['discount_amount' => 'مبلغ الخصم أكبر من إجمالي الفاتورة'])
+                ->withInput();
+        }
+
         // إنشاء الفاتورة
         $invoice = Invoice::create([
             'customer_name' => $request->customer_name,
@@ -74,6 +86,8 @@ class InvoiceController extends Controller
             'invoice_number' => $request->invoice_number,
             'notes' => $request->notes,
             'total_amount' => $total,
+            'discount_amount' => $discountAmount,
+            'afterDiscount_amount' => $afterDiscountAmount,
         ]);
 
         // إضافة العناصر
