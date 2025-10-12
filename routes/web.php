@@ -153,6 +153,8 @@ Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index
 Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
 Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
 Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
+Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
+Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
 
 // Maintenance Deposit routes
 Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('deposits.index');

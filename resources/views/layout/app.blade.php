@@ -75,6 +75,7 @@
             align-items: center;
             gap: 0.75rem;
             transition: transform 0.3s ease;
+            text-decoration: none;
         }
 
         .navbar-brand:hover {
@@ -92,6 +93,7 @@
             color: var(--primary-color);
             font-size: 1.5rem;
             box-shadow: var(--shadow-md);
+            flex-shrink: 0;
         }
 
         .brand-text {
@@ -111,6 +113,20 @@
             font-weight: 400;
             opacity: 0.9;
             letter-spacing: 0.5px;
+        }
+
+        .navbar-toggler {
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
         }
 
         .nav-link {
@@ -172,6 +188,7 @@
             border: 2px solid white;
             object-fit: cover;
             box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
         }
 
         .user-info {
@@ -214,10 +231,22 @@
             transform: translateX(-3px);
         }
 
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
             padding: 3rem 0;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
         }
 
         /* Welcome Section */
@@ -396,6 +425,7 @@
             color: white;
             font-weight: bold;
             font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
         .footer-text {
@@ -452,6 +482,7 @@
         .service-card:nth-child(3) { animation-delay: 0.3s; }
         .service-card:nth-child(4) { animation-delay: 0.4s; }
         .service-card:nth-child(5) { animation-delay: 0.5s; }
+        .service-card:nth-child(6) { animation-delay: 0.6s; }
 
         /* Responsive */
         @media (max-width: 991px) {
@@ -460,6 +491,10 @@
                 padding: 1rem;
                 border-radius: 12px;
                 margin-top: 1rem;
+            }
+
+            .nav-link {
+                margin: 0.25rem 0;
             }
 
             .welcome-title {
@@ -471,9 +506,35 @@
                 text-align: center;
             }
 
+            .footer-info {
+                justify-content: center;
+            }
+
             .footer-links {
                 flex-direction: column;
                 gap: 0.5rem;
+            }
+
+            .brand-text {
+                display: none;
+            }
+
+            .user-info {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 2rem 0;
+            }
+
+            .welcome-section {
+                margin-bottom: 2rem;
+            }
+
+            .service-card {
+                padding: 2rem 1.5rem;
             }
         }
 
@@ -482,15 +543,52 @@
                 font-size: 1.75rem;
             }
 
+            .welcome-subtitle {
+                font-size: 1rem;
+            }
+
             .service-icon {
                 width: 70px;
                 height: 70px;
                 font-size: 2rem;
             }
 
-            .service-card {
-                padding: 2rem 1.5rem;
+            .service-title {
+                font-size: 1.2rem;
             }
+
+            .service-description {
+                font-size: 0.9rem;
+            }
+
+            .navbar {
+                padding: 0.75rem 0;
+            }
+
+            .brand-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 
@@ -513,7 +611,7 @@
                 </a>
 
                 <!-- Mobile Toggle -->
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -527,33 +625,27 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('sales.*') ? 'active' : '' }}" href="{{ route('sales.index') }}">
-                                <i class="fas fa-shopping-cart"></i>
-                                <span>المبيعات</span>
+                            <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}" href="{{ route('invoices.index') }}">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>الفواتير</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('purchases.*') ? 'active' : '' }}" href="{{ route('purchases.index') }}">
-                                <i class="fas fa-shopping-bag"></i>
-                                <span>المشتريات</span>
+                            <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}" href="{{ route('catalog.index') }}">
+                                <i class="fas fa-boxes"></i>
+                                <span>الكتالوج</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('repairs.*') ? 'active' : '' }}" href="{{ route('repairs.index') }}">
+                            <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}" href="{{ route('deposits.index') }}">
                                 <i class="fas fa-tools"></i>
-                                <span>الصيانة</span>
+                                <span>الأمانات</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                                 <i class="fas fa-chart-line"></i>
                                 <span>التقارير</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}" href="{{ route('settings.index') }}">
-                                <i class="fas fa-cog"></i>
-                                <span>الإعدادات</span>
                             </a>
                         </li>
                     </ul>
@@ -565,7 +657,7 @@
                                 <div class="user-section">
                                     <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true" alt="User" class="user-avatar">
                                     <div class="user-info d-none d-md-flex">
-                                        <span class="user-name">{{ auth()->user()->name ?? 'المستخدم' }}</span>
+                                        <span class="user-name">المستخدم</span>
                                         <span class="user-role">مدير النظام</span>
                                     </div>
                                     <i class="fas fa-chevron-down text-white"></i>
@@ -579,14 +671,14 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('settings.index') }}">
+                                    <a class="dropdown-item" href="#">
                                         <i class="fas fa-cog"></i>
                                         <span>الإعدادات</span>
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="POST" action="{{ route('logout') }}">
+                                    <form method="POST" action="#">
                                         @csrf
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="fas fa-sign-out-alt"></i>
@@ -617,7 +709,7 @@
                     <div class="footer-logo">
                         <i class="fas fa-store"></i>
                     </div>
-                    <span class="footer-text">&copy; {{ date('Y') }} معرض المبيعات الإلكتروني. جميع الحقوق محفوظة.</span>
+                    <span class="footer-text">&copy; {{ date('Y') }} معرض Online Sale. جميع الحقوق محفوظة.</span>
                 </div>
                 <div class="footer-links">
                     <a href="#" class="footer-link">الدعم الفني</a>
