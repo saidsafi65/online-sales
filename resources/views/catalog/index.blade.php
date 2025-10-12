@@ -44,6 +44,48 @@
                 </div>
             </div>
 
+            <!-- Search and Filter Section -->
+            <div class="search-filter-section mb-4">
+                <form method="GET" action="{{ route('catalog.index') }}">
+                    <div class="row">
+                        <!-- Search Input -->
+                        <div class="col-md-4">
+                            <input type="text" name="search" value="{{ request()->search }}" class="form-control"
+                                placeholder="البحث بالاسم أو النوع">
+                        </div>
+
+                        <!-- Quantity Filter -->
+                        <div class="col-md-3">
+                            <select name="quantity_filter" class="form-control">
+                                <option value="">تصفية حسب الكمية</option>
+                                <option value="low" {{ request()->quantity_filter == 'low' ? 'selected' : '' }}>منخفضة
+                                    (0-5)</option>
+                                <option value="medium" {{ request()->quantity_filter == 'medium' ? 'selected' : '' }}>متوسطة
+                                    (6-20)</option>
+                                <option value="high" {{ request()->quantity_filter == 'high' ? 'selected' : '' }}>عالية
+                                    (>20)</option>
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="col-md-2">
+                            <input type="number" name="price_min" value="{{ request()->price_min }}" class="form-control"
+                                placeholder="السعر الأدنى" min="0">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="price_max" value="{{ request()->price_max }}" class="form-control"
+                                placeholder="السعر الأعلى" min="0">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">بحث</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+
             <!-- Table Card -->
             <div class="service-card card-success">
                 <div style="overflow-x: auto; border-radius: 12px; border: 2px solid #e2e8f0;">
@@ -179,6 +221,44 @@
                     </div>
                 @endif
             </div>
+
+            <!-- Table Card -->
+            <div class="service-card card-success">
+                <div style="overflow-x: auto; border-radius: 12px; border: 2px solid #e2e8f0;">
+                    <table class="table mb-0" style="min-width: 1000px;">
+                        <thead style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white;">
+                            <!-- Add the table header here -->
+                        </thead>
+                        <tbody>
+                            @forelse($items as $index => $item)
+                                <tr>
+                                    <!-- Add table rows for each product -->
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" style="padding: 3rem; text-align: center;">
+                                        <div style="color: #94a3b8;">
+                                            <i class="fas fa-box-open"
+                                                style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد
+                                                نتائج</p>
+                                            <p style="font-size: 0.9rem;">حاول تعديل الفلاتر أو إضافة منتجات جديدة</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if ($items->hasPages())
+                    <div style="margin-top: 2rem; display: flex; justify-content: center;">
+                        {{ $items->links() }}
+                    </div>
+                @endif
+            </div>
+
 
             <!-- Statistics Cards -->
             @if ($items->count() > 0)

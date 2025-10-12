@@ -78,8 +78,8 @@ Route::get('/', function () {
 
     $monthlyPurchases = $cashTotal + $bankTotal;
 
-    // ✅ صافي الدخل = المبيعات - المشتريات
-    $netRevenue = $monthlySales - $monthlyPurchases;
+    // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
+    $netRevenue = ($monthlySales+$monthlycostRepair) - $monthlyPurchases;
 
     return view('home', [
         'todaySales' => Sale::whereDate('created_at', today())->count(),
@@ -93,9 +93,9 @@ Route::get('/', function () {
     ]);
 })->name('dashboard');
 
-Route::get('/settings', function () {
-    return view('settings.index');
-})->name('settings.index');
+// Route::get('/settings', function () {
+//     return view('settings.index');
+// })->name('settings.index');
 
 Route::get('/reports', function () {
     return view('reports.index');

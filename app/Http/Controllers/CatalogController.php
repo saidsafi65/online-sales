@@ -10,12 +10,52 @@ use Illuminate\View\View;
 
 class CatalogController extends Controller
 {
-    public function index(): View
-    {
-        $items = CatalogItem::orderBy('product')->orderBy('type')->paginate(30);
+    public function index(Request $request): View
+{
+    $query = CatalogItem::query();
 
-        return view('catalog.index', compact('items'));
+    // البحث بالاسم أو النوع
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('product', 'like', "%{$search}%")
+              ->orWhere('type', 'like', "%{$search}%");
+        });
     }
+
+    // تصفية حسب الكمية
+    if ($request->filled('quantity_filter')) {
+        switch ($request->quantity_filter) {
+            case 'low':
+                $query->where('quantity', '<=', 5);
+                break;
+            case 'medium':
+                $query->whereBetween('quantity', [6, 20]);
+                break;
+            case 'high':
+                $query->where('quantity', '>', 20);
+                break;
+        }
+    }
+
+    // تصفية حسب نطاق السعر
+    if ($request->filled('price_min')) {
+        $query->where('sale_price', '>=', $request->price_min);
+    }
+    if ($request->filled('price_max')) {
+        $query->where('sale_price', '<=', $request->price_max);
+    }
+
+    // الترتيب
+    $sortBy = $request->get('sort_by', 'product');
+    $sortOrder = $request->get('sort_order', 'asc');
+    $query->orderBy($sortBy, $sortOrder);
+
+    $items = $query->paginate(30)->withQueryString();
+
+    return view('catalog.index', compact('items'));
+}
+
 
     public function create(): View
     {
@@ -50,6 +90,32 @@ class CatalogController extends Controller
         );
 
         return redirect()->route('catalog.index')->with('success', 'تمت الإضافة أو التحديث بنجاح');
+    }
+
+    public function edit($id): View
+    {
+        $item = CatalogItem::findOrFail($id);
+        return view('catalog.edit', compact('item'));
+    }
+
+    public function update(Request $request, $id): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'product' => 'required|string|max:120',
+            'type' => 'required|string|max:120',
+            'quantity' => 'required|integer|min:0',
+            'wholesale_price' => 'required|numeric|min:0',
+            'sale_price' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $item = CatalogItem::findOrFail($id);
+        $item->update($request->all());
+
+        return redirect()->route('catalog.index')->with('success', 'تم تحديث المنتج بنجاح');
     }
 
     public function destroy(CatalogItem $item): RedirectResponse
