@@ -184,73 +184,119 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('backup.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-database"></i> <!-- أيقونة تناسب النسخ الاحتياطي مثل قاعدة البيانات -->
+                    </div>
+                    <h3 class="service-title">إدارة النسخ الاحتياطي</h3>
+                    <p class="service-description">إدارة النسخ الاحتياطي للبيانات، إنشاء نسخ جديدة، تحميل واستعادة النسخ.
+                    </p>
+                </div>
+            </a>
+        </div>
 
 
     </div>
 
-    <!-- Quick Stats Section (Optional) -->
+    <!-- Quick Stats Section -->
     <div class="row g-4 mt-5">
         <div class="col-12">
-            <div style="background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+            <div
+                style="background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0;">
                 <h4
                     style="color: #1e293b; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
-                    <i class="fas fa-chart-bar" style="color: #1e40af;"></i> نظرة سريعة
+                    <i class="fas fa-chart-bar" style="color: #475569;"></i> نظرة سريعة
                 </h4>
 
                 <div class="row g-4 text-center">
 
-                    <!-- دخل الشهر -->
+                    <!-- صافي دخل الشهر -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 15px;">
-                            <div style="font-size: 2rem; font-weight: 900; color: #0ea5e9; margin-bottom: 0.5rem;">
-                                {{ $monthlyRevenue ?? '0' }} شيكل
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; border: 1px solid #bbf7d0;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #16a34a; margin-bottom: 0.5rem;">
+                                {{ number_format($monthlyRevenue ?? 0) }} ₪
                             </div>
-                            <div style="color: #64748b; font-weight: 500;">دخل الشهر</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">صافي الشهر</div>
+                        </div>
+                    </div>
+
+                    <!-- مبيعات الشهر -->
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; border: 1px solid #bfdbfe;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #2563eb; margin-bottom: 0.5rem;">
+                                {{ number_format($monthlyIncome ?? 0) }} ₪
+                            </div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مبيعات الشهر مع الصيانة</div>
+                        </div>
+                    </div>
+
+                    <!-- مصروفات الشهر -->
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; border: 1px solid #fecaca;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #dc2626; margin-bottom: 0.5rem;">
+                                {{ number_format($monthlyPurchases ?? 0) }} ₪
+                            </div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مصروفات الشهر</div>
+                        </div>
+                    </div>
+
+                    <!-- الديون المتراكمة -->
+                    <div class="col-6 col-md-3">
+                        <div
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-radius: 12px; border: 1px solid #fde047;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #ca8a04; margin-bottom: 0.5rem;">
+                                {{ number_format($totalDebts ?? 0) }} ₪
+                            </div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">الديون المتراكمة</div>
                         </div>
                     </div>
 
                     <!-- مبيعات اليوم -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 15px;">
-                            <div style="font-size: 2rem; font-weight: 900; color: #1e40af; margin-bottom: 0.5rem;">
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border: 1px solid #cbd5e1;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #475569; margin-bottom: 0.5rem;">
                                 {{ $todaySales ?? '0' }}
                             </div>
-                            <div style="color: #64748b; font-weight: 500;">مبيعات اليوم</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مبيعات اليوم</div>
                         </div>
                     </div>
 
                     <!-- صيانات معلقة -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 15px;">
-                            <div style="font-size: 2rem; font-weight: 900; color: #f59e0b; margin-bottom: 0.5rem;">
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-radius: 12px; border: 1px solid #fed7aa;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #ea580c; margin-bottom: 0.5rem;">
                                 {{ $pendingRepairs ?? '0' }}
                             </div>
-                            <div style="color: #64748b; font-weight: 500;">صيانات معلقة</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">صيانات معلقة</div>
                         </div>
                     </div>
 
                     <!-- إجمالي المنتجات -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 15px;">
-                            <div style="font-size: 2rem; font-weight: 900; color: #10b981; margin-bottom: 0.5rem;">
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; border: 1px solid #ddd6fe;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #7c3aed; margin-bottom: 0.5rem;">
                                 {{ $totalProducts ?? '0' }}
                             </div>
-                            <div style="color: #64748b; font-weight: 500;">إجمالي المنتجات</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">إجمالي المنتجات</div>
                         </div>
                     </div>
 
                     <!-- إجمالي العملاء -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-radius: 15px;">
-                            <div style="font-size: 2rem; font-weight: 900; color: #8b5cf6; margin-bottom: 0.5rem;">
+                            style="padding: 1.5rem; background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-radius: 12px; border: 1px solid #f5d0fe;">
+                            <div style="font-size: 2rem; font-weight: 800; color: #c026d3; margin-bottom: 0.5rem;">
                                 {{ $totalCustomers ?? '0' }}
                             </div>
-                            <div style="color: #64748b; font-weight: 500;">إجمالي العملاء</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">إجمالي العملاء</div>
                         </div>
                     </div>
 

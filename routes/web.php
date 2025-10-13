@@ -20,10 +20,12 @@ use App\Models\CatalogItem;
 use App\Models\Purchase;
 use App\Models\Repair;
 use App\Models\Sale;
+use App\Models\Debt;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\BackupController;
 // Route::get('/', function () {
 //     return view('home');
 // })->name('dashboard');
@@ -80,6 +82,19 @@ Route::get('/', function () {
 
     // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
     $netRevenue = ($monthlySales+$monthlycostRepair) - $monthlyPurchases;
+    $monthlyIncome = $monthlySales+$monthlycostRepair;
+
+    // حساب الديون المتراكمة
+$totalReceivables = Debt::where('type', 'مدين')
+    ->whereNull('payment_date')
+    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+$totalPayables = Debt::where('type', 'دائن')
+    ->whereNull('payment_date')
+    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+$totalDebts = $totalReceivables - $totalPayables;
+
 
     return view('home', [
         'todaySales' => Sale::whereDate('created_at', today())->count(),
@@ -90,6 +105,9 @@ Route::get('/', function () {
         'totalCustomers' => Repair::count(),
         'totalProducts' => CatalogItem::count(),
         'monthlyRevenue' => $netRevenue,
+        'monthlyIncome' => $monthlyIncome,
+        'monthlyPurchases' => $monthlyPurchases,
+        'totalDebts' => $totalDebts,
     ]);
 })->name('dashboard');
 
@@ -258,6 +276,18 @@ Route::prefix('debts')->name('debts.')->group(function () {
     Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
     Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
     Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
+});
+
+// Backup routes
+Route::prefix('backup')->name('backup.')->group(function () {
+    Route::get('/', [BackupController::class, 'index'])->name('index');
+    Route::get('/create', [BackupController::class, 'create'])->name('create');
+    Route::post('/store', [BackupController::class, 'store'])->name('store');
+    Route::get('/upload', [BackupController::class, 'upload'])->name('upload');
+    Route::post('/upload', [BackupController::class, 'storeUpload'])->name('storeUpload');
+    Route::get('/download/{filename}', [BackupController::class, 'download'])->name('download');
+    Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('restore');
+    Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])->name('destroy');
 });
 
 // Clear config cache route

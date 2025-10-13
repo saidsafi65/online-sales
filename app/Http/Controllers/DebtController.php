@@ -4,14 +4,37 @@ namespace App\Http\Controllers;
 
 use App\Models\Debt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DebtController extends Controller
 {
     public function index()
     {
         $debts = Debt::latest()->paginate(10);
+        
+        // حساب الديون المتراكمة
+        $totalDebts = $this->calculateTotalDebts();
 
-        return view('debt.index', compact('debts'));
+        return view('debt.index', compact('debts', 'totalDebts'));
+    }
+
+    /**
+     * حساب إجمالي الديون المتراكمة
+     */
+    private function calculateTotalDebts()
+    {
+        // الديون المستحقة (مدين) = المبالغ التي يجب أن تُدفع لك
+        $receivables = Debt::where('type', 'مدين')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+        // الديون المستحقة الدفع (دائن) = المبالغ التي يجب أن تدفعها
+        $payables = Debt::where('type', 'دائن')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+        // صافي الديون = المستحقات - المستحق دفعها
+        return $receivables - $payables;
     }
 
     public function create()
