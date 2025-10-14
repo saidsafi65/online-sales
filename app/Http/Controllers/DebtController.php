@@ -11,7 +11,7 @@ class DebtController extends Controller
     public function index()
     {
         $debts = Debt::latest()->paginate(10);
-        
+
         // حساب الديون المتراكمة
         $totalDebts = $this->calculateTotalDebts();
 

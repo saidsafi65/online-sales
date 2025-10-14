@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CatalogItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -11,51 +12,56 @@ use Illuminate\View\View;
 class CatalogController extends Controller
 {
     public function index(Request $request): View
-{
-    $query = CatalogItem::query();
+    {
+        $query = CatalogItem::query();
 
-    // البحث بالاسم أو النوع
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('product', 'like', "%{$search}%")
-              ->orWhere('type', 'like', "%{$search}%");
-        });
-    }
-
-    // تصفية حسب الكمية
-    if ($request->filled('quantity_filter')) {
-        switch ($request->quantity_filter) {
-            case 'low':
-                $query->where('quantity', '<=', 5);
-                break;
-            case 'medium':
-                $query->whereBetween('quantity', [6, 20]);
-                break;
-            case 'high':
-                $query->where('quantity', '>', 20);
-                break;
+        // البحث بالاسم أو النوع
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('product', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
+            });
         }
-    }
 
-    // تصفية حسب نطاق السعر
-    if ($request->filled('price_min')) {
-        $query->where('sale_price', '>=', $request->price_min);
-    }
-    if ($request->filled('price_max')) {
-        $query->where('sale_price', '<=', $request->price_max);
-    }
+        // تصفية حسب الكمية
+        if ($request->filled('quantity_filter')) {
+            switch ($request->quantity_filter) {
+                case 'low':
+                    $query->where('quantity', '<=', 5);
+                    break;
+                case 'medium':
+                    $query->whereBetween('quantity', [6, 20]);
+                    break;
+                case 'high':
+                    $query->where('quantity', '>', 20);
+                    break;
+            }
+        }
 
-    // الترتيب
-    $sortBy = $request->get('sort_by', 'product');
-    $sortOrder = $request->get('sort_order', 'asc');
-    $query->orderBy($sortBy, $sortOrder);
+        // تصفية حسب نطاق السعر
+        if ($request->filled('price_min')) {
+            $query->where('sale_price', '>=', $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $query->where('sale_price', '<=', $request->price_max);
+        }
+
+        // الترتيب
+        $sortBy = $request->get('sort_by', 'product');
+        $sortOrder = $request->get('sort_order', 'asc');
+        $query->orderBy($sortBy, $sortOrder);
 
     $items = $query->paginate(30)->withQueryString();
 
-    return view('catalog.index', compact('items'));
-}
+    // حساب إجمالي قيمة المخزون على مستوى قاعدة البيانات بالكامل
+    $totals = CatalogItem::selectRaw('SUM(quantity * sale_price) as totalInventoryValue, SUM(quantity * wholesale_price) as totalWholesaleValue')->first();
 
+    $totalInventoryValue = $totals->totalInventoryValue ? (float) $totals->totalInventoryValue : 0.0;
+    $totalWholesaleValue = $totals->totalWholesaleValue ? (float) $totals->totalWholesaleValue : 0.0;
+
+    return view('catalog.index', compact('items', 'totalInventoryValue', 'totalWholesaleValue'));
+    }
 
     public function create(): View
     {
@@ -95,6 +101,7 @@ class CatalogController extends Controller
     public function edit($id): View
     {
         $item = CatalogItem::findOrFail($id);
+
         return view('catalog.edit', compact('item'));
     }
 

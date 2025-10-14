@@ -113,6 +113,11 @@
                 تصفية
             </button>
         </div>
+        <div class="card-tools">
+            <a href="{{ route('sales.create') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>إضافة مبيعة جديدة
+                                </a>
+        </div>
     </div>
 
     <div class="card-body">

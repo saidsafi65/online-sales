@@ -84,6 +84,7 @@ class SalesController extends Controller
         $rules = [
             'product' => 'required|string|max:255',
             'type' => 'required|string|max:100',
+            'quantity' => 'nullable|integer|min:1',
             'sale_date' => 'required|date',
             'payment_method' => 'required|in:cash,card,app,mixed',
             'notes' => 'nullable|string|max:1000',
@@ -136,20 +137,24 @@ class SalesController extends Controller
                 ->where('type', $request->type)
                 ->first();
 
-            // إذا لم تكن الكمية متوفرة أو أقل من 1، ارجع بخطأ
-            if (! $catalogItem || $catalogItem->quantity < 1) {
+            // استفاده من الكمية المطلوبة (الافتراضية 1)
+            $requestedQuantity = max(1, (int) $request->get('quantity', 1));
+
+            // إذا لم تكن الكمية متوفرة أو أقل من الكمية المطلوبة، ارجع بخطأ
+            if (! $catalogItem || $catalogItem->quantity < $requestedQuantity) {
                 return redirect()->back()
                     ->withErrors(['quantity' => 'المنتج غير متوفر أو الكمية غير كافية'])
                     ->withInput();
             }
 
             // تحديث الكمية بعد عملية البيع
-            $catalogItem->decrement('quantity', 1);
+            $catalogItem->decrement('quantity', $requestedQuantity);
 
             // إنشاء عملية البيع
             $sale = Sale::create([
                 'product' => $request->product,
                 'type' => $request->type,
+                'quantity' => $requestedQuantity,
                 'sale_date' => $request->sale_date,
                 'payment_method' => $request->payment_method,
                 'cash_amount' => $request->cash_amount,
@@ -196,6 +201,7 @@ class SalesController extends Controller
         $validator = Validator::make($request->all(), [
             'product' => 'required|string|max:255',
             'type' => 'required|string|max:100',
+            'quantity' => 'nullable|integer|min:1',
             'sale_date' => 'required|date',
             'payment_method' => 'required|in:cash,card,app,mixed',
             'cash_amount' => 'required|numeric|min:0',
@@ -218,10 +224,68 @@ class SalesController extends Controller
 
         try {
             DB::beginTransaction();
+            // كمية جديدة وقديمة
+            $newQuantity = max(1, (int) $request->get('quantity', $sale->quantity ?? 1));
+            $oldQuantity = isset($sale->quantity) ? (int) $sale->quantity : 1;
+
+            $oldProduct = $sale->product;
+            $oldType = $sale->type;
+
+            $newProduct = $request->product;
+            $newType = $request->type;
+
+            // إذا لم يتغير المنتج/النوع
+            if ($oldProduct === $newProduct && $oldType === $newType) {
+                $catalogItem = \App\Models\CatalogItem::where('product', $oldProduct)
+                    ->where('type', $oldType)
+                    ->first();
+
+                if (! $catalogItem) {
+                    return redirect()->back()
+                        ->withErrors(['quantity' => 'العنصر غير موجود في الكاتالوج'])
+                        ->withInput();
+                }
+
+                $delta = $newQuantity - $oldQuantity; // >0 means need to reduce inventory further
+
+                if ($delta > 0) {
+                    if ($catalogItem->quantity < $delta) {
+                        return redirect()->back()
+                            ->withErrors(['quantity' => 'الكمية المطلوبة أكبر من المتاح في المخزون'])
+                            ->withInput();
+                    }
+                    $catalogItem->decrement('quantity', $delta);
+                } elseif ($delta < 0) {
+                    // زيادة المخزون بمقدار الفرق
+                    $catalogItem->increment('quantity', -$delta);
+                }
+            } else {
+                // استعادة الكمية القديمة إلى الكاتالوج القديم
+                $oldCatalog = \App\Models\CatalogItem::where('product', $oldProduct)
+                    ->where('type', $oldType)
+                    ->first();
+                if ($oldCatalog) {
+                    $oldCatalog->increment('quantity', $oldQuantity);
+                }
+
+                // خصم الكمية الجديدة من الكاتالوج الجديد
+                $newCatalog = \App\Models\CatalogItem::where('product', $newProduct)
+                    ->where('type', $newType)
+                    ->first();
+
+                if (! $newCatalog || $newCatalog->quantity < $newQuantity) {
+                    return redirect()->back()
+                        ->withErrors(['quantity' => 'المنتج الجديد غير متوفر أو الكمية غير كافية'])
+                        ->withInput();
+                }
+
+                $newCatalog->decrement('quantity', $newQuantity);
+            }
 
             $sale->update([
-                'product' => $request->product,
-                'type' => $request->type,
+                'product' => $newProduct,
+                'type' => $newType,
+                'quantity' => $newQuantity,
                 'sale_date' => $request->sale_date,
                 'payment_method' => $request->payment_method,
                 'cash_amount' => $request->cash_amount,
@@ -297,10 +361,11 @@ class SalesController extends Controller
                 ->first();
 
             if ($catalogItem) {
-                // تحويل الكمية من string إلى int ثم زيادتها بمقدار 1
+                // استعادة الكمية بناءً على قيمة 'quantity' في المبيعة (افتراضي 1)
+                $restoreQty = isset($sale->quantity) ? (int) $sale->quantity : 1;
                 $currentQuantity = (int) $catalogItem->quantity;
                 $catalogItem->update([
-                    'quantity' => $currentQuantity + 1,
+                    'quantity' => $currentQuantity + $restoreQty,
                 ]);
             } else {
                 // إذا لم يتم العثور على العنصر، يمكنك إرجاع خطأ أو إنشاء سجل جديد حسب الحاجة

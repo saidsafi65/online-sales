@@ -294,10 +294,12 @@
                                 <i class="fas fa-coins"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
-                                {{ number_format($items->sum(function ($item) {return $item->quantity * $item->sale_price;}),2) }}
-                                ₪
+                                {{ number_format($totalInventoryValue, 2) }} ₪
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون (سعر البيع)</p>
+                            <div style="margin-top: 0.5rem; font-size: 0.95rem; color: #475569;">
+                                إجمالي حسب سعر الجملة: <strong>{{ number_format($totalWholesaleValue, 2) }} ₪</strong>
+                            </div>
                         </div>
                     </div>
                 </div>

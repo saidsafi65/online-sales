@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
@@ -17,15 +18,21 @@ use App\Http\Controllers\ReturnedGoodController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StoreController;
 use App\Models\CatalogItem;
+use App\Models\Debt;
 use App\Models\Purchase;
 use App\Models\Repair;
 use App\Models\Sale;
-use App\Models\Debt;
+use App\Models\Obligation;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\BackupController;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Illuminate\Http\Request;
+use App\Http\Controllers\MaintenancePartController;
+use App\Models\MaintenancePart;
+
 // Route::get('/', function () {
 //     return view('home');
 // })->name('dashboard');
@@ -78,23 +85,36 @@ Route::get('/', function () {
         ->where('is_returned', false)
         ->sum('amount_bank');
 
+    // إجمالي الالتزامات الشهرية
+    $obligationsCashTotal = Obligation::whereMonth('date', now()->month)
+        ->whereYear('date', now()->year)
+        ->sum('cash_amount');
+
+    $obligationsBankTotal = Obligation::whereMonth('date', now()->month)
+        ->whereYear('date', now()->year)
+        ->sum('bank_amount');
+
+    $monthlyObligations = $obligationsCashTotal + $obligationsBankTotal;
+    // جمع المشتريات مع الالتزامات
     $monthlyPurchases = $cashTotal + $bankTotal;
 
+    $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
+
+
     // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
-    $netRevenue = ($monthlySales+$monthlycostRepair) - $monthlyPurchases;
-    $monthlyIncome = $monthlySales+$monthlycostRepair;
+    $netRevenue = ($monthlySales + $monthlycostRepair) - $totalMonthlyPurchases;
+    $monthlyIncome = $monthlySales + $monthlycostRepair;
 
     // حساب الديون المتراكمة
-$totalReceivables = Debt::where('type', 'مدين')
-    ->whereNull('payment_date')
-    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+    $totalReceivables = Debt::where('type', 'مدين')
+        ->whereNull('payment_date')
+        ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-$totalPayables = Debt::where('type', 'دائن')
-    ->whereNull('payment_date')
-    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+    $totalPayables = Debt::where('type', 'دائن')
+        ->whereNull('payment_date')
+        ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-$totalDebts = $totalReceivables - $totalPayables;
-
+    $totalDebts = $totalReceivables - $totalPayables;
 
     return view('home', [
         'todaySales' => Sale::whereDate('created_at', today())->count(),
@@ -108,6 +128,7 @@ $totalDebts = $totalReceivables - $totalPayables;
         'monthlyIncome' => $monthlyIncome,
         'monthlyPurchases' => $monthlyPurchases,
         'totalDebts' => $totalDebts,
+        'totalMonthlyPurchases' => $totalMonthlyPurchases,
     ]);
 })->name('dashboard');
 
@@ -124,7 +145,7 @@ Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
 // صفحة إضافة عملية بيع جديدة
 Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
 // حذف عملية بيع
-Route::delete('/sales/{sale}', [SaleController::class, 'destroy']);
+Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
 
 // تخزين عملية البيع
 Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
@@ -288,6 +309,17 @@ Route::prefix('backup')->name('backup.')->group(function () {
     Route::get('/download/{filename}', [BackupController::class, 'download'])->name('download');
     Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('restore');
     Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])->name('destroy');
+});
+
+// Maintenance Parts routes
+Route::prefix('maintenance_parts')->name('maintenance_parts.')->group(function () {
+    Route::get('/', [MaintenancePartController::class, 'index'])->name('index');
+    Route::get('/create', [MaintenancePartController::class, 'create'])->name('create');
+    Route::post('/', [MaintenancePartController::class, 'store'])->name('store');
+    Route::get('/{maintenancePart}', [MaintenancePartController::class, 'show'])->name('show');
+    Route::get('/{maintenancePart}/edit', [MaintenancePartController::class, 'edit'])->name('edit');
+    Route::put('/{maintenancePart}', [MaintenancePartController::class, 'update'])->name('update');
+    Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])->name('destroy');
 });
 
 // Clear config cache route

@@ -49,6 +49,16 @@
                             @enderror
                         </div>
 
+                        <div class="col-md-4 mb-3">
+                            <label for="quantity" class="form-label">الكمية</label>
+                            <input type="number" min="1" step="1" id="quantity" name="quantity"
+                                class="form-control @error('quantity') is-invalid @enderror"
+                                value="{{ old('quantity', 1) }}">
+                            @error('quantity')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label for="sale_date" class="form-label">تاريخ البيع</label>
                             <input type="datetime-local" class="form-control @error('sale_date') is-invalid @enderror"

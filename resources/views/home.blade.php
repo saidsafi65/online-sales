@@ -196,6 +196,19 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('maintenance_parts.index') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-cogs"></i> <!-- أيقونة تناسب قطع الصيانة -->
+                    </div>
+                    <h3 class="service-title">إدارة قطع الصيانة</h3>
+                    <p class="service-description">
+                        إدارة قطع الصيانة، إضافة قطع جديدة، تعديل أو حذف قطع الصيانة.
+                    </p>
+                </div>
+            </a>
+        </div>
 
 
     </div>
@@ -239,9 +252,10 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; border: 1px solid #fecaca;">
                             <div style="font-size: 2rem; font-weight: 800; color: #dc2626; margin-bottom: 0.5rem;">
-                                {{ number_format($monthlyPurchases ?? 0) }} ₪
+                                {{ number_format($totalMonthlyPurchases ?? 0) }} ₪
                             </div>
-                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مصروفات الشهر</div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مصروفات الشهر مع الالتزامات
+                            </div>
                         </div>
                     </div>
 

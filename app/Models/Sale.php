@@ -15,6 +15,7 @@ class Sale extends Model
     protected $fillable = [
         'product',
         'type',
+        'quantity',
         'sale_date',
         'payment_method',
         'cash_amount',
@@ -27,6 +28,7 @@ class Sale extends Model
         'sale_date' => 'datetime',
         'cash_amount' => 'decimal:2',
         'app_amount' => 'decimal:2',
+        'quantity' => 'integer',
         'is_returned' => 'boolean',
     ];
 
