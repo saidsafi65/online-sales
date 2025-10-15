@@ -625,6 +625,50 @@ body {
     }
 }
 
+/* Compact pagination styling to reduce vertical space */
+.compact-pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0.75rem 0 1rem; /* smaller vertical spacing */
+}
+
+.pagination-wrapper .pagination {
+    display: inline-flex;
+    gap: 0.35rem;
+    align-items: center;
+}
+
+.pagination-wrapper .page-item .page-link {
+    padding: 0.35rem 0.5rem; /* smaller padding */
+    min-width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.9rem; /* slightly smaller text */
+}
+
+.pagination-wrapper .page-item .page-link:hover {
+    transform: none; /* avoid lift effect */
+}
+
+.pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    box-shadow: none;
+}
+
+.pagination-wrapper .page-item.disabled .page-link {
+    opacity: 0.6;
+}
+
+.pagination-wrapper .page-item:first-child .page-link,
+.pagination-wrapper .page-item:last-child .page-link {
+    border-radius: 8px;
+}
+
 /* Accessibility Improvements */
 .sr-only {
     position: absolute;

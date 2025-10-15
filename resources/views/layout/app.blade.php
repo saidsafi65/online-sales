@@ -664,7 +664,7 @@
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
+                                {{-- <li>
                                     <a class="dropdown-item" href="#">
                                         <i class="fas fa-user"></i>
                                         <span>الملف الشخصي</span>
@@ -675,10 +675,10 @@
                                         <i class="fas fa-cog"></i>
                                         <span>الإعدادات</span>
                                     </a>
-                                </li>
+                                </li> --}}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="POST" action="#">
+                                    <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="fas fa-sign-out-alt"></i>

@@ -37,6 +37,24 @@ use App\Models\MaintenancePart;
 //     return view('home');
 // })->name('dashboard');
 
+// Auth Routes
+Route::middleware('guest')->group(function () {
+    // Login
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    // Forgot Password
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    
+    // Reset Password
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+});
+
+// Logout (يجب أن يكون محمي)
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
 Route::get('/', function () {
 
     // عدد الصيانات المسلمة
@@ -130,7 +148,10 @@ Route::get('/', function () {
         'totalDebts' => $totalDebts,
         'totalMonthlyPurchases' => $totalMonthlyPurchases,
     ]);
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
+
+// Note: do not define a duplicate '/' route. The above dashboard route is protected by 'auth'
+// and Laravel's auth middleware will redirect guests to the named 'login' route.
 
 // Route::get('/settings', function () {
 //     return view('settings.index');

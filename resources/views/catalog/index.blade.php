@@ -214,10 +214,10 @@
 
                 <!-- Pagination -->
                 @if ($items->hasPages())
-                    <div style="margin-top: 2rem; display: flex; justify-content: center; align-items: center;">
-                        <div class="pagination-wrapper" style="display: flex; gap: 8px;">
+                    <div class="compact-pagination-container">
+                        <nav class="pagination-wrapper" aria-label="Pagination">
                             {{ $items->links() }}
-                        </div>
+                        </nav>
                     </div>
                 @endif
             </div>
@@ -258,7 +258,6 @@
                     </div>
                 @endif
             </div>
-
 
             <!-- Statistics Cards -->
             @if ($items->count() > 0)

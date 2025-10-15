@@ -98,15 +98,16 @@ class DailyHandoverController extends Controller
             ->sum(DB::raw('cash + bank'));
 
         // إجمالي المبيعات من جدول sales
-        $totalSales = DB::table('sales')
+        $totalSalessales = DB::table('sales')
             ->whereBetween(DB::raw('DATE(sale_date)'), [$startDate, $endDate])
             ->whereNull('deleted_at')
             ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
 
-        // // إجمالي المبيعات (الإيرادات)
-        // $totalSales = Sale::whereBetween('sale_date', [$startDate, $endDate])
-        //     ->sum('total_price');
+        $totalSalesrepairs = DB::table('repairs')
+            ->whereBetween(DB::raw('DATE(delivery_date)'), [$startDate, $endDate])
+            ->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
+        $totalSales = $totalSalessales + $totalSalesrepairs;
         // الفرق
         $difference = $totalSales - $totalHandovers;
 
@@ -117,11 +118,18 @@ class DailyHandoverController extends Controller
             ->orderBy('handover_date', 'desc')
             ->get()
             ->map(function ($handover) {
-                // استخدم COALESCE مع DB::raw في حال كانت بعض القيم null
-                $sales = DB::table('sales')
+                // جمع الإيرادات من جدول المبيعات (نقد + تطبيق)
+                $salesFromSales = DB::table('sales')
                     ->whereDate('sale_date', $handover->handover_date)
-                    ->whereNull('deleted_at') // تأكد من عدم وجود صفوف محذوفة
-                    ->sum(DB::raw('COALESCE(total_price, 0)'));
+                    ->whereNull('deleted_at')
+                    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
+
+                // جمع تكاليف الصيانات التي تم تسليمها في نفس التاريخ
+                $salesFromRepairs = DB::table('repairs')
+                    ->whereDate('delivery_date', $handover->handover_date)
+                    ->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
+
+                $sales = $salesFromSales + $salesFromRepairs;
 
                 return [
                     'date' => $handover->handover_date,
