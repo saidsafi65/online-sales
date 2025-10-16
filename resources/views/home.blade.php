@@ -209,6 +209,19 @@
                 </div>
             </a>
         </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('products.index-admin') }}" class="text-decoration-none">
+                <div class="service-card card-info">
+                    <div class="service-icon">
+                        <i class="fas fa-boxes"></i> <!-- أيقونة تناسب المنتجات -->
+                    </div>
+                    <h3 class="service-title">إدارة المنتجات</h3>
+                    <p class="service-description">
+                        إدارة المنتجات، إضافة منتجات جديدة، تعديل أو حذف المنتجات.
+                    </p>
+                </div>
+            </a>
+        </div>
 
 
     </div>

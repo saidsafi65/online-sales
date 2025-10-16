@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Http\Request;
 use App\Http\Controllers\MaintenancePartController;
 use App\Models\MaintenancePart;
+use App\Http\Controllers\Products\ProductController;
 
 // Route::get('/', function () {
 //     return view('home');
@@ -55,306 +56,311 @@ Route::middleware('guest')->group(function () {
 // Logout (يجب أن يكون محمي)
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
+// Products (public - available to guests)
+Route::get('/products', [ProductController::class, 'index'])->name('index');
+
+// Root: guests see the products list, authenticated users go to dashboard
 Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
 
-    // عدد الصيانات المسلمة
-    $deliveredRepairs = Repair::whereNotNull('delivery_date')->count();
-    // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة)
-    $monthlycost_cashRepair = Repair::whereMonth('delivery_date', now()->month)
-        ->whereYear('delivery_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('cost_cash');
-    $monthlycost_bankRepair = Repair::whereMonth('delivery_date', now()->month)
-        ->whereYear('delivery_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('cost_bank');
+    return app(\App\Http\Controllers\Products\ProductController::class)->index();
+})->name('home');
 
-    $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
+// All management routes (dashboard, sales, repairs, etc.) require authentication
+Route::middleware('auth')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', function () {
+        // عدد الصيانات المسلمة
+        $deliveredRepairs = Repair::whereNotNull('delivery_date')->count();
+        // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة)
+        $monthlycost_cashRepair = Repair::whereMonth('delivery_date', now()->month)
+            ->whereYear('delivery_date', now()->year)
+            ->where('is_returned', false)
+            ->sum('cost_cash');
+        $monthlycost_bankRepair = Repair::whereMonth('delivery_date', now()->month)
+            ->whereYear('delivery_date', now()->year)
+            ->where('is_returned', false)
+            ->sum('cost_bank');
 
-    // عدد الصيانات المعلقة (قبل الخصم)
-    $pendingRepairsRaw = Repair::where('status', 'pending')->count();
+        $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
 
-    // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة)
-    $monthlySales = Sale::whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->where('is_returned', false)
-        ->sum(DB::raw('cash_amount + app_amount'));
+        // عدد الصيانات المعلقة (قبل الخصم)
+        $pendingRepairsRaw = Repair::where('status', 'pending')->count();
 
-    // إجمالي المبيعات النقدية لهذا الشهر (غير المرجعة)
-    $monthlySalesCash = Sale::whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->where('is_returned', false)
-        ->sum('cash_amount');
+        // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة)
+        $monthlySales = Sale::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->where('is_returned', false)
+            ->sum(DB::raw('cash_amount + app_amount'));
 
-    // إجمالي المبيعات البنكية لهذا الشهر (غير المرجعة)
-    $monthlySalesAppAmount = Sale::whereMonth('created_at', now()->month)
-        ->whereYear('created_at', now()->year)
-        ->where('is_returned', false)
-        ->sum('app_amount');
+        // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
+        $cashTotal = Purchase::whereMonth('purchase_date', now()->month)
+            ->whereYear('purchase_date', now()->year)
+            ->where('is_returned', false)
+            ->sum('amount_cash');
 
-    // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
-    $cashTotal = Purchase::whereMonth('purchase_date', now()->month)
-        ->whereYear('purchase_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('amount_cash');
+        $bankTotal = Purchase::whereMonth('purchase_date', now()->month)
+            ->whereYear('purchase_date', now()->year)
+            ->where('is_returned', false)
+            ->sum('amount_bank');
 
-    $bankTotal = Purchase::whereMonth('purchase_date', now()->month)
-        ->whereYear('purchase_date', now()->year)
-        ->where('is_returned', false)
-        ->sum('amount_bank');
+        // إجمالي الالتزامات الشهرية
+        $obligationsCashTotal = Obligation::whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->sum('cash_amount');
 
-    // إجمالي الالتزامات الشهرية
-    $obligationsCashTotal = Obligation::whereMonth('date', now()->month)
-        ->whereYear('date', now()->year)
-        ->sum('cash_amount');
+        $obligationsBankTotal = Obligation::whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->sum('bank_amount');
 
-    $obligationsBankTotal = Obligation::whereMonth('date', now()->month)
-        ->whereYear('date', now()->year)
-        ->sum('bank_amount');
+        $monthlyObligations = $obligationsCashTotal + $obligationsBankTotal;
+        // جمع المشتريات مع الالتزامات
+        $monthlyPurchases = $cashTotal + $bankTotal;
 
-    $monthlyObligations = $obligationsCashTotal + $obligationsBankTotal;
-    // جمع المشتريات مع الالتزامات
-    $monthlyPurchases = $cashTotal + $bankTotal;
-
-    $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
+        $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
 
 
-    // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
-    $netRevenue = ($monthlySales + $monthlycostRepair) - $totalMonthlyPurchases;
-    $monthlyIncome = $monthlySales + $monthlycostRepair;
+        // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
+        $netRevenue = ($monthlySales + $monthlycostRepair) - $totalMonthlyPurchases;
+        $monthlyIncome = $monthlySales + $monthlycostRepair;
 
-    // حساب الديون المتراكمة
-    $totalReceivables = Debt::where('type', 'مدين')
-        ->whereNull('payment_date')
-        ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        // حساب الديون المتراكمة
+        $totalReceivables = Debt::where('type', 'مدين')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-    $totalPayables = Debt::where('type', 'دائن')
-        ->whereNull('payment_date')
-        ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        $totalPayables = Debt::where('type', 'دائن')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-    $totalDebts = $totalReceivables - $totalPayables;
+        $totalDebts = $totalReceivables - $totalPayables;
 
-    return view('home', [
-        'todaySales' => Sale::whereDate('created_at', today())->count(),
-        'pendingRepairs' => Repair::where('status', 'pending')->count(),
-        // خصم عدد التسليمات من الصيانات المعلقة
-        'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
-        // عدد العملاء = عدد الأسماء الفريدة + عدد الصيانات المسلمة
-        'totalCustomers' => Repair::count(),
-        'totalProducts' => CatalogItem::count(),
-        'monthlyRevenue' => $netRevenue,
-        'monthlyIncome' => $monthlyIncome,
-        'monthlyPurchases' => $monthlyPurchases,
-        'totalDebts' => $totalDebts,
-        'totalMonthlyPurchases' => $totalMonthlyPurchases,
-    ]);
-})->middleware('auth')->name('dashboard');
+        return view('home', [
+            'todaySales' => Sale::whereDate('created_at', today())->count(),
+            'pendingRepairs' => Repair::where('status', 'pending')->count(),
+            // خصم عدد التسليمات من الصيانات المعلقة
+            'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
+            // عدد العملاء = عدد الأسماء الفريدة + عدد الصيانات المسلمة
+            'totalCustomers' => Repair::count(),
+            'totalProducts' => CatalogItem::count(),
+            'monthlyRevenue' => $netRevenue,
+            'monthlyIncome' => $monthlyIncome,
+            'monthlyPurchases' => $monthlyPurchases,
+            'totalDebts' => $totalDebts,
+            'totalMonthlyPurchases' => $totalMonthlyPurchases,
+        ]);
+    })->name('dashboard');
 
-// Note: do not define a duplicate '/' route. The above dashboard route is protected by 'auth'
-// and Laravel's auth middleware will redirect guests to the named 'login' route.
+    // الصفحة الرئيسية (مبيعات اليوم)
+    Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
 
-// Route::get('/settings', function () {
-//     return view('settings.index');
-// })->name('settings.index');
+    // صفحة إضافة عملية بيع جديدة
+    Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
+    // حذف عملية بيع
+    Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
 
-Route::get('/reports', function () {
-    return view('reports.index');
-})->name('reports.index');
-// الصفحة الرئيسية (مبيعات اليوم)
-Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
+    // تخزين عملية البيع
+    Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
 
-// صفحة إضافة عملية بيع جديدة
-Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
-// حذف عملية بيع
-Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
+    // عرض تفاصيل عملية بيع
+    Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('sales.show');
 
-// تخزين عملية البيع
-Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
+    // تعديل عملية بيع
+    Route::get('/sales/{sale}/edit', [SalesController::class, 'edit'])->name('sales.edit');
+    Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
 
-// عرض تفاصيل عملية بيع
-Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('sales.show');
+    // عرض إحصائيات الدخل اليومي
+    Route::get('/sales/daily-income', [SalesController::class, 'dailyIncome'])->name('sales.dailyIncome');
 
-// تعديل عملية بيع
-Route::get('/sales/{sale}/edit', [SalesController::class, 'edit'])->name('sales.edit');
-Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
+    // عرض إحصائيات الدخل الأسبوعي
+    Route::get('/sales/weekly-income', [SalesController::class, 'weeklyIncome'])->name('sales.weeklyIncome');
 
-// عرض إحصائيات الدخل اليومي
-Route::get('/sales/daily-income', [SalesController::class, 'dailyIncome'])->name('sales.dailyIncome');
+    // عرض إحصائيات الدخل الشهري
+    Route::get('/sales/monthly-income', [SalesController::class, 'monthlyIncome'])->name('sales.monthlyIncome');
 
-// عرض إحصائيات الدخل الأسبوعي
-Route::get('/sales/weekly-income', [SalesController::class, 'weeklyIncome'])->name('sales.weeklyIncome');
+    // إرجاع عملية بيع
+    Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
 
-// عرض إحصائيات الدخل الشهري
-Route::get('/sales/monthly-income', [SalesController::class, 'monthlyIncome'])->name('sales.monthlyIncome');
+    // Repairs routes
+    Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
+    Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
+    Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
+    Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
+    Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
+    Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])->name('repairs.destroy');
 
-// إرجاع عملية بيع
-Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
+    // Purchases routes
+    Route::get('/purchases', [PurchasesController::class, 'index'])->name('purchases.index');
+    Route::get('/purchases/create', [PurchasesController::class, 'create'])->name('purchases.create');
+    Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
+    Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
+    Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
+    Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
+    Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
+    Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
 
-// Repairs routes
-Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
-Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
-Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
-Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
-Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
-Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])->name('repairs.destroy');
+    // Catalog routes
+    Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
+    Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
+    Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
+    Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
+    Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
 
-// Purchases routes
-Route::get('/purchases', [PurchasesController::class, 'index'])->name('purchases.index');
-Route::get('/purchases/create', [PurchasesController::class, 'create'])->name('purchases.create');
-Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
-Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
-Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
-Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
-Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
-Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
+    // Maintenance Deposit routes
+    Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('deposits.index');
+    Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
+    Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
+    Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])->name('deposits.destroy');
+    Route::get('/deposits/{id}/edit', [MaintenanceDepositController::class, 'edit'])->name('deposits.edit');
+    Route::put('/deposits/{id}', [MaintenanceDepositController::class, 'update'])->name('deposits.update');
 
-// Catalog routes
-Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
-Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
-Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
-Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
-Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
-Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
+    // Reports routes
+    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
 
-// Maintenance Deposit routes
-Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('deposits.index');
-Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
-Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
-Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])->name('deposits.destroy');
-Route::get('/deposits/{id}/edit', [MaintenanceDepositController::class, 'edit'])->name('deposits.edit');
-Route::put('/deposits/{id}', [MaintenanceDepositController::class, 'update'])->name('deposits.update');
+    // Obligation routes
+    Route::get('/obligations', [ObligationController::class, 'index'])->name('obligations.index');
+    Route::get('/obligations/create', [ObligationController::class, 'create'])->name('obligations.create');
+    Route::post('/obligations', [ObligationController::class, 'store'])->name('obligations.store');
 
-// Reports routes
-Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+    // Invoices routes
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
+    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
 
-// Obligation routes
-Route::get('/obligations', [ObligationController::class, 'index'])->name('obligations.index');
-Route::get('/obligations/create', [ObligationController::class, 'create'])->name('obligations.create');
-Route::post('/obligations', [ObligationController::class, 'store'])->name('obligations.store');
+    // صفحة المتطابقات الرئيسية
+    Route::get('/compatibility', [LaptopCompatibilityController::class, 'index'])
+        ->name('compatibility.index');
 
-// Invoices routes
-Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
-Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
-Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
-Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
-Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    // عرض تفاصيل جهاز معين
+    Route::get('/compatibility/laptop/{id}', [LaptopCompatibilityController::class, 'show'])
+        ->name('compatibility.show');
 
-// صفحة المتطابقات الرئيسية
-Route::get('/compatibility', [LaptopCompatibilityController::class, 'index'])
-    ->name('compatibility.index');
+    // API للحصول على الأجهزة المتوافقة
+    Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::class, 'getCompatibleLaptops'])
+        ->name('compatibility.get-compatible');
+    // إدارة الأجهزة
+    Route::get('/compatibility/manage', [LaptopCompatibilityController::class, 'manageLaptops'])
+        ->name('compatibility.manage');
 
-// عرض تفاصيل جهاز معين
-Route::get('/compatibility/laptop/{id}', [LaptopCompatibilityController::class, 'show'])
-    ->name('compatibility.show');
+    Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
+        ->name('compatibility.store-laptop');
 
-// API للحصول على الأجهزة المتوافقة
-Route::post('/compatibility/get-compatible', [LaptopCompatibilityController::class, 'getCompatibleLaptops'])
-    ->name('compatibility.get-compatible');
-// إدارة الأجهزة
-Route::get('/compatibility/manage', [LaptopCompatibilityController::class, 'manageLaptops'])
-    ->name('compatibility.manage');
+    // ربط قطعة بجهاز
+    Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
+        ->name('compatibility.attach-part');
 
-Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
-    ->name('compatibility.store-laptop');
+    // إضافة/حذف توافق
+    Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
+        ->name('compatibility.add');
 
-// ربط قطعة بجهاز
-Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
-    ->name('compatibility.attach-part');
+    Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
+        ->name('compatibility.remove');
 
-// إضافة/حذف توافق
-Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
-    ->name('compatibility.add');
+    // Customer Orders routes
+    Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
+        Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
+        Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
+        Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
+        Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
+        Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
+        Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
+        Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
+    });
 
-Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
-    ->name('compatibility.remove');
+    // Daily Handovers routes
+    Route::prefix('daily-handovers')->name('daily-handovers.')->group(function () {
+        Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
+        Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
+        Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
+        Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
+        Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
+        Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
+        Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
+    });
 
-// Customer Orders routes
-Route::prefix('customer-orders')->name('customer-orders.')->group(function () {
-    Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
-    Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
-    Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
-    Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
-    Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
-    Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
-    Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
+    Route::prefix('returned-goods')->name('returned-goods.')->group(function () {
+        Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
+        Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
+        Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
+        Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
+        Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
+        Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
+        Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('store')->group(function () {
+        Route::get('/', [StoreController::class, 'index'])->name('store.index');
+        Route::get('/create', [StoreController::class, 'create'])->name('store.create');
+        Route::post('/', [StoreController::class, 'store'])->name('store.store');
+        Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
+        Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
+        Route::delete('/{id}', [StoreController::class, 'destroy'])->name('store.destroy');
+    });
+    // Debts routes
+    Route::prefix('debts')->name('debts.')->group(function () {
+        Route::get('/', [DebtController::class, 'index'])->name('index');    // عرض جميع الديون
+        Route::get('/create', [DebtController::class, 'create'])->name('create');  // عرض نموذج إضافة دين جديد
+        Route::post('/', [DebtController::class, 'store'])->name('store');   // حفظ دين جديد
+        Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
+        Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
+        Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
+    });
+
+    // Backup routes
+    Route::prefix('backup')->name('backup.')->group(function () {
+        Route::get('/', [BackupController::class, 'index'])->name('index');
+        Route::get('/create', [BackupController::class, 'create'])->name('create');
+        Route::post('/store', [BackupController::class, 'store'])->name('store');
+        Route::get('/upload', [BackupController::class, 'upload'])->name('upload');
+        Route::post('/upload', [BackupController::class, 'storeUpload'])->name('storeUpload');
+        Route::get('/download/{filename}', [BackupController::class, 'download'])->name('download');
+        Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('restore');
+        Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])->name('destroy');
+    });
+
+    // Maintenance Parts routes
+    Route::prefix('maintenance_parts')->name('maintenance_parts.')->group(function () {
+        Route::get('/', [MaintenancePartController::class, 'index'])->name('index');
+        Route::get('/create', [MaintenancePartController::class, 'create'])->name('create');
+        Route::post('/', [MaintenancePartController::class, 'store'])->name('store');
+        Route::get('/{maintenancePart}', [MaintenancePartController::class, 'show'])->name('show');
+        Route::get('/{maintenancePart}/edit', [MaintenancePartController::class, 'edit'])->name('edit');
+        Route::put('/{maintenancePart}', [MaintenancePartController::class, 'update'])->name('update');
+        Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::get('/', [ProductController::class, 'index_admin'])->name('index-admin');
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+        Route::get('/{products}', [ProductController::class, 'show'])->name('show');
+        Route::get('/{products}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{products}', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{products}', [ProductController::class, 'destroy'])->name('destroy');
+    });
+
+    // Clear config cache route
+    Route::get('/fix-config', function () {
+        Artisan::call('config:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('config:cache');
+
+        return '✅ تم مسح الكاش بنجاح';
+    });
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Auth routes
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Daily Handovers routes
-Route::prefix('daily-handovers')->name('daily-handovers.')->group(function () {
-    Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
-    Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
-    Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
-    Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
-    Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
-    Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
-    Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
-});
 
-Route::prefix('returned-goods')->name('returned-goods.')->group(function () {
-    Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
-    Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
-    Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
-    Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
-    Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
-    Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
-    Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
-});
-
-Route::prefix('store')->group(function () {
-    Route::get('/', [StoreController::class, 'index'])->name('store.index');
-    Route::get('/create', [StoreController::class, 'create'])->name('store.create');
-    Route::post('/', [StoreController::class, 'store'])->name('store.store');
-    Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
-    Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
-    Route::delete('/{id}', [StoreController::class, 'destroy'])->name('store.destroy');
-});
-// Debts routes
-Route::prefix('debts')->name('debts.')->group(function () {
-    Route::get('/', [DebtController::class, 'index'])->name('index');    // عرض جميع الديون
-    Route::get('/create', [DebtController::class, 'create'])->name('create');  // عرض نموذج إضافة دين جديد
-    Route::post('/', [DebtController::class, 'store'])->name('store');   // حفظ دين جديد
-    Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
-    Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
-    Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
-});
-
-// Backup routes
-Route::prefix('backup')->name('backup.')->group(function () {
-    Route::get('/', [BackupController::class, 'index'])->name('index');
-    Route::get('/create', [BackupController::class, 'create'])->name('create');
-    Route::post('/store', [BackupController::class, 'store'])->name('store');
-    Route::get('/upload', [BackupController::class, 'upload'])->name('upload');
-    Route::post('/upload', [BackupController::class, 'storeUpload'])->name('storeUpload');
-    Route::get('/download/{filename}', [BackupController::class, 'download'])->name('download');
-    Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('restore');
-    Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])->name('destroy');
-});
-
-// Maintenance Parts routes
-Route::prefix('maintenance_parts')->name('maintenance_parts.')->group(function () {
-    Route::get('/', [MaintenancePartController::class, 'index'])->name('index');
-    Route::get('/create', [MaintenancePartController::class, 'create'])->name('create');
-    Route::post('/', [MaintenancePartController::class, 'store'])->name('store');
-    Route::get('/{maintenancePart}', [MaintenancePartController::class, 'show'])->name('show');
-    Route::get('/{maintenancePart}/edit', [MaintenancePartController::class, 'edit'])->name('edit');
-    Route::put('/{maintenancePart}', [MaintenancePartController::class, 'update'])->name('update');
-    Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])->name('destroy');
-});
-
-// Clear config cache route
-Route::get('/fix-config', function () {
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('config:cache');
-
-    return '✅ تم مسح الكاش بنجاح';
-});
-
-// Profile routes
-Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-// Auth routes
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
