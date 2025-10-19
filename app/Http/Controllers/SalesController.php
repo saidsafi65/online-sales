@@ -20,6 +20,10 @@ class SalesController extends Controller
     {
         $query = Sale::query();
 
+        // إذا كان المستخدم ليس مدير نظام، اعرض فقط مبيعات فرعه
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
         // Apply filters
         if ($request->filled('start_date')) {
             $query->whereDate('sale_date', '>=', $request->start_date);
@@ -169,6 +173,7 @@ class SalesController extends Controller
                 'cash_amount' => $request->cash_amount,
                 'app_amount' => $request->app_amount,
                 'is_returned' => false,
+                'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
                 'notes' => $request->notes,
             ]);
 

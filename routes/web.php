@@ -33,6 +33,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\MaintenancePartController;
 use App\Models\MaintenancePart;
 use App\Http\Controllers\Products\ProductController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\BranchManagementController;
+
 
 // Route::get('/', function () {
 //     return view('home');
@@ -70,8 +73,149 @@ Route::get('/', function () {
 
 // All management routes (dashboard, sales, repairs, etc.) require authentication
 Route::middleware('auth')->group(function () {
+
+    // User and Branch Management (only for admins)
+    Route::resource('users', UserManagementController::class);
+    Route::resource('branches', BranchManagementController::class);
+
+      // 🔐 إدارة المستخدمين (فقط للمدير)
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])->name('index');
+        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::post('/', [UserManagementController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserManagementController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
+    });
+
+    // 🏢 إدارة الفروع (فقط للمدير)
+    Route::prefix('branches')->name('branches.')->group(function () {
+        Route::get('/', [BranchManagementController::class, 'index'])->name('index');
+        Route::get('/create', [BranchManagementController::class, 'create'])->name('create');
+        Route::post('/', [BranchManagementController::class, 'store'])->name('store');
+        Route::get('/{branch}/edit', [BranchManagementController::class, 'edit'])->name('edit');
+        Route::put('/{branch}', [BranchManagementController::class, 'update'])->name('update');
+        Route::delete('/{branch}', [BranchManagementController::class, 'destroy'])->name('destroy');
+    });
+
     // Dashboard
     Route::get('/dashboard', function () {
+
+        // الحصول على فرع المستخدم إذا لم يكن مدير نظام
+         $user = auth()->user();
+        $branchFilter = $user->isAdmin() ? null : $user->branch_id;
+
+        
+        // ===== إحصائيات المبيعات =====
+        $salesQuery = Sale::where('is_returned', false);
+        if ($branchFilter) {
+            $salesQuery->where('branch_id', $branchFilter);
+        }
+        
+        $monthlySales = $salesQuery
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum(DB::raw('cash_amount + app_amount'));
+
+        $todaySalesCount = $salesQuery
+            ->whereDate('created_at', today())
+            ->count();
+
+        // ===== إحصائيات الصيانة =====
+        $repairsQuery = Repair::where('is_returned', false);
+        if ($branchFilter) {
+            $repairsQuery->where('branch_id', $branchFilter);
+        }
+
+        $deliveredRepairs = $repairsQuery
+            ->whereNotNull('delivery_date')
+            ->whereMonth('delivery_date', now()->month)
+            ->count();
+
+        $monthlycost_cashRepair = $repairsQuery
+            ->whereMonth('delivery_date', now()->month)
+            ->sum('cost_cash');
+
+        $monthlycost_bankRepair = $repairsQuery
+            ->whereMonth('delivery_date', now()->month)
+            ->sum('cost_bank');
+
+        $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
+
+        $pendingRepairs = Repair::query();
+        if ($branchFilter) {
+            $pendingRepairs->where('branch_id', $branchFilter);
+        }
+        $pendingRepairs = max($pendingRepairs->where('status', 'pending')->count() - $deliveredRepairs, 0);
+
+        // ===== إحصائيات المشتريات =====
+        $purchasesQuery = Purchase::where('is_returned', false);
+        if ($branchFilter) {
+            $purchasesQuery->where('branch_id', $branchFilter);
+        }
+
+        $cashPurchases = $purchasesQuery
+            ->whereMonth('purchase_date', now()->month)
+            ->sum('amount_cash');
+
+        $bankPurchases = $purchasesQuery
+            ->whereMonth('purchase_date', now()->month)
+            ->sum('amount_bank');
+
+        $monthlyPurchases = $cashPurchases + $bankPurchases;
+
+        // ===== إحصائيات الالتزامات =====
+        $obligationsQuery = Obligation::query();
+        if ($branchFilter) {
+            $obligationsQuery->where('branch_id', $branchFilter);
+        }
+
+        $obligationsCash = $obligationsQuery
+            ->whereMonth('date', now()->month)
+            ->sum('cash_amount');
+
+        $obligationsBank = $obligationsQuery
+            ->whereMonth('date', now()->month)
+            ->sum('bank_amount');
+
+        $monthlyObligations = $obligationsCash + $obligationsBank;
+        $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
+
+        // ===== إحصائيات الديون =====
+        $debtsQuery = Debt::query();
+        if ($branchFilter) {
+            $debtsQuery->where('branch_id', $branchFilter);
+        }
+
+        $totalReceivables = $debtsQuery
+            ->where('type', 'مدين')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+        $totalPayables = $debtsQuery
+            ->where('type', 'دائن')
+            ->whereNull('payment_date')
+            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+        $totalDebts = $totalReceivables - $totalPayables;
+
+        // ===== الحسابات النهائية =====
+        $monthlyIncome = $monthlySales + $monthlycostRepair;
+        $netRevenue = $monthlyIncome - $totalMonthlyPurchases;
+
+        // ===== بيانات إضافية =====
+        $catalogQuery = CatalogItem::query();
+        if ($branchFilter) {
+            $catalogQuery->where('branch_id', $branchFilter);
+        }
+        $totalProducts = $catalogQuery->count();
+
+        $repairCount = Repair::query();
+        if ($branchFilter) {
+            $repairCount->where('branch_id', $branchFilter);
+        }
+        $totalCustomers = $repairCount->count();       
+
         // عدد الصيانات المسلمة
         $deliveredRepairs = Repair::whereNotNull('delivery_date')->count();
         // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة)
@@ -345,6 +489,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{products}', [ProductController::class, 'update'])->name('update');
         Route::delete('/{products}', [ProductController::class, 'destroy'])->name('destroy');
     });
+
 
     // Clear config cache route
     Route::get('/fix-config', function () {

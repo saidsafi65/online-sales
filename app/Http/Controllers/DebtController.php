@@ -10,6 +10,12 @@ class DebtController extends Controller
 {
     public function index()
     {
+        $query = Debt::query();
+
+        // إذا كان المستخدم ليس مدير نظام، اعرض فقط ديون فرعه
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
         $debts = Debt::latest()->paginate(10);
 
         // حساب الديون المتراكمة
@@ -23,6 +29,11 @@ class DebtController extends Controller
      */
     private function calculateTotalDebts()
     {
+         $query = Debt::query();
+
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
         // الديون المستحقة (مدين) = المبالغ التي يجب أن تُدفع لك
         $receivables = Debt::where('type', 'مدين')
             ->whereNull('payment_date')
@@ -53,6 +64,7 @@ class DebtController extends Controller
             'reason' => 'required|string',
             'debt_date' => 'required|date',
             'payment_date' => 'nullable|date|after_or_equal:debt_date',
+            'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
         ]);
 
         Debt::create($validated);

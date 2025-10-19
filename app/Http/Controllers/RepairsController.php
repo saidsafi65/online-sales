@@ -15,6 +15,11 @@ class RepairsController extends Controller
     {
         $query = Repair::query();
 
+        // إذا كان المستخدم ليس مدير نظام، اعرض فقط صيانة فرعه
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+        
         if ($request->filled('payment_method')) {
             $query->where('payment_method', $request->payment_method);
         }
@@ -93,6 +98,7 @@ class RepairsController extends Controller
                 'return_date' => $request->return_date,
                 'return_cost' => $request->return_cost,
                 'return_delivery_date' => $request->return_delivery_date,
+                'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
                 'notes' => $request->notes,
             ]);
 

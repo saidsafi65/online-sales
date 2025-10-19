@@ -15,6 +15,11 @@ class PurchasesController extends Controller
     {
         $query = Purchase::query();
 
+        // إذا كان المستخدم ليس مدير نظام، اعرض فقط مشتريات فرعه
+        if (!auth()->user()->isAdmin()) {
+             $query->where('branch_id', auth()->user()->branch_id);
+        }
+
         if ($request->filled('payment_method')) {
             $query->where('payment_method', $request->payment_method);
         }
@@ -61,6 +66,7 @@ class PurchasesController extends Controller
             'is_returned' => 'nullable|boolean',
             'issue' => 'nullable|string',
             'return_date' => 'nullable|date',
+            'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
             'notes' => 'nullable|string|max:1000',
         ];
 

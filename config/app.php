@@ -13,6 +13,12 @@ return [
     |
     */
 
+    'aliases' => [
+        // ... الـ aliases الموجودة ...
+        'BranchHelper' => App\Helpers\BranchHelper::class,
+    ],
+
+
     'name' => env('APP_NAME', 'Laravel'),
 
     /*

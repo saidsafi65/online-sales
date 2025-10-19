@@ -25,6 +25,9 @@ class ReportsController extends Controller
             $salesQuery = Sale::where('is_returned', false)
                 ->whereBetween('created_at', [$dateStart, $dateEnd]);
 
+            if (!auth()->user()->isAdmin()) {
+                $salesQuery->where('branch_id', auth()->user()->branch_id);
+            }
             $monthlySalesCash = $salesQuery->sum('cash_amount');
             $monthlySalesAppAmount = $salesQuery->sum('app_amount');
             $monthlySales = $monthlySalesCash + $monthlySalesAppAmount;

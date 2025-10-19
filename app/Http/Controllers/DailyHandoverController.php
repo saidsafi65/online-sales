@@ -11,6 +11,13 @@ class DailyHandoverController extends Controller
 {
     public function index()
     {
+        $query = DailyHandover::query();
+
+        // إذا كان المستخدم ليس مدير نظام، اعرض فقط تسليمات فرعه
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+
         $handovers = DailyHandover::latest('handover_date')
             ->latest('handover_time')
             ->paginate(15);
@@ -48,6 +55,7 @@ class DailyHandoverController extends Controller
             'reason' => 'required|string|max:255',
             'notes' => 'nullable|string',
             'received_by' => 'nullable|string|max:255',
+            'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
         ]);
 
         // إنشاء تسليم جديد مع البيانات المعتمدة
