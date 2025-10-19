@@ -874,3 +874,32 @@ body {
 .fab i {
     font-size: 1.5rem;
 }
+
+/* Fix oversized pagination arrows */
+.pagination,
+.pagination .page-item,
+.pagination .page-link {
+    line-height: 1;
+}
+
+.pagination .page-link svg,
+.pagination li a svg,
+.pagination svg {
+    width: 18px !important; /* consistent arrow size */
+    height: 18px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    max-width: 22px !important;
+}
+
+.pagination-wrapper .page-link svg {
+    margin: 0;
+    transform: translateY(1px);
+}
+
+.pagination-wrapper .page-item .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}

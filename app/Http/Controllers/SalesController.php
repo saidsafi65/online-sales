@@ -69,7 +69,16 @@ class SalesController extends Controller
     {
         // جلب كتالوج المنتجات لتعبئة القوائم
         $catalog = \App\Models\CatalogItem::orderBy('product')->orderBy('type')->get();
-        $products = $catalog->groupBy('product');
+
+        // Group by product, keep only types with quantity > 0, and remove products with no available types
+        $products = $catalog->groupBy('product')
+            ->map(function ($group) {
+                return $group->filter(function ($item) {
+                    return isset($item->quantity) && (int) $item->quantity > 0;
+                })->pluck('type')->unique()->values();
+            })->filter(function ($types) {
+                return $types->isNotEmpty();
+            });
 
         return view('sales.create', compact('products'));
     }

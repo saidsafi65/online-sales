@@ -17,13 +17,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
-    <style>
-        .service-card {
-            height: auto;
-        }
-    </style>
-
+<style>
+    .service-card {
+        height: auto;
+    }
+</style>
     <div class="row justify-content-center">
         <div class="col-12">
             <!-- Header Card -->
@@ -45,46 +43,77 @@
             </div>
 
             <!-- Search and Filter Section -->
-            <div class="search-filter-section mb-4">
+            <div class="service-card card-info mb-4">
                 <form method="GET" action="{{ route('catalog.index') }}">
-                    <div class="row">
+                    <div class="row g-3">
                         <!-- Search Input -->
                         <div class="col-md-4">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-search" style="color: #0ea5e9;"></i>
+                                البحث
+                            </label>
                             <input type="text" name="search" value="{{ request()->search }}" class="form-control"
-                                placeholder="البحث بالاسم أو النوع">
+                                placeholder="ابحث عن منتج أو نوع..."
+                                style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
                         </div>
 
                         <!-- Quantity Filter -->
-                        <div class="col-md-3">
-                            <select name="quantity_filter" class="form-control">
-                                <option value="">تصفية حسب الكمية</option>
-                                <option value="low" {{ request()->quantity_filter == 'low' ? 'selected' : '' }}>منخفضة
-                                    (0-5)</option>
-                                <option value="medium" {{ request()->quantity_filter == 'medium' ? 'selected' : '' }}>متوسطة
-                                    (6-20)</option>
-                                <option value="high" {{ request()->quantity_filter == 'high' ? 'selected' : '' }}>عالية
-                                    (>20)</option>
+                        <div class="col-md-2">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-warehouse" style="color: #10b981;"></i>
+                                الكمية
+                            </label>
+                            <select name="quantity_filter" class="form-select"
+                                style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
+                                <option value="">الكل</option>
+                                <option value="low" {{ request()->quantity_filter == 'low' ? 'selected' : '' }}>منخفض (≤ 5)</option>
+                                <option value="medium" {{ request()->quantity_filter == 'medium' ? 'selected' : '' }}>متوسط (6-20)</option>
+                                <option value="high" {{ request()->quantity_filter == 'high' ? 'selected' : '' }}>عالي (> 20)</option>
                             </select>
                         </div>
 
-                        <!-- Price Range -->
+                        <!-- Price Min -->
                         <div class="col-md-2">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-money-bill-wave" style="color: #f59e0b;"></i>
+                                السعر من
+                            </label>
                             <input type="number" name="price_min" value="{{ request()->price_min }}" class="form-control"
-                                placeholder="السعر الأدنى" min="0">
+                                placeholder="0" min="0" step="0.01"
+                                style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
                         </div>
+
+                        <!-- Price Max -->
                         <div class="col-md-2">
+                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-money-bill-wave" style="color: #f59e0b;"></i>
+                                إلى
+                            </label>
                             <input type="number" name="price_max" value="{{ request()->price_max }}" class="form-control"
-                                placeholder="السعر الأعلى" min="0">
+                                placeholder="∞" min="0" step="0.01"
+                                style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="col-md-1">
-                            <button type="submit" class="btn btn-primary w-100">بحث</button>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: white; padding: 0.75rem 1rem; border-radius: 10px; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                <i class="fas fa-filter"></i>
+                                بحث
+                            </button>
                         </div>
                     </div>
+
+                    <!-- Reset Button -->
+                    @if(request()->filled('search') || request()->filled('quantity_filter') || request()->filled('price_min') || request()->filled('price_max'))
+                    <div class="mt-3">
+                        <a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-2"></i>
+                            إعادة تعيين
+                        </a>
+                    </div>
+                    @endif
                 </form>
             </div>
-
 
             <!-- Table Card -->
             <div class="service-card card-success">
@@ -103,7 +132,14 @@
                         </thead>
                         <tbody>
                             @forelse($items as $index => $item)
-                                <tr style="transition: all 0.2s ease;">
+                                <tr style="transition: all 0.2s ease; 
+                                    @if($item->quantity == 0)
+                                        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+                                        border-left: 4px solid #ef4444;
+                                    @elseif($item->quantity <= 5)
+                                        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                                    @endif
+                                ">
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <span
                                             style="background: #1e40af; color: white; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600;">
@@ -112,7 +148,11 @@
                                     </td>
                                     <td style="padding: 0.75rem; vertical-align: middle;">
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            <i class="fas fa-box" style="color: #1e40af;"></i>
+                                            @if($item->quantity == 0)
+                                                <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                                            @else
+                                                <i class="fas fa-box" style="color: #1e40af;"></i>
+                                            @endif
                                             <span style="font-weight: 600; color: #1e293b;">{{ $item->product }}</span>
                                         </div>
                                     </td>
@@ -124,7 +164,14 @@
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <span
-                                            style="background: {{ $item->quantity > 10 ? '#d1fae5' : '#fef3c7' }}; color: {{ $item->quantity > 10 ? '#065f46' : '#b45309' }}; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem;">
+                                            style="background: {{ $item->quantity == 0 ? '#fee2e2' : ($item->quantity > 10 ? '#d1fae5' : '#fef3c7') }}; 
+                                                    color: {{ $item->quantity == 0 ? '#dc2626' : ($item->quantity > 10 ? '#065f46' : '#b45309') }}; 
+                                                    padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem;
+                                                    @if($item->quantity == 0) border: 2px solid #ef4444; @endif
+                                            ">
+                                            @if($item->quantity == 0)
+                                                <i class="fas fa-ban me-1"></i>
+                                            @endif
                                             {{ $item->quantity }}
                                         </span>
                                     </td>
@@ -169,80 +216,8 @@
                                         <div style="color: #94a3b8;">
                                             <i class="fas fa-box-open"
                                                 style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
-                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد
-                                                منتجات</p>
+                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد منتجات</p>
                                             <p style="font-size: 0.9rem;">ابدأ بإضافة منتج جديد للكتالوج</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <style>
-                    .pagination-wrapper a,
-                    .pagination-wrapper span {
-                        display: inline-block;
-                        padding: 8px 16px;
-                        margin: 0 4px;
-                        background-color: #f0f0f0;
-                        border-radius: 4px;
-                        color: #333;
-                        font-weight: 600;
-                        text-decoration: none;
-                        transition: all 0.3s ease;
-                    }
-
-                    .pagination-wrapper a:hover {
-                        background-color: #6366f1;
-                        color: #fff;
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                    }
-
-                    .pagination-wrapper .active {
-                        background-color: #6366f1;
-                        color: white;
-                        font-weight: 700;
-                    }
-
-                    .pagination-wrapper span {
-                        background-color: #ddd;
-                        color: #777;
-                    }
-                </style>
-
-                <!-- Pagination -->
-                @if ($items->hasPages())
-                    <div class="compact-pagination-container">
-                        <nav class="pagination-wrapper" aria-label="Pagination">
-                            {{ $items->links() }}
-                        </nav>
-                    </div>
-                @endif
-            </div>
-
-            <!-- Table Card -->
-            <div class="service-card card-success">
-                <div style="overflow-x: auto; border-radius: 12px; border: 2px solid #e2e8f0;">
-                    <table class="table mb-0" style="min-width: 1000px;">
-                        <thead style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white;">
-                            <!-- Add the table header here -->
-                        </thead>
-                        <tbody>
-                            @forelse($items as $index => $item)
-                                <tr>
-                                    <!-- Add table rows for each product -->
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" style="padding: 3rem; text-align: center;">
-                                        <div style="color: #94a3b8;">
-                                            <i class="fas fa-box-open"
-                                                style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
-                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد
-                                                نتائج</p>
-                                            <p style="font-size: 0.9rem;">حاول تعديل الفلاتر أو إضافة منتجات جديدة</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -257,12 +232,13 @@
                         {{ $items->links() }}
                     </div>
                 @endif
+                
             </div>
 
             <!-- Statistics Cards -->
             @if ($items->count() > 0)
-                <div class="row g-4 mt-2">
-                    <div class="col-md-4">
+                <div class="row g-4 mt-4">
+                    <div class="col-md-3">
                         <div class="service-card card-primary" style="text-align: center; padding: 1.5rem;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #1e40af; font-size: 1.8rem;">
@@ -274,7 +250,7 @@
                             <p style="color: #64748b; margin: 0; font-weight: 500;">إجمالي المنتجات</p>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="service-card card-success" style="text-align: center; padding: 1.5rem;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #10b981; font-size: 1.8rem;">
@@ -286,19 +262,28 @@
                             <p style="color: #64748b; margin: 0; font-weight: 500;">إجمالي الكمية</p>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="service-card card-warning" style="text-align: center; padding: 1.5rem;">
                             <div
-                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #f59e0b; font-size: 1.8rem;">
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #ef4444; font-size: 1.8rem;">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <h3 style="color: #dc2626; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
+                                {{ $items->where('quantity', 0)->count() }}
+                            </h3>
+                            <p style="color: #64748b; margin: 0; font-weight: 500;">منتجات بدون مخزون</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="service-card card-info" style="text-align: center; padding: 1.5rem;">
+                            <div
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #0ea5e9; font-size: 1.8rem;">
                                 <i class="fas fa-coins"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
-                                {{ number_format($totalInventoryValue, 2) }} ₪
+                                {{ number_format($items->sum(function($item) { return $item->quantity * $item->sale_price; }), 2) }} ₪
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون (سعر البيع)</p>
-                            <div style="margin-top: 0.5rem; font-size: 0.95rem; color: #475569;">
-                                إجمالي حسب سعر الجملة: <strong>{{ number_format($totalWholesaleValue, 2) }} ₪</strong>
-                            </div>
+                            <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون</p>
                         </div>
                     </div>
                 </div>
@@ -309,7 +294,7 @@
     @push('styles')
         <style>
             .table tbody tr:hover {
-                background: #f8fafc;
+                background: #f8fafc !important;
             }
 
             .alert {

@@ -108,7 +108,7 @@
             قائمة المبيعات
         </h5>
         <div class="card-tools">
-            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <button class="btn btn-outline-light btn-sm" style="color: unset;" data-bs-toggle="modal" data-bs-target="#filterModal">
                 <i class="fas fa-filter me-1"></i>
                 تصفية
             </button>

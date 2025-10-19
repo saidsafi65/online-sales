@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,7 +11,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@300;400;600;700;900&display=swap"
+        rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -456,6 +459,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -467,6 +471,7 @@
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -477,12 +482,29 @@
             animation: fadeIn 0.6s ease-out backwards;
         }
 
-        .service-card:nth-child(1) { animation-delay: 0.1s; }
-        .service-card:nth-child(2) { animation-delay: 0.2s; }
-        .service-card:nth-child(3) { animation-delay: 0.3s; }
-        .service-card:nth-child(4) { animation-delay: 0.4s; }
-        .service-card:nth-child(5) { animation-delay: 0.5s; }
-        .service-card:nth-child(6) { animation-delay: 0.6s; }
+        .service-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .service-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .service-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .service-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .service-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .service-card:nth-child(6) {
+            animation-delay: 0.6s;
+        }
 
         /* Responsive */
         @media (max-width: 991px) {
@@ -590,10 +612,53 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-    </style>
 
+        /* Pagination arrows style fix: normalize SVG size and alignment */
+        .pagination,
+        .pagination .page-item,
+        .pagination .page-link {
+            line-height: 1;
+        }
+
+        /* Target SVGs used as pagination arrows (more specific selectors to override other styles) */
+        .pagination .page-link svg,
+        .pagination li a svg,
+        .pagination svg {
+            width: 18px !important;   /* smaller, consistent arrow size */
+            height: 18px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            max-width: 22px !important;
+        }
+
+        .pagination .page-link {
+            font-size: 0.9rem !important;
+            padding: 6px 12px !important;
+            border-radius: 8px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 1rem;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+    </style>
     @stack('styles')
 </head>
+
 <body>
     <!-- Header -->
     <header class="header-professional">
@@ -619,31 +684,36 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                            <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                                href="{{ route('dashboard') }}">
                                 <i class="fas fa-home"></i>
                                 <span>الرئيسية</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}" href="{{ route('invoices.index') }}">
+                            <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
+                                href="{{ route('invoices.index') }}">
                                 <i class="fas fa-file-invoice"></i>
                                 <span>الفواتير</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}" href="{{ route('catalog.index') }}">
+                            <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}"
+                                href="{{ route('catalog.index') }}">
                                 <i class="fas fa-boxes"></i>
                                 <span>الكتالوج</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}" href="{{ route('deposits.index') }}">
+                            <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}"
+                                href="{{ route('deposits.index') }}">
                                 <i class="fas fa-tools"></i>
                                 <span>الأمانات</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                                href="{{ route('reports.index') }}">
                                 <i class="fas fa-chart-line"></i>
                                 <span>التقارير</span>
                             </a>
@@ -653,9 +723,11 @@
                     <!-- User Menu -->
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle p-0" href="#" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle p-0" href="#" role="button"
+                                data-bs-toggle="dropdown">
                                 <div class="user-section">
-                                    <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true" alt="User" class="user-avatar">
+                                    <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true"
+                                        alt="User" class="user-avatar">
                                     <div class="user-info d-none d-md-flex">
                                         <span class="user-name">المستخدم</span>
                                         <span class="user-role">مدير النظام</span>
@@ -676,7 +748,9 @@
                                         <span>الإعدادات</span>
                                     </a>
                                 </li> --}}
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -725,4 +799,5 @@
 
     @stack('scripts')
 </body>
+
 </html>

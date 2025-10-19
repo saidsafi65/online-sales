@@ -149,13 +149,19 @@
     <script>
         // ربط قائمة الأنواع مع المنتج المختار
         (function() {
-            const products = @json(($products ?? collect())->map->pluck('type'));
+            // products is an object where keys are product names and values are arrays of available types (already filtered server-side)
+            const products = @json($products->map(function($arr){ return $arr->toArray(); })->toArray() ?? []);
             const productSelect = document.getElementById('product');
             const typeSelect = document.getElementById('type');
 
             function fillTypes(selectedProduct) {
                 typeSelect.innerHTML = '<option value="">اختر النوع / الموديل</option>';
                 const types = products[selectedProduct] || [];
+                // If no types available, leave only the placeholder option
+                if (!types || types.length === 0) {
+                    return;
+                }
+
                 types.forEach(t => {
                     const opt = document.createElement('option');
                     opt.value = t;
