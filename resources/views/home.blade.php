@@ -243,7 +243,7 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-radius: 12px; border: 1px solid #bbf7d0;">
                             <div style="font-size: 2rem; font-weight: 800; color: #16a34a; margin-bottom: 0.5rem;">
-                                {{ number_format($monthlyRevenue ?? 0) }} ₪
+                                {{ number_format($monthlyRevenue ?? 0) }} شيكل
                             </div>
                             <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">صافي الشهر</div>
                         </div>
@@ -254,7 +254,7 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; border: 1px solid #bfdbfe;">
                             <div style="font-size: 2rem; font-weight: 800; color: #2563eb; margin-bottom: 0.5rem;">
-                                {{ number_format($monthlyIncome ?? 0) }} ₪
+                                {{ number_format($monthlyIncome ?? 0) }} شيكل
                             </div>
                             <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مبيعات الشهر مع الصيانة</div>
                         </div>
@@ -265,7 +265,7 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-radius: 12px; border: 1px solid #fecaca;">
                             <div style="font-size: 2rem; font-weight: 800; color: #dc2626; margin-bottom: 0.5rem;">
-                                {{ number_format($totalMonthlyPurchases ?? 0) }} ₪
+                                {{ number_format($totalMonthlyPurchases ?? 0) }} شيكل
                             </div>
                             <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">مصروفات الشهر مع الالتزامات
                             </div>
@@ -277,7 +277,7 @@
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-radius: 12px; border: 1px solid #fde047;">
                             <div style="font-size: 2rem; font-weight: 800; color: #ca8a04; margin-bottom: 0.5rem;">
-                                {{ number_format($totalDebts ?? 0) }} ₪
+                                {{ number_format($totalDebts ?? 0) }} شيكل
                             </div>
                             <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">الديون المتراكمة</div>
                         </div>

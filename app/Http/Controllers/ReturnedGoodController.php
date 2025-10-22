@@ -9,6 +9,11 @@ class ReturnedGoodController extends Controller
 {
     public function index()
     {
+        $query = ReturnedGood::query();
+
+    if (!auth()->user()->isAdmin()) {
+        $query->where('branch_id', auth()->user()->branch_id);
+    }
         $returnedGoods = ReturnedGood::latest()->paginate(15);
 
         $pendingCount = ReturnedGood::where('status', 'pending')->count();
@@ -42,6 +47,7 @@ class ReturnedGoodController extends Controller
             'issue_discovered_date' => 'required|date',
             'status' => 'nullable|in:pending,returned,replaced,refunded',
             'notes' => 'nullable|string',
+            'branch_id' => auth()->user()->branch_id,
         ]);
 
         // البحث عن المنتج في قاعدة البيانات

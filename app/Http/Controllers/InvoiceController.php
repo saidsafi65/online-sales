@@ -21,6 +21,13 @@ class InvoiceController extends Controller
         return view('invoices.index', compact('invoices'));
     }
 
+    public function receipt($id)
+    {
+        $invoice = Invoice::with('items')->findOrFail($id);
+        $invoice->invoice_date = Carbon::parse($invoice->invoice_date);
+
+        return view('invoices.receipt', compact('invoice'));
+    }
     // عرض صفحة إضافة فاتورة جديدة
     public function create()
     {

@@ -123,7 +123,7 @@
                                    style="padding: 0.75rem 1rem; border-radius: 10px 0 0 10px; border: 2px solid #e2e8f0; font-size: 1rem;"
                                    oninput="calculateProfit()"
                                    required>
-                            <span class="input-group-text" style="background: #f8fafc; border: 2px solid #e2e8f0; border-right: none; border-radius: 0 10px 10px 0; font-weight: 600; color: #64748b;">₪</span>
+                            <span class="input-group-text" style="background: #f8fafc; border: 2px solid #e2e8f0; border-right: none; border-radius: 0 10px 10px 0; font-weight: 600; color: #64748b;">شيكل</span>
                             @error('wholesale_price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -150,7 +150,7 @@
                                    style="padding: 0.75rem 1rem; border-radius: 10px 0 0 10px; border: 2px solid #e2e8f0; font-size: 1rem;"
                                    oninput="calculateProfit()"
                                    required>
-                            <span class="input-group-text" style="background: #f8fafc; border: 2px solid #e2e8f0; border-right: none; border-radius: 0 10px 10px 0; font-weight: 600; color: #64748b;">₪</span>
+                            <span class="input-group-text" style="background: #f8fafc; border: 2px solid #e2e8f0; border-right: none; border-radius: 0 10px 10px 0; font-weight: 600; color: #64748b;">شيكل</span>
                             @error('sale_price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -171,7 +171,7 @@
                                 </div>
                                 <div>
                                     <p style="margin: 0; font-size: 0.9rem; color: #065f46; font-weight: 600;">الربح المتوقع</p>
-                                    <p style="margin: 0; font-size: 1.8rem; font-weight: 700; color: #10b981;" id="profitAmount">0.00 ₪</p>
+                                    <p style="margin: 0; font-size: 1.8rem; font-weight: 700; color: #10b981;" id="profitAmount">0.00 شيكل</p>
                                 </div>
                             </div>
                         </div>
@@ -211,7 +211,7 @@
         const profit = salePrice - wholesalePrice;
         const profitPercentage = wholesalePrice > 0 ? ((profit / wholesalePrice) * 100).toFixed(2) : 0;
         
-        document.getElementById('profitAmount').textContent = profit.toFixed(2) + ' ₪';
+        document.getElementById('profitAmount').textContent = profit.toFixed(2) + ' شيكل';
         document.getElementById('profitPercentage').textContent = profitPercentage + '%';
         
         // تغيير اللون بناءً على الربح

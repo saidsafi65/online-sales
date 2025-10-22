@@ -11,6 +11,7 @@ class LaptopCompatibilitySeeder extends Seeder
 {
     public function run()
     {
+        Part::truncate();
         // إنشاء أنواع القطع
         $partTypes = [
             ['name' => 'شاشة', 'name_en' => 'Screen'],

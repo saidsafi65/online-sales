@@ -31,7 +31,7 @@ return new class extends Migration
             'stores',
             'debts',
             'maintenance_parts',
-            'users',
+            
         ];
 
         foreach ($tables as $table) {
@@ -68,7 +68,7 @@ return new class extends Migration
             'stores',
             'debts',
             'maintenance_parts',
-            'users',
+            
         ];
 
         foreach ($tables as $table) {

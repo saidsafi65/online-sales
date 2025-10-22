@@ -14,7 +14,9 @@ class CatalogController extends Controller
     public function index(Request $request): View
     {
         $query = CatalogItem::query();
-
+    if (!auth()->user()->isAdmin()) {
+        $query->where('branch_id', auth()->user()->branch_id);
+    }
         // البحث بالاسم أو النوع
         if ($request->filled('search')) {
             $search = $request->search;

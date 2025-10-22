@@ -177,12 +177,12 @@
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <div style="font-weight: 600; color: #059669; font-size: 1rem;">
-                                            {{ number_format($item->wholesale_price, 2) }} ₪
+                                            {{ number_format($item->wholesale_price, 2) }} شيكل
                                         </div>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <div style="font-weight: 700; color: #10b981; font-size: 1.1rem;">
-                                            {{ number_format($item->sale_price, 2) }} ₪
+                                            {{ number_format($item->sale_price, 2) }} شيكل
                                         </div>
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
@@ -281,7 +281,7 @@
                                 <i class="fas fa-coins"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
-                                {{ number_format($items->sum(function($item) { return $item->quantity * $item->sale_price; }), 2) }} ₪
+                                {{ number_format($items->sum(function($item) { return $item->quantity * $item->sale_price; }), 2) }} شيكل
                             </h3>
                             <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون</p>
                         </div>

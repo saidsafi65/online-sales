@@ -1,29 +1,15 @@
+<!-- resources/views/invoices/print.blade.php (محدّث مع الختم) -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>فاتورة - {{ $invoice->invoice_number }}</title>
     <style>
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', 'Segoe UI', sans-serif;
-            background: white;
-            padding: 0;
-            margin: 0;
-        }
-
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', 'Segoe UI', sans-serif; background: white; padding: 0; margin: 0; }
+        
         .invoice-container {
             width: 210mm;
             min-height: 297mm;
@@ -33,7 +19,25 @@
             padding: 20mm;
         }
 
-        /* التصميم الهندسي في الخلفية */
+        /* الختم */
+        .stamp-container {
+            position: absolute;
+            bottom: 120mm;
+            left: 30mm;
+            width: 120px;
+            height: 120px;
+            opacity: 0.7;
+            transform: rotate(-15deg);
+            z-index: 10;
+        }
+
+        .stamp-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* التصميم الهندسي */
         .background-design {
             position: absolute;
             top: 0;
@@ -77,11 +81,7 @@
             transform: rotate(-25deg);
         }
 
-        /* المحتوى */
-        .content {
-            position: relative;
-            z-index: 1;
-        }
+        .content { position: relative; z-index: 1; }
 
         /* الهيدر */
         .header {
@@ -104,24 +104,22 @@
             border-radius: 10px;
             padding: 15px;
             background: white;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .store-name-section {
-            text-align: center;
+        .logo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        .store-title-ar {
-            font-size: 28px;
-            color: #2c3e50;
-            margin-bottom: 3px;
-        }
-
-        .store-title-en {
-            font-size: 24px;
-            color: #FF4757;
-            font-weight: bold;
-            letter-spacing: 3px;
-        }
+        .store-name-section { text-align: center; }
+        .store-title-ar { font-size: 28px; color: #2c3e50; margin-bottom: 3px; }
+        .store-title-en { font-size: 24px; color: #FF4757; font-weight: bold; letter-spacing: 3px; }
 
         .invoice-title-box {
             background: #FF4757;
@@ -149,17 +147,8 @@
             border-radius: 5px;
         }
 
-        .info-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
+        .info-label { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
+        .info-value { font-size: 16px; font-weight: bold; color: #2c3e50; }
 
         /* جدول المنتجات */
         .items-table {
@@ -188,19 +177,11 @@
             font-size: 14px;
         }
 
-        .items-table tbody tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-
-        .items-table tbody tr:hover {
-            background: #e8f4f8;
-        }
+        .items-table tbody tr:nth-child(even) { background: #f8f9fa; }
+        .items-table tbody tr:hover { background: #e8f4f8; }
 
         /* صفوف الحسابات */
-        .subtotal-row {
-            background: #f8f9fa !important;
-        }
-
+        .subtotal-row { background: #f8f9fa !important; }
         .subtotal-row td {
             font-weight: bold;
             font-size: 16px;
@@ -208,10 +189,7 @@
             border: 2px solid #e0e0e0;
         }
 
-        .discount-row {
-            background: #fff9e6 !important;
-        }
-
+        .discount-row { background: #fff9e6 !important; }
         .discount-row td {
             font-weight: bold;
             font-size: 16px;
@@ -219,10 +197,7 @@
             border: 2px solid #f39c12;
         }
 
-        .total-row {
-            background: #e8f5e9 !important;
-        }
-
+        .total-row { background: #e8f5e9 !important; }
         .total-row td {
             font-weight: bold;
             font-size: 20px;
@@ -300,10 +275,7 @@
             gap: 8px;
         }
 
-        .address-icon {
-            color: #FF4757;
-            font-size: 16px;
-        }
+        .address-icon { color: #FF4757; font-size: 16px; }
 
         /* أزرار الطباعة */
         .print-buttons {
@@ -327,37 +299,15 @@
             display: inline-block;
         }
 
-        .btn-print {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-print:hover {
-            background: #229954;
-        }
-
-        .btn-back {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-back:hover {
-            background: #7f8c8d;
-        }
+        .btn-print { background: #27ae60; color: white; }
+        .btn-print:hover { background: #229954; }
+        .btn-back { background: #95a5a6; color: white; }
+        .btn-back:hover { background: #7f8c8d; }
 
         @media print {
-            .print-buttons {
-                display: none;
-            }
-
-            .invoice-container {
-                width: 100%;
-                padding: 15mm;
-            }
-
-            body {
-                background: white;
-            }
+            .print-buttons { display: none; }
+            .invoice-container { width: 100%; padding: 15mm; }
+            body { background: white; }
         }
     </style>
 </head>
@@ -369,7 +319,12 @@
     </div>
 
     <div class="invoice-container">
-        <!-- التصميم الهندسي في الخلفية -->
+        <!-- الختم -->
+        <div class="stamp-container">
+            <img src="{{ asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
+        </div>
+
+        <!-- التصميم الهندسي -->
         <div class="background-design">
             <div class="triangle-top"></div>
             <div class="triangle-bottom"></div>
@@ -382,7 +337,7 @@
             <div class="header">
                 <div class="logo-section">
                     <div class="logo-box">
-                        <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo" />
+                        <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo">
                     </div>
                 </div>
 
@@ -392,13 +347,11 @@
                 </div>
 
                 <div class="invoice-title-box">
-                    <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">Online Sale
-                         - أونلاين سيل</div>
+                    <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">Online Sale - أونلاين سيل</div>
                     <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">
-                        العنوان: خانيونس - شمال مفترق النص <br>- بجانب مجوهرات الترتوري
+                        العنوان: خانيونس - شمال مفترق النص<br>- بجانب مجوهرات الترتوري
                     </div>
-                    <div class="store-title-ar" style="font-size: 14px; margin: 0; text-align: left;">رقم الهاتف:
-                        0597848937</div>
+                    <div class="store-title-ar" style="font-size: 14px; margin: 0; text-align: left;">رقم الهاتف: 0597848937</div>
                 </div>
             </div>
 
@@ -442,10 +395,7 @@
                         </tr>
                     @endforeach
 
-                    @php
-                        $emptyRows = 8 - $invoice->items->count();
-                    @endphp
-
+                    @php $emptyRows = 8 - $invoice->items->count(); @endphp
                     @for ($i = 0; $i < $emptyRows; $i++)
                         <tr>
                             <td>{{ $invoice->items->count() + $i + 1 }}</td>
@@ -456,13 +406,11 @@
                         </tr>
                     @endfor
 
-                    <!-- الإجمالي قبل الخصم -->
                     <tr class="subtotal-row">
                         <td colspan="4" style="text-align: left; padding-right: 20px;">الإجمالي قبل الخصم</td>
                         <td>{{ number_format($invoice->total_amount, 2) }} شيكل</td>
                     </tr>
 
-                    <!-- الخصم -->
                     @if($invoice->discount_amount > 0)
                     <tr class="discount-row">
                         <td colspan="4" style="text-align: left; padding-right: 20px;">الخصم</td>
@@ -470,7 +418,6 @@
                     </tr>
                     @endif
 
-                    <!-- الإجمالي النهائي -->
                     <tr class="total-row">
                         <td colspan="4" style="text-align: left; padding-right: 20px;">
                             <span style="font-size: 22px;">💰</span> إجمالي المطلوب
@@ -480,7 +427,6 @@
                 </tbody>
             </table>
 
-            <!-- الملاحظات -->
             @if ($invoice->notes)
                 <div class="notes-section">
                     <div class="notes-title">ملاحظات:</div>
@@ -510,5 +456,4 @@
         </div>
     </div>
 </body>
-
 </html>

@@ -14,6 +14,9 @@ class StoreController extends Controller
     {
         $query = Store::query();
 
+    if (!auth()->user()->isAdmin()) {
+        $query->where('branch_id', auth()->user()->branch_id);
+    }
         // البحث
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -59,6 +62,7 @@ class StoreController extends Controller
             'cash_amount' => 'required|numeric|min:0',
             'bank_amount' => 'required|numeric|min:0',
             'date_added' => 'required|date',
+            'branch_id' => auth()->user()->branch_id, // ✅ أضف هذا
         ], [
             'product_name.required' => 'اسم المنتج مطلوب',
             'product_type.required' => 'نوع المنتج مطلوب',

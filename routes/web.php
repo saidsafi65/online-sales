@@ -377,6 +377,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
     Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+    Route::get('/invoices/{id}/receipt', [InvoiceController::class, 'receipt'])->name('invoices.receipt');
 
     // صفحة المتطابقات الرئيسية
     Route::get('/compatibility', [LaptopCompatibilityController::class, 'index'])

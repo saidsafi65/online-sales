@@ -29,7 +29,7 @@
                             <div class="card bg-success text-white">
                                 <div class="card-body">
                                     <h6>إجمالي النقدي</h6>
-                                    <h3>{{ number_format($totalCash, 2) }} ₪</h3>
+                                    <h3>{{ number_format($totalCash, 2) }} شيكل</h3>
                                 </div>
                             </div>
                         </div>
@@ -37,7 +37,7 @@
                             <div class="card bg-info text-white">
                                 <div class="card-body">
                                     <h6>إجمالي البنكي</h6>
-                                    <h3>{{ number_format($totalBank, 2) }} ₪</h3>
+                                    <h3>{{ number_format($totalBank, 2) }} شيكل</h3>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                             <div class="card bg-primary text-white">
                                 <div class="card-body">
                                     <h6>الإجمالي الكلي</h6>
-                                    <h3>{{ number_format($totalCash + $totalBank, 2) }} ₪</h3>
+                                    <h3>{{ number_format($totalCash + $totalBank, 2) }} شيكل</h3>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +98,7 @@
                                     <td>{{ $item->product_type }}</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>{{ $item->supplier_name }}</td>
-                                    <td>{{ number_format($item->wholesale_price, 2) }} ₪</td>
+                                    <td>{{ number_format($item->wholesale_price, 2) }} شيكل</td>
                                     <td>
                                         @if($item->payment_method == 'نقدي')
                                         <span class="badge bg-success">نقدي</span>
@@ -108,8 +108,8 @@
                                         <span class="badge bg-warning">مختلط</span>
                                         @endif
                                     </td>
-                                    <td>{{ number_format($item->cash_amount, 2) }} ₪</td>
-                                    <td>{{ number_format($item->bank_amount, 2) }} ₪</td>
+                                    <td>{{ number_format($item->cash_amount, 2) }} شيكل</td>
+                                    <td>{{ number_format($item->bank_amount, 2) }} شيكل</td>
                                     <td>{{ $item->date_added }}</td>
                                     <td>
                                         <div class="btn-group" role="group">

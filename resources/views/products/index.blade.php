@@ -303,7 +303,7 @@
                         <p class="product-description">{{ $product->description }}</p>
                     @endif
                     <div class="product-footer">
-                        <div class="product-price">{{ number_format($product->price, 2) }} ₪</div>
+                        <div class="product-price">{{ number_format($product->price, 2) }} شيكل</div>
                         <a href="{{ route('products.show', $product->id) }}" class="btn-details">
                             <span>التفاصيل</span>
                             <i class="fas fa-arrow-left"></i>

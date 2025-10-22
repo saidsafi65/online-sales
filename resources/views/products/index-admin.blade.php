@@ -85,7 +85,7 @@
                                 </td>
                                 <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                     <span style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1rem;">
-                                        {{ number_format($product->price, 2) }} ₪
+                                        {{ number_format($product->price, 2) }} شيكل
                                     </span>
                                 </td>
                                 <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">

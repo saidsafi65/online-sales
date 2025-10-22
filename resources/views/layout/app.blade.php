@@ -624,7 +624,8 @@
         .pagination .page-link svg,
         .pagination li a svg,
         .pagination svg {
-            width: 18px !important;   /* smaller, consistent arrow size */
+            width: 18px !important;
+            /* smaller, consistent arrow size */
             height: 18px !important;
             display: inline-block !important;
             vertical-align: middle !important;
@@ -748,6 +749,18 @@
                                         <span>الإعدادات</span>
                                     </a>
                                 </li> --}}
+                                @if (auth()->user()->isAdmin())
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('users.index') }}">
+                                            <i class="fas fa-users"></i> إدارة المستخدمين
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('branches.index') }}">
+                                            <i class="fas fa-building"></i> إدارة الفروع
+                                        </a>
+                                    </li>
+                                @endif
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
