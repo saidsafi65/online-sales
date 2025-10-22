@@ -15,7 +15,6 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        Part::truncate();
        User::create([
         'name' => 'online_sale',
         'email' => 'onlinesales0597848937@gmail.com',
@@ -61,9 +60,9 @@ class UserSeeder extends Seeder
             'role' => 'employee',
             'status' => 'inactive', // مثال على مستخدم غير مفعل
         ]);
-        $this->call([
-        BranchSeeder::class, // لو عندك فروع
-        UserSeeder::class,
-    ]);
+    //     $this->call([
+    //     BranchSeeder::class, // لو عندك فروع
+    //     UserSeeder::class,
+    // ]);
     }
 }

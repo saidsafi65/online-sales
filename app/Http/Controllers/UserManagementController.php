@@ -8,17 +8,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class UserManagementController extends Controller {
-    public function __construct() {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->user()->isAdmin()) {
-                abort(403, 'غير مصرح لك بالوصول لهذه الصفحة');
-            }
-            return $next($request);
-        });
-    }
 
     // عرض جميع المستخدمين
     public function index(Request $request) {
+        // ✅ ضع الفحص هنا مباشرة
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'غير مصرح لك بالوصول لهذه الصفحة');
+        }
+        
         $query = User::query();
 
         // البحث
@@ -53,6 +50,10 @@ class UserManagementController extends Controller {
 
     // عرض صفحة إضافة مستخدم جديد
     public function create() {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $branches = Branch::all();
         $roles = ['admin' => 'مدير النظام', 'manager' => 'مدير الفرع', 'employee' => 'موظف'];
 
@@ -61,6 +62,10 @@ class UserManagementController extends Controller {
 
     // حفظ المستخدم الجديد
     public function store(Request $request) {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -90,6 +95,10 @@ class UserManagementController extends Controller {
 
     // عرض صفحة تعديل المستخدم
     public function edit(User $user) {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $branches = Branch::all();
         $roles = ['admin' => 'مدير النظام', 'manager' => 'مدير الفرع', 'employee' => 'موظف'];
         $statuses = ['active' => 'نشط', 'inactive' => 'غير نشط'];
@@ -99,6 +108,10 @@ class UserManagementController extends Controller {
 
     // تحديث المستخدم
     public function update(Request $request, User $user) {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => "required|email|unique:users,email,{$user->id}",
@@ -125,6 +138,10 @@ class UserManagementController extends Controller {
 
     // حذف المستخدم
     public function destroy(User $user) {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'لا يمكنك حذف حسابك الخاص');
         }

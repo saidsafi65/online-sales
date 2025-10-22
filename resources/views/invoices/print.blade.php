@@ -24,7 +24,7 @@
             position: absolute;
             bottom: 120mm;
             left: 30mm;
-            width: 120px;
+            width: 150px;
             height: 120px;
             opacity: 0.7;
             transform: rotate(-15deg);

@@ -1,20 +1,30 @@
 <!-- resources/views/invoices/receipt.blade.php (سند القبض) -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سند قبض - {{ $invoice->invoice_number }}</title>
     <style>
-        @page { size: A5 landscape; margin: 0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Arial', 'Segoe UI', sans-serif; 
-            background: white; 
-            padding: 0; 
-            margin: 0; 
+        @page {
+            size: A4;
+            margin: 0;
         }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Segoe UI', sans-serif;
+            background: white;
+            padding: 0;
+            margin: 0;
+        }
+
         .receipt-container {
             width: 210mm;
             height: 148mm;
@@ -29,16 +39,32 @@
         /* الختم */
         .stamp-container {
             position: absolute;
-            bottom: 25mm;
-            left: 20mm;
-            width: 100px;
-            height: 100px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-150%) translateY(250%) rotate(30deg);
+            width: 250px;
+            height: 150px;
             opacity: 0.6;
-            transform: rotate(-15deg);
             z-index: 10;
         }
 
         .stamp-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* التوقيع */
+        .signature-container {
+            position: static;
+            bottom: 25mm;
+            left: 20mm;
+            width: 150px;
+            height: 90px;
+            z-index: 10;
+        }
+
+        .signature-container img {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -59,7 +85,7 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .receipt-subtitle {
@@ -130,7 +156,7 @@
             font-size: 48px;
             font-weight: 900;
             color: #10b981;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .amount-words {
@@ -203,15 +229,38 @@
             display: inline-block;
         }
 
-        .btn-print { background: #27ae60; color: white; }
-        .btn-print:hover { background: #229954; }
-        .btn-back { background: #95a5a6; color: white; }
-        .btn-back:hover { background: #7f8c8d; }
+        .btn-print {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background: #229954;
+        }
+
+        .btn-back {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #7f8c8d;
+        }
 
         @media print {
-            .print-buttons { display: none; }
-            .receipt-container { width: 100%; height: 100%; padding: 10mm; }
-            body { background: white; }
+            .print-buttons {
+                display: none;
+            }
+
+            .receipt-container {
+                width: 100%;
+                height: 100%;
+                padding: 10mm;
+            }
+
+            body {
+                background: white;
+            }
         }
     </style>
 </head>
@@ -223,11 +272,6 @@
     </div>
 
     <div class="receipt-container">
-        <!-- الختم -->
-        <div class="stamp-container">
-            <img src="{{ asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
-        </div>
-
         <!-- الهيدر -->
         <div class="receipt-header">
             <div class="receipt-title">سند قبض</div>
@@ -248,31 +292,37 @@
                 <div class="info-label">التاريخ:</div>
                 <div class="info-value">{{ $invoice->invoice_date->locale('ar')->isoFormat('dddd، D MMMM YYYY') }}</div>
             </div>
-
+            <!-- الختم -->
+            <div class="stamp-container">
+                <img src="{{ asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
+            </div>
             <!-- مربع المبلغ -->
             <div class="amount-box">
                 <div class="amount-label">💰 المبلغ المستلم</div>
-                <div class="amount-value">{{ number_format($invoice->afterDiscount_amount, 2) }} ₪</div>
+                <div class="amount-value">{{ number_format($invoice->afterDiscount_amount, 2) }} شيكل</div>
                 <div class="amount-words">
-                    فقط {{ $this->numberToArabicWords($invoice->afterDiscount_amount) }} شيكل لا غير
+                    <!-- Fallback: show numeric amount; client-side JS will replace this with words -->
+                    فقط {{ number_format($invoice->afterDiscount_amount, 2) }} شيكل لا غير
                 </div>
             </div>
 
-            @if($invoice->discount_amount > 0)
-            <div class="info-row" style="background: #fff9e6; border-right-color: #f39c12;">
-                <div class="info-label">🏷️ الخصم المطبق:</div>
-                <div class="info-value" style="color: #f39c12; font-weight: 700;">{{ number_format($invoice->discount_amount, 2) }} ₪</div>
-            </div>
+            @if ($invoice->discount_amount > 0)
+                <div class="info-row" style="background: #fff9e6; border-right-color: #f39c12;">
+                    <div class="info-label">🏷️ الخصم المطبق:</div>
+                    <div class="info-value" style="color: #f39c12; font-weight: 700;">
+                        {{ number_format($invoice->discount_amount, 2) }} شيكل</div>
+                </div>
             @endif
 
             <!-- السبب -->
             <div class="info-row">
                 <div class="info-label">وذلك عن:</div>
                 <div class="info-value">
-                    @if($invoice->notes)
+                    @if ($invoice->notes)
                         {{ $invoice->notes }}
                     @else
-                        دفعة مقابل {{ $invoice->items->count() }} منتج/منتجات حسب الفاتورة رقم {{ $invoice->invoice_number }}
+                        دفعة مقابل {{ $invoice->items->count() }} منتج/منتجات حسب الفاتورة رقم
+                        {{ $invoice->invoice_number }}
                     @endif
                 </div>
             </div>
@@ -281,7 +331,12 @@
         <!-- التوقيعات -->
         <div class="signatures">
             <div class="signature-box">
-                <div class="signature-line"></div>
+                <div class="signature-line">
+                    <!-- الختم -->
+                    <div class="signature-container">
+                        <img src="{{ asset('assets/logo/signature.png') }}" alt="توقيع المعرض">
+                    </div>
+                </div>
                 <div class="signature-label">توقيع المستلم</div>
                 <div style="font-size: 12px; color: #999; margin-top: 5px;">Online Sale</div>
             </div>
@@ -297,7 +352,8 @@
             <div class="footer-info">
                 <strong>Online Sale - أونلاين سيل</strong><br>
                 📍 خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري<br>
-                📞 059-784-8937 | 💬 +970592552702
+                📞 059-784-8937 | <img style="width: 15px" src="{{ asset('assets/logo/whatsapp.png') }}">
+                00970592552702
             </div>
         </div>
     </div>
@@ -307,11 +363,15 @@
         function numberToArabicWords(number) {
             const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
             const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
-            const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
-            const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+            const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر',
+                'ثمانية عشر', 'تسعة عشر'
+            ];
+            const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة',
+                'تسعمائة'
+            ];
 
             number = Math.floor(number);
-            
+
             if (number === 0) return 'صفر';
             if (number >= 10000) return number.toString(); // للأرقام الكبيرة
 
@@ -339,7 +399,7 @@
             } else {
                 const tensDigit = Math.floor(number / 10);
                 const onesDigit = number % 10;
-                
+
                 if (tensDigit > 0) {
                     result += tens[tensDigit];
                     if (onesDigit > 0) result += ' و';
@@ -363,4 +423,5 @@
         });
     </script>
 </body>
+
 </html>

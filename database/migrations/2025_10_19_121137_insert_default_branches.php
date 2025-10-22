@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,8 +13,8 @@ return new class extends Migration
     public function up(): void
     {
        DB::table('branches')->insert([
-            ['name' => 'خانيونس', 'location' => 'خانيونس', 'phone' => '0599111111', 'created_at' => now()],
-            ['name' => 'الدير', 'location' => 'الدير', 'phone' => '0599222222', 'created_at' => now()],
+            ['name' => 'خانيونس', 'location' => 'خانيونس', 'phone' => '0599111111', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'الدير', 'location' => 'الدير', 'phone' => '0599222222', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
     }
@@ -24,5 +25,6 @@ return new class extends Migration
     public function down(): void
     {
         //
+                DB::table('branches')->whereIn('name', ['خانيونس', 'الدير'])->delete();
     }
 };

@@ -751,13 +751,15 @@
                                 </li> --}}
                                 @if (auth()->user()->isAdmin())
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('users.index') }}">
-                                            <i class="fas fa-users"></i> إدارة المستخدمين
+                                        <a class="nav-link" href="{{ route('users.index') }}" style="color: rgb(0 0 0 / 90%) !important;">
+                                            <i class="fas fa-users" style="color: blue;"></i>
+                                            إدارة المستخدمين
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('branches.index') }}">
-                                            <i class="fas fa-building"></i> إدارة الفروع
+                                        <a class="nav-link" href="{{ route('branches.index') }}" style="color: rgb(0 0 0 / 90%) !important;">
+                                            <i class="fas fa-building" style="color: blue;"></i>
+                                            إدارة الفروع
                                         </a>
                                     </li>
                                 @endif
