@@ -106,14 +106,20 @@ class DailyHandoverController extends Controller
             ->sum(DB::raw('cash + bank'));
 
         // إجمالي المبيعات من جدول sales
-        $totalSalessales = DB::table('sales')
+        $totalSalessalesQuery = DB::table('sales')
             ->whereBetween(DB::raw('DATE(sale_date)'), [$startDate, $endDate])
-            ->whereNull('deleted_at')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
+            ->whereNull('deleted_at');
+        if (!auth()->user()->isAdmin()) {
+            $totalSalessalesQuery->where('branch_id', auth()->user()->branch_id);
+        }
+        $totalSalessales = $totalSalessalesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
 
-        $totalSalesrepairs = DB::table('repairs')
-            ->whereBetween(DB::raw('DATE(delivery_date)'), [$startDate, $endDate])
-            ->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
+        $totalSalesrepairsQuery = DB::table('repairs')
+            ->whereBetween(DB::raw('DATE(delivery_date)'), [$startDate, $endDate]);
+        if (!auth()->user()->isAdmin()) {
+            $totalSalesrepairsQuery->where('branch_id', auth()->user()->branch_id);
+        }
+        $totalSalesrepairs = $totalSalesrepairsQuery->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
         $totalSales = $totalSalessales + $totalSalesrepairs;
         // الفرق
@@ -127,15 +133,21 @@ class DailyHandoverController extends Controller
             ->get()
             ->map(function ($handover) {
                 // جمع الإيرادات من جدول المبيعات (نقد + تطبيق)
-                $salesFromSales = DB::table('sales')
+                $salesFromSalesQuery = DB::table('sales')
                     ->whereDate('sale_date', $handover->handover_date)
-                    ->whereNull('deleted_at')
-                    ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
+                    ->whereNull('deleted_at');
+                if (!auth()->user()->isAdmin()) {
+                    $salesFromSalesQuery->where('branch_id', auth()->user()->branch_id);
+                }
+                $salesFromSales = $salesFromSalesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
 
                 // جمع تكاليف الصيانات التي تم تسليمها في نفس التاريخ
-                $salesFromRepairs = DB::table('repairs')
-                    ->whereDate('delivery_date', $handover->handover_date)
-                    ->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
+                $salesFromRepairsQuery = DB::table('repairs')
+                    ->whereDate('delivery_date', $handover->handover_date);
+                if (!auth()->user()->isAdmin()) {
+                    $salesFromRepairsQuery->where('branch_id', auth()->user()->branch_id);
+                }
+                $salesFromRepairs = $salesFromRepairsQuery->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
                 $sales = $salesFromSales + $salesFromRepairs;
 

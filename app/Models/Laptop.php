@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasBranchScope;
 
 // Model 1: Laptop.php
 class Laptop extends Model
 {
+    use HasBranchScope;
     protected $fillable = ['brand', 'model', 'description', 'image'];
 
     // القطع المرتبطة بهذا اللابتوب

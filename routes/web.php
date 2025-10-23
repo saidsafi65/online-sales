@@ -216,48 +216,79 @@ Route::middleware('auth')->group(function () {
         }
         $totalCustomers = $repairCount->count();       
 
-        // عدد الصيانات المسلمة
-        $deliveredRepairs = Repair::whereNotNull('delivery_date')->count();
-        // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة)
-        $monthlycost_cashRepair = Repair::whereMonth('delivery_date', now()->month)
+        // عدد الصيانات المسلمة (مع تطبيق فلتر الفرع إذا لم يكن مدير)
+        $deliveredRepairsQuery = Repair::whereNotNull('delivery_date');
+        if ($branchFilter) {
+            $deliveredRepairsQuery->where('branch_id', $branchFilter);
+        }
+        $deliveredRepairs = $deliveredRepairsQuery->count();
+
+        // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة) مع فلتر الفرع
+        $monthlycost_cashRepairQuery = Repair::whereMonth('delivery_date', now()->month)
             ->whereYear('delivery_date', now()->year)
-            ->where('is_returned', false)
-            ->sum('cost_cash');
-        $monthlycost_bankRepair = Repair::whereMonth('delivery_date', now()->month)
+            ->where('is_returned', false);
+        if ($branchFilter) {
+            $monthlycost_cashRepairQuery->where('branch_id', $branchFilter);
+        }
+        $monthlycost_cashRepair = $monthlycost_cashRepairQuery->sum('cost_cash');
+
+        $monthlycost_bankRepairQuery = Repair::whereMonth('delivery_date', now()->month)
             ->whereYear('delivery_date', now()->year)
-            ->where('is_returned', false)
-            ->sum('cost_bank');
+            ->where('is_returned', false);
+        if ($branchFilter) {
+            $monthlycost_bankRepairQuery->where('branch_id', $branchFilter);
+        }
+        $monthlycost_bankRepair = $monthlycost_bankRepairQuery->sum('cost_bank');
 
         $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
 
-        // عدد الصيانات المعلقة (قبل الخصم)
-        $pendingRepairsRaw = Repair::where('status', 'pending')->count();
+        // عدد الصيانات المعلقة (قبل الخصم) مع فلتر الفرع
+        $pendingRepairsRawQuery = Repair::where('status', 'pending');
+        if ($branchFilter) {
+            $pendingRepairsRawQuery->where('branch_id', $branchFilter);
+        }
+        $pendingRepairsRaw = $pendingRepairsRawQuery->count();
 
-        // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة)
-        $monthlySales = Sale::whereMonth('created_at', now()->month)
+        // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة) مع فلتر الفرع
+        $monthlySalesQuery = Sale::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->where('is_returned', false)
-            ->sum(DB::raw('cash_amount + app_amount'));
+            ->where('is_returned', false);
+        if ($branchFilter) {
+            $monthlySalesQuery->where('branch_id', $branchFilter);
+        }
+        $monthlySales = $monthlySalesQuery->sum(DB::raw('cash_amount + app_amount'));
 
-        // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة)
-        $cashTotal = Purchase::whereMonth('purchase_date', now()->month)
+        // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة) مع فلتر الفرع
+        $cashTotalQuery = Purchase::whereMonth('purchase_date', now()->month)
             ->whereYear('purchase_date', now()->year)
-            ->where('is_returned', false)
-            ->sum('amount_cash');
+            ->where('is_returned', false);
+        if ($branchFilter) {
+            $cashTotalQuery->where('branch_id', $branchFilter);
+        }
+        $cashTotal = $cashTotalQuery->sum('amount_cash');
 
-        $bankTotal = Purchase::whereMonth('purchase_date', now()->month)
+        $bankTotalQuery = Purchase::whereMonth('purchase_date', now()->month)
             ->whereYear('purchase_date', now()->year)
-            ->where('is_returned', false)
-            ->sum('amount_bank');
+            ->where('is_returned', false);
+        if ($branchFilter) {
+            $bankTotalQuery->where('branch_id', $branchFilter);
+        }
+        $bankTotal = $bankTotalQuery->sum('amount_bank');
 
-        // إجمالي الالتزامات الشهرية
-        $obligationsCashTotal = Obligation::whereMonth('date', now()->month)
-            ->whereYear('date', now()->year)
-            ->sum('cash_amount');
+        // إجمالي الالتزامات الشهرية مع فلتر الفرع
+        $obligationsCashTotalQuery = Obligation::whereMonth('date', now()->month)
+            ->whereYear('date', now()->year);
+        if ($branchFilter) {
+            $obligationsCashTotalQuery->where('branch_id', $branchFilter);
+        }
+        $obligationsCashTotal = $obligationsCashTotalQuery->sum('cash_amount');
 
-        $obligationsBankTotal = Obligation::whereMonth('date', now()->month)
-            ->whereYear('date', now()->year)
-            ->sum('bank_amount');
+        $obligationsBankTotalQuery = Obligation::whereMonth('date', now()->month)
+            ->whereYear('date', now()->year);
+        if ($branchFilter) {
+            $obligationsBankTotalQuery->where('branch_id', $branchFilter);
+        }
+        $obligationsBankTotal = $obligationsBankTotalQuery->sum('bank_amount');
 
         $monthlyObligations = $obligationsCashTotal + $obligationsBankTotal;
         // جمع المشتريات مع الالتزامات
@@ -265,30 +296,36 @@ Route::middleware('auth')->group(function () {
 
         $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
 
-
         // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
         $netRevenue = ($monthlySales + $monthlycostRepair) - $totalMonthlyPurchases;
         $monthlyIncome = $monthlySales + $monthlycostRepair;
 
-        // حساب الديون المتراكمة
-        $totalReceivables = Debt::where('type', 'مدين')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        // حساب الديون المتراكمة مع فلتر الفرع
+        $totalReceivablesQuery = Debt::where('type', 'مدين')
+            ->whereNull('payment_date');
+        if ($branchFilter) {
+            $totalReceivablesQuery->where('branch_id', $branchFilter);
+        }
+        $totalReceivables = $totalReceivablesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-        $totalPayables = Debt::where('type', 'دائن')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        $totalPayablesQuery = Debt::where('type', 'دائن')
+            ->whereNull('payment_date');
+        if ($branchFilter) {
+            $totalPayablesQuery->where('branch_id', $branchFilter);
+        }
+        $totalPayables = $totalPayablesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
         $totalDebts = $totalReceivables - $totalPayables;
 
         return view('home', [
-            'todaySales' => Sale::whereDate('created_at', today())->count(),
-            'pendingRepairs' => Repair::where('status', 'pending')->count(),
-            // خصم عدد التسليمات من الصيانات المعلقة
+            // المبيعات اليوم مع فلتر الفرع
+            'todaySales' => $todaySalesCount,
+            // صيانات معلقة بعد خصم المسلَّمة (مصدر مرشح بحسب الفرع)
             'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
-            // عدد العملاء = عدد الأسماء الفريدة + عدد الصيانات المسلمة
-            'totalCustomers' => Repair::count(),
-            'totalProducts' => CatalogItem::count(),
+            // عدد العملاء والمنتجات مع فلتر الفرع
+            'totalCustomers' => $totalCustomers,
+            'totalProducts' => $totalProducts,
+            // الأرقام المالية (مصادر محلية مفلترة للفرع أو جميع الفروع للمسؤول)
             'monthlyRevenue' => $netRevenue,
             'monthlyIncome' => $monthlyIncome,
             'monthlyPurchases' => $monthlyPurchases,

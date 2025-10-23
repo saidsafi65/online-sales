@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasBranchScope;
 
 class ReturnedGood extends Model
 {
-    use HasFactory;
+    use HasFactory, HasBranchScope;
 
     protected $fillable = [
         'supplier_name',

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasBranchScope;
 
 class Part extends Model
 {
+    use HasBranchScope;
     protected $fillable = ['part_type_id', 'part_number', 'specifications', 'price'];
 
     protected $casts = [

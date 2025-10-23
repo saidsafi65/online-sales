@@ -261,26 +261,32 @@ class PurchasesController extends Controller
             ]);
 
             // 2. إضافة أو تحديث الكتالوج
-            $catalogItem = DB::table('catalog_items')
+            $catalogQuery = DB::table('catalog_items')
                 ->where('product', $request->item)
-                ->where('type', $request->type)
-                ->first();
+                ->where('type', $request->type);
+            if (!auth()->user()->isAdmin()) {
+                $catalogQuery->where('branch_id', auth()->user()->branch_id);
+            }
+            $catalogItem = $catalogQuery->first();
 
             if ($catalogItem) {
                 // المنتج موجود: تحديث الكمية والأسعار
                 $newQuantity = (int) $catalogItem->quantity + (int) $request->quantity;
-                DB::table('catalog_items')
+                $updateQuery = DB::table('catalog_items')
                     ->where('product', $request->item)
-                    ->where('type', $request->type)
-                    ->update([
-                        'quantity' => (string) $newQuantity,
-                        'wholesale_price' => (string) $request->wholesale_price,
-                        'sale_price' => (string) $request->sale_price,
-                        'updated_at' => now(),
-                    ]);
+                    ->where('type', $request->type);
+                if (!auth()->user()->isAdmin()) {
+                    $updateQuery->where('branch_id', auth()->user()->branch_id);
+                }
+                $updateQuery->update([
+                    'quantity' => (string) $newQuantity,
+                    'wholesale_price' => (string) $request->wholesale_price,
+                    'sale_price' => (string) $request->sale_price,
+                    'updated_at' => now(),
+                ]);
             } else {
                 // المنتج غير موجود: إنشاء سجل جديد
-                DB::table('catalog_items')->insert([
+                $insertData = [
                     'product' => $request->item,
                     'type' => $request->type,
                     'quantity' => (string) $request->quantity,
@@ -288,7 +294,11 @@ class PurchasesController extends Controller
                     'sale_price' => (string) $request->sale_price,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
+                if (!auth()->user()->isAdmin()) {
+                    $insertData['branch_id'] = auth()->user()->branch_id;
+                }
+                DB::table('catalog_items')->insert($insertData);
             }
 
             DB::commit();
