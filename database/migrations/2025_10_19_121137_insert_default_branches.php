@@ -12,10 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-       DB::table('branches')->insert([
-            ['name' => 'خانيونس', 'location' => 'خانيونس', 'phone' => '0599111111', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'الدير', 'location' => 'الدير', 'phone' => '0599222222', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+       // تحقق من وجود الجدول قبل الإدراج
+        if (!Schema::hasTable('branches')) {
+            return;
+        }
+
+        $branches = [
+            ['name' => 'خانيونس'],
+            ['name' => 'الدير'],
+        ];
+
+        // استخدم insertOrIgnore لتجنب أخطاء التكرار
+        foreach ($branches as $branch) {
+            DB::table('branches')->insertOrIgnore($branch);
+        }
 
     }
 
@@ -25,6 +35,11 @@ return new class extends Migration
     public function down(): void
     {
         //
-                DB::table('branches')->whereIn('name', ['خانيونس', 'الدير'])->delete();
+               if (!Schema::hasTable('branches')) {
+            return;
+        }
+
+        DB::table('branches')->whereIn('name', ['خانيونس', 'الدير'])->delete();
+    
     }
 };

@@ -720,24 +720,47 @@
                             </a>
                         </li>
                     </ul>
-
+                    @php
+                        $user = auth()->user();
+                        $isAdmin = auth()->check() && method_exists($user, 'isAdmin') ? (bool) $user->isAdmin() : false;
+                    @endphp
                     <!-- User Menu -->
-                    <ul class="navbar-nav">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle p-0" href="#" role="button"
-                                data-bs-toggle="dropdown">
-                                <div class="user-section">
-                                    <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true"
-                                        alt="User" class="user-avatar">
-                                    <div class="user-info d-none d-md-flex">
-                                        <span class="user-name">المستخدم</span>
-                                        <span class="user-role">مدير النظام</span>
+                    @if (auth()->check())
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle p-0" href="#" role="button"
+                                    data-bs-toggle="dropdown">
+                                    <div class="user-section">
+                                        <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true"
+                                            alt="User" class="user-avatar">
+                                        <div class="user-info d-none d-md-flex">
+                                            <span class="user-name">{{ $user->name ?? 'مستخدم' }}</span>
+                                            <span class="user-role">
+                                                @if (!empty($user->role ?? null))
+                                                    @if ($user->role === 'employee')
+                                                        موظف
+                                                    @elseif ($user->role === 'manager')
+                                                        مدير فرع
+                                                    @elseif ($user->role === 'admin')
+                                                        مسؤول النظام
+                                                    @else
+                                                        غير محدد
+                                                    @endif
+                                                @endif
+                                                @if (!empty($user->branch->name ?? null))
+                                                    في فرع {{ $user->branch->name }}
+                                                @endif
+                                                @if ($isAdmin)
+                                                    حساب مسؤول النظام
+                                                @endif
+
+                                            </span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-white"></i>
                                     </div>
-                                    <i class="fas fa-chevron-down text-white"></i>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                {{-- <li>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    {{-- <li>
                                     <a class="dropdown-item" href="#">
                                         <i class="fas fa-user"></i>
                                         <span>الملف الشخصي</span>
@@ -749,35 +772,40 @@
                                         <span>الإعدادات</span>
                                     </a>
                                 </li> --}}
-                                @if (auth()->user()->isAdmin())
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('users.index') }}" style="color: rgb(0 0 0 / 90%) !important;">
-                                            <i class="fas fa-users" style="color: blue;"></i>
-                                            إدارة المستخدمين
-                                        </a>
+                                    @if (auth()->user()->isAdmin())
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('users.index') }}"
+                                                style="color: rgb(0 0 0 / 90%) !important;">
+                                                <i class="fas fa-users" style="color: blue;"></i>
+                                                إدارة المستخدمين
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('branches.index') }}"
+                                                style="color: rgb(0 0 0 / 90%) !important;">
+                                                <i class="fas fa-building" style="color: blue;"></i>
+                                                إدارة الفروع
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li>
+                                        <hr class="dropdown-divider">
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ route('branches.index') }}" style="color: rgb(0 0 0 / 90%) !important;">
-                                            <i class="fas fa-building" style="color: blue;"></i>
-                                            إدارة الفروع
-                                        </a>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt"></i>
+                                                <span>تسجيل الخروج</span>
+                                            </button>
+                                        </form>
                                     </li>
-                                @endif
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt"></i>
-                                            <span>تسجيل الخروج</span>
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                                </ul>
+                            </li>
+                        </ul>
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary">تسجيل الدخول</a>
+                    @endif
                 </div>
             </div>
         </nav>

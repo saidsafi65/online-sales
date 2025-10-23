@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->decimal('total_price', 10, 2)->nullable(); // Add the total_price column
-        });
+        // تحقق من وجود الجدول أولاً
+        if (!Schema::hasTable('sales')) {
+            return;
+        }
+
+        // أضف العمود فقط إن لم يكن موجوداً
+        if (!Schema::hasColumn('sales', 'total_price')) {
+            Schema::table('sales', function (Blueprint $table) {
+                // Do not force column position; some environments may not have 'quantity' column yet
+                $table->decimal('total_price', 10, 2)->nullable();
+            });
+        }
     }
 
     /**
@@ -21,8 +30,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropColumn('total_price');
-        });
+         if (!Schema::hasTable('sales')) {
+            return;
+        }
+
+        // احذف العمود فقط إن كان موجوداً
+        if (Schema::hasColumn('sales', 'total_price')) {
+            Schema::table('sales', function (Blueprint $table) {
+                $table->dropColumn('total_price');
+            });
+        }
     }
 };
