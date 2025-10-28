@@ -1,0 +1,141 @@
+
+/* تنسيقات عامة للصفحات */
+.backup-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* تنسيق البطاقات */
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* تنسيق الجدول */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* أزرار مخصصة */
+.btn-sm {
+    margin: 0 2px;
+}
+
+.btn {
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* رسائل التنبيه */
+.alert {
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+}
+
+/* شريط التقدم */
+.progress {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    font-weight: bold;
+}
+
+/* أيقونات الملفات */
+.fa-file-archive {
+    font-size: 1.2em;
+}
+
+/* تنسيق الرموز */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.8em;
+}
+
+/* تنسيق الحاوية الفارغة */
+.text-center.py-5 i.fa-3x {
+    opacity: 0.3;
+}
+
+/* تنسيق التذييل */
+.card-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-header h4 {
+        font-size: 1.2rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .table {
+        font-size: 0.85rem;
+    }
+}
+
+/* تنسيق منطقة رفع الملفات */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* رسوم متحركة للتحميل */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-border {
+    animation: spin 1s linear infinite;
+}
+
+/* تنسيق القوائم */
+ul {
+    padding-right: 20px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
+/* تنسيق الأكواد */
+code {
+    background-color: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 90%;
+    color: #e83e8c;
+}
