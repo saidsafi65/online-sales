@@ -48,7 +48,9 @@
                         <button class="btn btn-secondary w-100">تصفية</button>
                     </div>
                 </form>
-
+@php
+    use Illuminate\Support\Str;
+@endphp
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
                         <thead>

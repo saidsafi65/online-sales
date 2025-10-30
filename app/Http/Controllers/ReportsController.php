@@ -42,7 +42,7 @@ class ReportsController extends Controller
         if (in_array($type, ['all', 'sales'], true)) {
             $salesQuery = Sale::query()
                 ->where('is_returned', false)
-                ->whereBetween('created_at', [$dateStart, $dateEnd]);
+                ->whereBetween('sale_date', [$dateStart, $dateEnd]);
 
             if (!$isAdmin && $userBranchId) {
                 $salesQuery->where('branch_id', $userBranchId);

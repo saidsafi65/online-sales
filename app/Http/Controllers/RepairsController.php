@@ -26,6 +26,19 @@ class RepairsController extends Controller
         if ($request->filled('is_returned')) {
             $query->where('is_returned', (bool) $request->is_returned);
         }
+        if ($request->filled('delivery_date_from') || $request->filled('delivery_date_to')) {
+            $query->whereNotNull('delivery_date');
+            if ($request->filled('delivery_date_from') && $request->filled('delivery_date_to')) {
+                $query->whereBetween('delivery_date', [
+                    $request->delivery_date_from,
+                    $request->delivery_date_to
+                ]);
+            } elseif ($request->filled('delivery_date_from')) {
+                $query->where('delivery_date', '>=', $request->delivery_date_from);
+            } elseif ($request->filled('delivery_date_to')) {
+                $query->where('delivery_date', '<=', $request->delivery_date_to);
+            }
+        }
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {

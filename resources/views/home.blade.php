@@ -276,8 +276,9 @@
                     <div class="col-6 col-md-3">
                         <div
                             style="padding: 1.5rem; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-radius: 12px; border: 1px solid #fde047;">
-                            <div style="font-size: 2rem; font-weight: 800; color: #ca8a04; margin-bottom: 0.5rem;">
-                                {{ number_format($totalDebts ?? 0) }} شيكل
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #ca8a04; margin-bottom: 0.5rem;">
+                                <div>علينا: {{ number_format($totalReceivables ?? 0) }} شيكل</div>
+                                <div>لنا: {{ number_format($totalPayables ?? 0) }} شيكل</div>
                             </div>
                             <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">الديون المتراكمة</div>
                         </div>

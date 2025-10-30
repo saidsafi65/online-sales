@@ -66,7 +66,7 @@ class PurchasesController extends Controller
             'is_returned' => 'nullable|boolean',
             'issue' => 'nullable|string',
             'return_date' => 'nullable|date',
-            'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
+            'branch_id' => 'nullable|integer',
             'notes' => 'nullable|string|max:1000',
         ];
 
@@ -105,6 +105,7 @@ class PurchasesController extends Controller
                 'issue' => $request->issue,
                 'return_date' => $request->return_date,
                 'notes' => $request->notes,
+                'branch_id' => auth()->user()->branch_id, // assign branch on create
             ]);
 
             DB::commit();

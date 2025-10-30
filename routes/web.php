@@ -320,7 +320,7 @@ Route::middleware('auth')->group(function () {
         return view('home', [
             // المبيعات اليوم مع فلتر الفرع
             'todaySales' => $todaySalesCount,
-            // صيانات معلقة بعد خصم المسلَّمة (مصدر مرشح بحسب الفرع)
+            // صيانات معلقة بعد خصم المسلَّمة (مصدر مرشح بحسب الفرع)
             'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
             // عدد العملاء والمنتجات مع فلتر الفرع
             'totalCustomers' => $totalCustomers,
@@ -331,6 +331,9 @@ Route::middleware('auth')->group(function () {
             'monthlyPurchases' => $monthlyPurchases,
             'totalDebts' => $totalDebts,
             'totalMonthlyPurchases' => $totalMonthlyPurchases,
+            // إضافة متغيرات الديون المستحقة
+            'totalReceivables' => $totalReceivables,
+            'totalPayables' => $totalPayables,
         ]);
     })->name('dashboard');
 

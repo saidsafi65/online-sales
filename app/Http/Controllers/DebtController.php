@@ -64,8 +64,8 @@ class DebtController extends Controller
             'reason' => 'required|string',
             'debt_date' => 'required|date',
             'payment_date' => 'nullable|date|after_or_equal:debt_date',
-            'branch_id' => auth()->user()->branch_id, // ✅ أضف الفرع
         ]);
+    $validated['branch_id'] = auth()->user()->branch_id;
 
         Debt::create($validated);
 

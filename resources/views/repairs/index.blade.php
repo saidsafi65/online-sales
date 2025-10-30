@@ -19,19 +19,17 @@
         <div class="card">
             <div class="card-body">
                 <form method="GET" class="row g-3 mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">طريقة الدفع</label>
                         <select name="payment_method" class="form-select">
                             <option value="">الكل</option>
                             <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>نقدي</option>
-                            <option value="card" {{ request('payment_method') == 'card' ? 'selected' : '' }}>بطاقة
-                            </option>
+                            <option value="card" {{ request('payment_method') == 'card' ? 'selected' : '' }}>بطاقة</option>
                             <option value="app" {{ request('payment_method') == 'app' ? 'selected' : '' }}>تطبيق</option>
-                            <option value="mixed" {{ request('payment_method') == 'mixed' ? 'selected' : '' }}>مختلط
-                            </option>
+                            <option value="mixed" {{ request('payment_method') == 'mixed' ? 'selected' : '' }}>مختلط</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">الحالة</label>
                         <select name="is_returned" class="form-select">
                             <option value="">الكل</option>
@@ -39,10 +37,17 @@
                             <option value="1" {{ request('is_returned') === '1' ? 'selected' : '' }}>مرجع</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
+                        <label class="form-label">من تاريخ التسليم</label>
+                        <input type="date" name="delivery_date_from" value="{{ request('delivery_date_from') }}" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">إلى تاريخ التسليم</label>
+                        <input type="date" name="delivery_date_to" value="{{ request('delivery_date_to') }}" class="form-control">
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label">بحث</label>
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control"
-                            placeholder="ابحث بالاسم أو الجهاز أو الموديل أو المشكلة">
+                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="ابحث بالاسم أو الجهاز أو الموديل أو المشكلة">
                     </div>
                     <div class="col-md-2 align-self-end">
                         <button class="btn btn-secondary w-100">تصفية</button>
