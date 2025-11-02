@@ -691,6 +691,7 @@
                                 <span>الرئيسية</span>
                             </a>
                         </li>
+                        @if(auth()->check() && auth()->user()->canViewSection('invoices'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
                                 href="{{ route('invoices.index') }}">
@@ -698,6 +699,8 @@
                                 <span>الفواتير</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->check() && auth()->user()->canViewSection('catalog'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}"
                                 href="{{ route('catalog.index') }}">
@@ -705,6 +708,8 @@
                                 <span>الكتالوج</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->check() && auth()->user()->canViewSection('deposits'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}"
                                 href="{{ route('deposits.index') }}">
@@ -712,6 +717,8 @@
                                 <span>الأمانات</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->check() && auth()->user()->canViewSection('reports'))
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
                                 href="{{ route('reports.index') }}">
@@ -719,6 +726,7 @@
                                 <span>التقارير</span>
                             </a>
                         </li>
+                        @endif
                     </ul>
                     @php
                         $user = auth()->user();

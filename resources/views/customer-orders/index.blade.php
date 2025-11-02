@@ -2,6 +2,10 @@
 
 @section('title', 'طلبات الزبائن')
 
+            @php
+                use Illuminate\Support\Str;
+            @endphp
+            
 @push('styles')
 <style>
     .orders-header {

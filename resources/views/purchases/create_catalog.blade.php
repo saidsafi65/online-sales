@@ -19,7 +19,6 @@
                     </ul>
                 </div>
             @endif
-
             <form action="{{ route('purchases.store-catalog') }}" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                 @csrf
                 

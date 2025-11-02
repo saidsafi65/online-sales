@@ -42,7 +42,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">تاريخ الاستلام</label>
-                        <input type="datetime-local" name="received_date" id="received_date" class="form-control" value="{{ old('received_date', now()->format('Y-m-d\TH:i')) }}" required>
+                        <input type="datetime-local" name="received_date" id="received_date" class="form-control" value="{{ old('received_date', now()->setTimezone('Asia/Gaza')->format('Y-m-d\TH:i')) }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">طريقة الدفع</label>
