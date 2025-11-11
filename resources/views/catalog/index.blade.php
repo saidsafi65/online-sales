@@ -280,9 +280,22 @@
                                 <i class="fas fa-coins"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
-                                {{ number_format($totalInventoryValue, 2) }} شيكل
+                                {{ number_format($totalInventoryValue ?? 0, 2) }} شيكل
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية (سعر البيع)</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="service-card card-secondary" style="text-align: center; padding: 1.5rem; height: 100%;">
+                            <div
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #0ea5e9; font-size: 1.8rem;">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
+                                {{ number_format($totalWholesaleValue ?? 0, 2) }} شيكل
+                            </h3>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية (سعر الجملة)</p>
                         </div>
                     </div>
                 </div>
