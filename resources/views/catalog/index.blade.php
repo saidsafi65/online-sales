@@ -228,62 +228,61 @@
 
                 <!-- Pagination -->
                 @if ($items->hasPages())
-                    <div style="margin-top: 2rem; display: flex; justify-content: center;">
+                    <div style="padding: 1.5rem 1rem; display: flex; justify-content: center; border-top: 1px solid #e2e8f0;">
                         {{ $items->links() }}
                     </div>
                 @endif
-                
             </div>
 
             <!-- Statistics Cards -->
             @if ($items->count() > 0)
-                <div class="row g-4 mt-4">
-                    <div class="col-md-3">
-                        <div class="service-card card-primary" style="text-align: center; padding: 1.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; padding: 0 1rem;">
+                    <div>
+                        <div class="service-card card-primary" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #1e40af; font-size: 1.8rem;">
                                 <i class="fas fa-boxes"></i>
                             </div>
-                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 2rem; font-weight: 700;">
+                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
                                 {{ $items->total() }}
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">إجمالي المنتجات</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">إجمالي المنتجات</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="service-card card-success" style="text-align: center; padding: 1.5rem;">
+                    <div>
+                        <div class="service-card card-success" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #10b981; font-size: 1.8rem;">
                                 <i class="fas fa-warehouse"></i>
                             </div>
-                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 2rem; font-weight: 700;">
-                                {{ $items->sum('quantity') }}
+                            <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
+                                {{ $totalQuantity ?? $items->sum('quantity') }}
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">إجمالي الكمية</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">إجمالي الكمية</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="service-card card-warning" style="text-align: center; padding: 1.5rem;">
+                    <div>
+                        <div class="service-card card-warning" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #ef4444; font-size: 1.8rem;">
                                 <i class="fas fa-ban"></i>
                             </div>
                             <h3 style="color: #dc2626; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
-                                {{ $items->where('quantity', 0)->count() }}
+                                {{ $totalOutOfStock ?? $items->where('quantity', 0)->count() }}
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">منتجات بدون مخزون</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">منتجات بدون مخزون</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="service-card card-info" style="text-align: center; padding: 1.5rem;">
+                    <div>
+                        <div class="service-card card-info" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #0ea5e9; font-size: 1.8rem;">
                                 <i class="fas fa-coins"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
-                                {{ number_format($items->sum(function($item) { return $item->quantity * $item->sale_price; }), 2) }} شيكل
+                                {{ number_format($totalInventoryValue, 2) }} شيكل
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500;">قيمة المخزون</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية</p>
                         </div>
                     </div>
                 </div>

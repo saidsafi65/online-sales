@@ -657,6 +657,11 @@
             color: white;
         }
     </style>
+    <style>
+        .service-card {
+            height: auto;
+        }
+    </style>
     @stack('styles')
 </head>
 
@@ -691,41 +696,41 @@
                                 <span>الرئيسية</span>
                             </a>
                         </li>
-                        @if(auth()->check() && auth()->user()->canViewSection('invoices'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
-                                href="{{ route('invoices.index') }}">
-                                <i class="fas fa-file-invoice"></i>
-                                <span>الفواتير</span>
-                            </a>
-                        </li>
+                        @if (auth()->check() && auth()->user()->canViewSection('invoices'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('invoices.*') ? 'active' : '' }}"
+                                    href="{{ route('invoices.index') }}">
+                                    <i class="fas fa-file-invoice"></i>
+                                    <span>الفواتير</span>
+                                </a>
+                            </li>
                         @endif
-                        @if(auth()->check() && auth()->user()->canViewSection('catalog'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}"
-                                href="{{ route('catalog.index') }}">
-                                <i class="fas fa-boxes"></i>
-                                <span>الكتالوج</span>
-                            </a>
-                        </li>
+                        @if (auth()->check() && auth()->user()->canViewSection('catalog'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}"
+                                    href="{{ route('catalog.index') }}">
+                                    <i class="fas fa-boxes"></i>
+                                    <span>الكتالوج</span>
+                                </a>
+                            </li>
                         @endif
-                        @if(auth()->check() && auth()->user()->canViewSection('deposits'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}"
-                                href="{{ route('deposits.index') }}">
-                                <i class="fas fa-tools"></i>
-                                <span>الأمانات</span>
-                            </a>
-                        </li>
+                        @if (auth()->check() && auth()->user()->canViewSection('deposits'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('deposits.*') ? 'active' : '' }}"
+                                    href="{{ route('deposits.index') }}">
+                                    <i class="fas fa-tools"></i>
+                                    <span>الأمانات</span>
+                                </a>
+                            </li>
                         @endif
-                        @if(auth()->check() && auth()->user()->canViewSection('reports'))
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
-                                href="{{ route('reports.index') }}">
-                                <i class="fas fa-chart-line"></i>
-                                <span>التقارير</span>
-                            </a>
-                        </li>
+                        @if (auth()->check() && auth()->user()->canViewSection('reports'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                                    href="{{ route('reports.index') }}">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>التقارير</span>
+                                </a>
+                            </li>
                         @endif
                     </ul>
                     @php

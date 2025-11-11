@@ -205,6 +205,12 @@
                 </tbody>
             </table>
         </div>
+        {{-- Server-side pagination links like catalog --}}
+        @if(isset($sales) && $sales->hasPages())
+            <div style="padding: 1.5rem 1rem; display: flex; justify-content: center; border-top: 1px solid #e2e8f0;">
+                {{ $sales->links() }}
+            </div>
+        @endif
     </div>
 </div>
 
@@ -273,7 +279,10 @@ $(document).ready(function() {
             url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/ar.json'
         },
         responsive: true,
-        pageLength: 25,
+        // Disable DataTables paging/searching/info so server-side pagination (Laravel) handles it
+        paging: false,
+        searching: false,
+        info: false,
         order: [[0, 'desc']],
         columnDefs: [
             { orderable: false, targets: -1 }
