@@ -68,7 +68,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">صورة الهوية (اختياري)</label>
-                        <input type="file" name="id_image" accept="image/*" class="form-control">
+                        <input type="file" name="id_image" class="form-control">
                         @if($purchase->id_image)
                             <div class="mt-2">
                                 <a href="/{{ $purchase->id_image }}" target="_blank" class="btn btn-sm btn-outline-info">عرض الصورة الحالية</a>

@@ -67,7 +67,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">صورة الهوية (اختياري)</label>
-                        <input type="file" name="id_image" accept="image/*" class="form-control">
+                        <input type="file" name="id_image" class="form-control">
                     </div>
 
                     <div class="col-md-6">
