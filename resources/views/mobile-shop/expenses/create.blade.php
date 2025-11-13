@@ -4,9 +4,20 @@
 
 @section('content')
     <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12" style="display:flex; align-items:center; gap:1rem;">
+                <a href="{{ route('mobile-shop.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </a>
+                <h1 class="h3 mb-0" style="color: #1e293b; font-weight: 700;">
+                    <i class="fas fa-receipt" style="color: #8b5cf6; margin-right: 0.5rem;"></i>
+                    إضافة مصروف
+                </h1>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body">
-                <h4>إضافة مصروف</h4>
 
                 @if ($errors->any())
                     <div class="alert alert-danger">
