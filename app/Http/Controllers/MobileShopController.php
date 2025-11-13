@@ -35,6 +35,8 @@ class MobileShopController extends Controller
             'payment_method' => 'required|in:نقدي,تطبيق,مختلط',
             'cash_amount' => 'required|numeric|min:0',
             'bank_amount' => 'required|numeric|min:0',
+            'delivery_date' => 'nullable|date',
+            'receipt_date' => 'nullable|date',
         ]);
 
         $validated['branch_id'] = auth()->user()->branch_id;
@@ -60,6 +62,8 @@ class MobileShopController extends Controller
             'payment_method' => 'required|in:نقدي,تطبيق,مختلط',
             'cash_amount' => 'required|numeric|min:0',
             'bank_amount' => 'required|numeric|min:0',
+            'delivery_date' => 'nullable|date',
+            'receipt_date' => 'nullable|date',
         ]);
 
         $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);

@@ -43,6 +43,8 @@
                             <th style="color: #475569; font-weight: 700; padding: 1rem;">نقدي</th>
                             <th style="color: #475569; font-weight: 700; padding: 1rem;">بنكي</th>
                             <th style="color: #475569; font-weight: 700; padding: 1rem;">الإجمالي</th>
+                            <th style="color: #475569; font-weight: 700; padding: 1rem;">تاريخ التسليم</th>
+                            <th style="color: #475569; font-weight: 700; padding: 1rem;">تاريخ الاستلام</th>
                             <th style="color: #475569; font-weight: 700; padding: 1rem;">التاريخ</th>
                             <th style="color: #475569; font-weight: 700; padding: 1rem;">الإجراءات</th>
                         </tr>
@@ -62,6 +64,8 @@
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format($maintenance->cash_amount ?? $maintenance->cost ?? 0, 2) }} شيكل</td>
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format($maintenance->bank_amount ?? 0, 2) }} شيكل</td>
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format(($maintenance->cash_amount ?? $maintenance->cost ?? 0) + ($maintenance->bank_amount ?? 0), 2) }} شيكل</td>
+                                <td style="padding: 1rem; color: #475569;">{{ $maintenance->delivery_date ? $maintenance->delivery_date->format('Y-m-d') : '-' }}</td>
+                                <td style="padding: 1rem; color: #475569;">{{ $maintenance->receipt_date ? $maintenance->receipt_date->format('Y-m-d') : '-' }}</td>
                                 <td style="padding: 1rem; color: #475569;">{{ $maintenance->created_at->format('Y-m-d') }}</td>
                                 <td style="padding: 1rem;">
                                     <a href="{{ route('mobile-shop.maintenance.edit', $maintenance) }}" class="btn btn-sm btn-primary">
@@ -78,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4" style="color: #94a3b8;">
+                                <td colspan="12" class="text-center py-4" style="color: #94a3b8;">
                                     <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
                                     <p>لا توجد صيانات</p>
                                 </td>

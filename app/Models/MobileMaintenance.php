@@ -20,6 +20,8 @@ class MobileMaintenance extends Model
         'cost',
         'cash_amount',
         'bank_amount',
+        'delivery_date',
+        'receipt_date',
         'branch_id'
     ];
 
@@ -27,6 +29,8 @@ class MobileMaintenance extends Model
         'cost' => 'decimal:2',
         'cash_amount' => 'decimal:2',
         'bank_amount' => 'decimal:2',
+        'delivery_date' => 'date',
+        'receipt_date' => 'date',
     ];
 
     public function branch()
