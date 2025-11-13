@@ -64,6 +64,19 @@
             </a>
         </div>
 
+        <!-- معرض الجوال -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ route('mobile-shop.index') }}" class="text-decoration-none">
+                <div class="service-card card-primary">
+                    <div class="service-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="service-title">معرض الجوال</h3>
+                    <p class="service-description">لوحة تحكم سريعة لمتابعة الصيانات، المبيعات، المخزون، الديون والمصروفات للجوال</p>
+                </div>
+            </a>
+        </div>
+
         <!-- أمانات الصيانة -->
         <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('deposits.index') }}" class="text-decoration-none">
