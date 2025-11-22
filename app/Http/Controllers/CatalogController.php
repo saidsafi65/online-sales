@@ -14,9 +14,11 @@ class CatalogController extends Controller
     public function index(Request $request): View
     {
         $query = CatalogItem::query();
-    if (!auth()->user()->isAdmin()) {
-        $query->where('branch_id', auth()->user()->branch_id);
-    }
+        
+        if (!auth()->user()->isAdmin()) {
+            $query->where('branch_id', auth()->user()->branch_id);
+        }
+        
         // البحث بالاسم أو النوع
         if ($request->filled('search')) {
             $search = $request->search;
@@ -48,21 +50,30 @@ class CatalogController extends Controller
         if ($request->filled('price_max')) {
             $query->where('sale_price', '<=', $request->price_max);
         }
+        
+        // تصفية حسب نوع المنتج (جوال أو عادي)
+        if ($request->filled('product_source')) {
+            if ($request->product_source === 'mobile') {
+                $query->where('is_mobile_product', true);
+            } elseif ($request->product_source === 'regular') {
+                $query->where('is_mobile_product', false);
+            }
+        }
 
         // الترتيب
         $sortBy = $request->get('sort_by', 'product');
         $sortOrder = $request->get('sort_order', 'asc');
         $query->orderBy($sortBy, $sortOrder);
 
-    $items = $query->paginate(30)->withQueryString();
+        $items = $query->paginate(30)->withQueryString();
 
-    // حساب إجمالي قيمة المخزون على مستوى قاعدة البيانات بالكامل
-    $totals = CatalogItem::selectRaw('SUM(quantity * sale_price) as totalInventoryValue, SUM(quantity * wholesale_price) as totalWholesaleValue')->first();
+        // حساب إجمالي قيمة المخزون
+        $totals = CatalogItem::selectRaw('SUM(quantity * sale_price) as totalInventoryValue, SUM(quantity * wholesale_price) as totalWholesaleValue')->first();
 
-    $totalInventoryValue = $totals->totalInventoryValue ? (float) $totals->totalInventoryValue : 0.0;
-    $totalWholesaleValue = $totals->totalWholesaleValue ? (float) $totals->totalWholesaleValue : 0.0;
+        $totalInventoryValue = $totals->totalInventoryValue ? (float) $totals->totalInventoryValue : 0.0;
+        $totalWholesaleValue = $totals->totalWholesaleValue ? (float) $totals->totalWholesaleValue : 0.0;
 
-    return view('catalog.index', compact('items', 'totalInventoryValue', 'totalWholesaleValue'));
+        return view('catalog.index', compact('items', 'totalInventoryValue', 'totalWholesaleValue'));
     }
 
     public function create(): View
@@ -84,16 +95,16 @@ class CatalogController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // البحث عن نفس المنتج والنوع، إذا وجد، سيتم تحديث الكمية، وإذا لم يوجد سيتم إضافته
         CatalogItem::updateOrCreate(
             [
                 'product' => $request->product,
                 'type' => $request->type,
             ],
             [
-                'quantity' => DB::raw('quantity + '.(int) $request->quantity), // جمع الكمية الحالية مع الكمية المدخلة
+                'quantity' => DB::raw('quantity + '.(int) $request->quantity),
                 'wholesale_price' => $request->wholesale_price,
                 'sale_price' => $request->sale_price,
+                'is_mobile_product' => false, // المنتجات المضافة يدوياً ليست من معرض الجوال
             ]
         );
 
@@ -103,7 +114,6 @@ class CatalogController extends Controller
     public function edit($id): View
     {
         $item = CatalogItem::findOrFail($id);
-
         return view('catalog.edit', compact('item'));
     }
 
@@ -130,7 +140,6 @@ class CatalogController extends Controller
     public function destroy(CatalogItem $item): RedirectResponse
     {
         $item->delete();
-
         return redirect()->route('catalog.index')->with('success', 'تم الحذف من الكتالوج');
     }
 }

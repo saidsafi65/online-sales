@@ -17,11 +17,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-<style>
-    .service-card {
-        height: auto;
-    }
-</style>
+    <style>
+        .service-card {
+            height: auto;
+        }
+    </style>
     <div class="row justify-content-center">
         <div class="col-12">
             <!-- Header Card -->
@@ -48,7 +48,8 @@
                     <div class="row g-3">
                         <!-- Search Input -->
                         <div class="col-md-4">
-                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <label class="form-label"
+                                style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="fas fa-search" style="color: #0ea5e9;"></i>
                                 البحث
                             </label>
@@ -59,22 +60,27 @@
 
                         <!-- Quantity Filter -->
                         <div class="col-md-2">
-                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <label class="form-label"
+                                style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="fas fa-warehouse" style="color: #10b981;"></i>
                                 الكمية
                             </label>
                             <select name="quantity_filter" class="form-select"
                                 style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
                                 <option value="">الكل</option>
-                                <option value="low" {{ request()->quantity_filter == 'low' ? 'selected' : '' }}>منخفض (≤ 5)</option>
-                                <option value="medium" {{ request()->quantity_filter == 'medium' ? 'selected' : '' }}>متوسط (6-20)</option>
-                                <option value="high" {{ request()->quantity_filter == 'high' ? 'selected' : '' }}>عالي (> 20)</option>
+                                <option value="low" {{ request()->quantity_filter == 'low' ? 'selected' : '' }}>منخفض (≤
+                                    5)</option>
+                                <option value="medium" {{ request()->quantity_filter == 'medium' ? 'selected' : '' }}>متوسط
+                                    (6-20)</option>
+                                <option value="high" {{ request()->quantity_filter == 'high' ? 'selected' : '' }}>عالي (>
+                                    20)</option>
                             </select>
                         </div>
 
                         <!-- Price Min -->
                         <div class="col-md-2">
-                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <label class="form-label"
+                                style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="fas fa-money-bill-wave" style="color: #f59e0b;"></i>
                                 السعر من
                             </label>
@@ -85,7 +91,8 @@
 
                         <!-- Price Max -->
                         <div class="col-md-2">
-                            <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <label class="form-label"
+                                style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="fas fa-money-bill-wave" style="color: #f59e0b;"></i>
                                 إلى
                             </label>
@@ -93,10 +100,26 @@
                                 placeholder="∞" min="0" step="0.01"
                                 style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
                         </div>
-
+                        <!-- Product Source Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label"
+                                style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-filter" style="color: #8b5cf6;"></i>
+                                المصدر
+                            </label>
+                            <select name="product_source" class="form-select"
+                                style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
+                                <option value="">الكل</option>
+                                <option value="mobile" {{ request()->product_source == 'mobile' ? 'selected' : '' }}>معرض
+                                    الجوال</option>
+                                <option value="regular" {{ request()->product_source == 'regular' ? 'selected' : '' }}>
+                                    منتجات عادية</option>
+                            </select>
+                        </div>
                         <!-- Submit Button -->
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: white; padding: 0.75rem 1rem; border-radius: 10px; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <button type="submit" class="btn w-100"
+                                style="background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); color: white; padding: 0.75rem 1rem; border-radius: 10px; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                                 <i class="fas fa-filter"></i>
                                 بحث
                             </button>
@@ -104,13 +127,16 @@
                     </div>
 
                     <!-- Reset Button -->
-                    @if(request()->filled('search') || request()->filled('quantity_filter') || request()->filled('price_min') || request()->filled('price_max'))
-                    <div class="mt-3">
-                        <a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-redo me-2"></i>
-                            إعادة تعيين
-                        </a>
-                    </div>
+                    @if (request()->filled('search') ||
+                            request()->filled('quantity_filter') ||
+                            request()->filled('price_min') ||
+                            request()->filled('price_max'))
+                        <div class="mt-3">
+                            <a href="{{ route('catalog.index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-redo me-2"></i>
+                                إعادة تعيين
+                            </a>
+                        </div>
                     @endif
                 </form>
             </div>
@@ -132,13 +158,12 @@
                         </thead>
                         <tbody>
                             @forelse($items as $index => $item)
-                                <tr style="transition: all 0.2s ease; 
-                                    @if($item->quantity == 0)
-                                        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+                                <tr
+                                    style="transition: all 0.2s ease; 
+                                    @if ($item->quantity == 0) background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
                                         border-left: 4px solid #ef4444;
                                     @elseif($item->quantity <= 5)
-                                        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-                                    @endif
+                                        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); @endif
                                 ">
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <span
@@ -148,7 +173,7 @@
                                     </td>
                                     <td style="padding: 0.75rem; vertical-align: middle;">
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                            @if($item->quantity == 0)
+                                            @if ($item->quantity == 0)
                                                 <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
                                             @else
                                                 <i class="fas fa-box" style="color: #1e40af;"></i>
@@ -167,9 +192,9 @@
                                             style="background: {{ $item->quantity == 0 ? '#fee2e2' : ($item->quantity > 10 ? '#d1fae5' : '#fef3c7') }}; 
                                                     color: {{ $item->quantity == 0 ? '#dc2626' : ($item->quantity > 10 ? '#065f46' : '#b45309') }}; 
                                                     padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem;
-                                                    @if($item->quantity == 0) border: 2px solid #ef4444; @endif
+                                                    @if ($item->quantity == 0) border: 2px solid #ef4444; @endif
                                             ">
-                                            @if($item->quantity == 0)
+                                            @if ($item->quantity == 0)
                                                 <i class="fas fa-ban me-1"></i>
                                             @endif
                                             {{ $item->quantity }}
@@ -216,7 +241,8 @@
                                         <div style="color: #94a3b8;">
                                             <i class="fas fa-box-open"
                                                 style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
-                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد منتجات</p>
+                                            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">لا توجد
+                                                منتجات</p>
                                             <p style="font-size: 0.9rem;">ابدأ بإضافة منتج جديد للكتالوج</p>
                                         </div>
                                     </td>
@@ -228,7 +254,8 @@
 
                 <!-- Pagination -->
                 @if ($items->hasPages())
-                    <div style="padding: 1.5rem 1rem; display: flex; justify-content: center; border-top: 1px solid #e2e8f0;">
+                    <div
+                        style="padding: 1.5rem 1rem; display: flex; justify-content: center; border-top: 1px solid #e2e8f0;">
                         {{ $items->links() }}
                     </div>
                 @endif
@@ -236,7 +263,8 @@
 
             <!-- Statistics Cards -->
             @if ($items->count() > 0)
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; padding: 0 1rem;">
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 2rem; padding: 0 1rem;">
                     <div>
                         <div class="service-card card-primary" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
@@ -270,7 +298,8 @@
                             <h3 style="color: #dc2626; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
                                 {{ $totalOutOfStock ?? $items->where('quantity', 0)->count() }}
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">منتجات بدون مخزون</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">منتجات بدون مخزون
+                            </p>
                         </div>
                     </div>
                     <div>
@@ -282,12 +311,14 @@
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
                                 {{ number_format($totalInventoryValue ?? 0, 2) }} شيكل
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية (سعر البيع)</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية
+                                (سعر البيع)</p>
                         </div>
                     </div>
 
                     <div>
-                        <div class="service-card card-secondary" style="text-align: center; padding: 1.5rem; height: 100%;">
+                        <div class="service-card card-secondary"
+                            style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
                                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #0ea5e9; font-size: 1.8rem;">
                                 <i class="fas fa-tags"></i>
@@ -295,7 +326,8 @@
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 700;">
                                 {{ number_format($totalWholesaleValue ?? 0, 2) }} شيكل
                             </h3>
-                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية (سعر الجملة)</p>
+                            <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">قيمة المخزون الكلية
+                                (سعر الجملة)</p>
                         </div>
                     </div>
                 </div>

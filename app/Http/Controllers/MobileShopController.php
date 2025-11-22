@@ -7,7 +7,13 @@ use App\Models\MobileSale;
 use App\Models\MobileInventory;
 use App\Models\MobileDebt;
 use App\Models\MobileExpense;
+use App\Models\CatalogItem;
+use App\Models\Repair;
+use App\Models\Sale;
+use App\Models\Debt;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MobileShopController extends Controller
 {
@@ -39,12 +45,43 @@ class MobileShopController extends Controller
             'receipt_date' => 'nullable|date',
         ]);
 
-        $validated['branch_id'] = auth()->user()->branch_id;
-        // compute unified cost for backward compatibility
-        $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
-        MobileMaintenance::create($validated);
+        DB::beginTransaction();
+        try {
+            $validated['branch_id'] = auth()->user()->branch_id;
+            $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
+            
+            // إنشاء في جدول معرض الجوال
+            $mobileMaintenance = MobileMaintenance::create($validated);
 
-        return redirect()->route('mobile-shop.maintenance.index')->with('success', 'تم إضافة الصيانة بنجاح');
+            // إضافة تلقائياً في جدول الصيانة الرئيسي
+            Repair::create([
+                'customer_name' => $validated['customer_name'],
+                'phone' => $validated['phone_number'],
+                'device_name' => 'جوال - ' . $validated['mobile_type'],
+                'model' => $validated['mobile_type'],
+                'issue' => $validated['problem_description'],
+                'received_date' => now(),
+                'delivery_date' => $validated['delivery_date'] ?? null,
+                'cost_cash' => $validated['cash_amount'],
+                'cost_bank' => $validated['bank_amount'],
+                'payment_method' => match($validated['payment_method']) {
+                    'نقدي' => 'cash',
+                    'تطبيق' => 'app',
+                    'مختلط' => 'mixed',
+                    default => 'cash'
+                },
+                'received_by' => auth()->user()->name,
+                'branch_id' => auth()->user()->branch_id,
+                'is_returned' => false,
+                'notes' => 'تم إضافتها من معرض الجوال'
+            ]);
+
+            DB::commit();
+            return redirect()->route('mobile-shop.maintenance.index')->with('success', 'تم إضافة الصيانة بنجاح');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
     }
 
     public function maintenanceEdit(MobileMaintenance $maintenance)
@@ -102,11 +139,39 @@ class MobileShopController extends Controller
             'bank_amount' => 'required|numeric|min:0',
         ]);
 
-        $validated['branch_id'] = auth()->user()->branch_id;
-        $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
-        MobileSale::create($validated);
+        DB::beginTransaction();
+        try {
+            $validated['branch_id'] = auth()->user()->branch_id;
+            $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
+            
+            // إنشاء في جدول معرض الجوال
+            MobileSale::create($validated);
 
-        return redirect()->route('mobile-shop.sales.index')->with('success', 'تم إضافة المبيعة بنجاح');
+            // إضافة تلقائياً في جدول المبيعات الرئيسي
+            Sale::create([
+                'product' => $validated['product_name'],
+                'type' => $validated['product_type'],
+                'quantity' => $validated['quantity'],
+                'sale_date' => now(),
+                'payment_method' => match($validated['payment_method']) {
+                    'نقدي' => 'cash',
+                    'تطبيق' => 'app',
+                    'مختلط' => 'mixed',
+                    default => 'cash'
+                },
+                'cash_amount' => $validated['cash_amount'],
+                'app_amount' => $validated['bank_amount'],
+                'branch_id' => auth()->user()->branch_id,
+                'is_returned' => false,
+                'notes' => 'تم إضافتها من معرض الجوال'
+            ]);
+
+            DB::commit();
+            return redirect()->route('mobile-shop.sales.index')->with('success', 'تم إضافة المبيعة بنجاح');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
     }
 
     public function salesEdit(MobileSale $sale)
@@ -160,10 +225,34 @@ class MobileShopController extends Controller
             'selling_price' => 'required|numeric|min:0',
         ]);
 
-        $validated['branch_id'] = auth()->user()->branch_id;
-        MobileInventory::create($validated);
+        DB::beginTransaction();
+        try {
+            $validated['branch_id'] = auth()->user()->branch_id;
+            
+            // إنشاء في جدول معرض الجوال
+            MobileInventory::create($validated);
 
-        return redirect()->route('mobile-shop.inventory.index')->with('success', 'تم إضافة المنتج بنجاح');
+            // إضافة/تحديث في الكتالوج الرئيسي
+            CatalogItem::updateOrCreate(
+                [
+                    'product' => $validated['product_name'],
+                    'type' => $validated['model_type'],
+                    'branch_id' => auth()->user()->branch_id
+                ],
+                [
+                    'quantity' => DB::raw('quantity + ' . (int)$validated['quantity']),
+                    'wholesale_price' => $validated['wholesale_price'],
+                    'sale_price' => $validated['selling_price'],
+                    'is_mobile_product' => true
+                ]
+            );
+
+            DB::commit();
+            return redirect()->route('mobile-shop.inventory.index')->with('success', 'تم إضافة المنتج بنجاح');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
     }
 
     public function inventoryEdit(MobileInventory $inventory)
@@ -217,11 +306,33 @@ class MobileShopController extends Controller
             'payment_date' => 'nullable|date',
         ]);
 
-        $validated['total'] = $validated['cash_amount'] + $validated['bank_amount'];
-        $validated['branch_id'] = auth()->user()->branch_id;
-        MobileDebt::create($validated);
+        DB::beginTransaction();
+        try {
+            $validated['total'] = $validated['cash_amount'] + $validated['bank_amount'];
+            $validated['branch_id'] = auth()->user()->branch_id;
+            
+            // إنشاء في جدول معرض الجوال
+            MobileDebt::create($validated);
 
-        return redirect()->route('mobile-shop.debts.index')->with('success', 'تم إضافة الدين بنجاح');
+            // إضافة في جدول الديون الرئيسي
+            Debt::create([
+                'customer_name' => $validated['customer_name'],
+                'phone' => $validated['phone_number'],
+                'type' => 'مدين', // افتراضياً
+                'cash_amount' => $validated['cash_amount'],
+                'bank_amount' => $validated['bank_amount'],
+                'reason' => 'دين من معرض الجوال - ' . $validated['type'],
+                'debt_date' => $validated['debt_date'],
+                'payment_date' => $validated['payment_date'],
+                'branch_id' => auth()->user()->branch_id
+            ]);
+
+            DB::commit();
+            return redirect()->route('mobile-shop.debts.index')->with('success', 'تم إضافة الدين بنجاح');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
     }
 
     public function debtsEdit(MobileDebt $debt)
@@ -285,23 +396,54 @@ class MobileShopController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $validated['total'] = $validated['cash_amount'] + $validated['bank_amount'];
-        $validated['branch_id'] = auth()->user()->branch_id;
-        // معالجة رفع صورة الهوية إن وجدت
-        if ($request->hasFile('id_photo')) {
-            $file = $request->file('id_photo');
-            $destinationPath = public_path('uploads/mobile-expenses');
-            if (! is_dir($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
+        DB::beginTransaction();
+        try {
+            $validated['total'] = $validated['cash_amount'] + $validated['bank_amount'];
+            $validated['branch_id'] = auth()->user()->branch_id;
+            
+            // معالجة رفع صورة الهوية
+            if ($request->hasFile('id_photo')) {
+                $file = $request->file('id_photo');
+                $destinationPath = public_path('uploads/mobile-expenses');
+                if (!is_dir($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+                $file->move($destinationPath, $filename);
+                $validated['id_photo'] = 'uploads/mobile-expenses/' . $filename;
             }
-            $filename = time().'_'.preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
-            $file->move($destinationPath, $filename);
-            $validated['id_photo'] = 'uploads/mobile-expenses/'.$filename;
+
+            // إنشاء في جدول معرض الجوال
+            MobileExpense::create($validated);
+
+            // إضافة في جدول المشتريات الرئيسي
+            Purchase::create([
+                'item' => $validated['category'],
+                'type' => $validated['type'],
+                'quantity' => $validated['quantity'],
+                'payment_method' => match($validated['payment_method']) {
+                    'نقدي' => 'cash',
+                    'بنكي' => 'app',
+                    'مختلط' => 'mixed',
+                    default => 'cash'
+                },
+                'amount_cash' => $validated['cash_amount'],
+                'amount_bank' => $validated['bank_amount'],
+                'purchase_date' => $validated['expense_date'],
+                'supplier_name' => $validated['supplier_name'],
+                'phone' => $validated['supplier_phone'],
+                'id_image' => $validated['id_photo'] ?? null,
+                'notes' => 'تم إضافتها من معرض الجوال - ' . ($validated['notes'] ?? ''),
+                'branch_id' => auth()->user()->branch_id,
+                'is_returned' => false
+            ]);
+
+            DB::commit();
+            return redirect()->route('mobile-shop.expenses.index')->with('success', 'تم إضافة المصروف بنجاح');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'حدث خطأ: ' . $e->getMessage());
         }
-
-        MobileExpense::create($validated);
-
-        return redirect()->route('mobile-shop.expenses.index')->with('success', 'تم إضافة المصروف بنجاح');
     }
 
     public function expensesEdit(MobileExpense $expense)
@@ -329,18 +471,17 @@ class MobileShopController extends Controller
         ]);
 
         $validated['total'] = $validated['cash_amount'] + $validated['bank_amount'];
-        // معالجة رفع صورة الهوية إن تم تحميلها
+        
         if ($request->hasFile('id_photo')) {
             $file = $request->file('id_photo');
             $destinationPath = public_path('uploads/mobile-expenses');
-            if (! is_dir($destinationPath)) {
+            if (!is_dir($destinationPath)) {
                 mkdir($destinationPath, 0755, true);
             }
-            $filename = time().'_'.preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+            $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
             $file->move($destinationPath, $filename);
-            $validated['id_photo'] = 'uploads/mobile-expenses/'.$filename;
+            $validated['id_photo'] = 'uploads/mobile-expenses/' . $filename;
         } else {
-            // لا تغير قيمة id_photo إذا لم يتم رفع ملف جديد
             unset($validated['id_photo']);
         }
 

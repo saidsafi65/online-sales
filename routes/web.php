@@ -338,50 +338,51 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // Mobile Shop (معرض الجوال)
-    Route::prefix('mobile-shop')->name('mobile-shop.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\MobileShopController::class, 'index'])->name('index');
+    Route::middleware(['auth', 'mobile.shop.only'])->group(function () {
+        Route::prefix('mobile-shop')->name('mobile-shop.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\MobileShopController::class, 'index'])->name('index');
 
-        // Maintenance
-        Route::get('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceIndex'])->name('maintenance.index');
-        Route::get('/maintenance/create', [\App\Http\Controllers\MobileShopController::class, 'maintenanceCreate'])->name('maintenance.create');
-        Route::post('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceStore'])->name('maintenance.store');
-        Route::get('/maintenance/{maintenance}/edit', [\App\Http\Controllers\MobileShopController::class, 'maintenanceEdit'])->name('maintenance.edit');
-        Route::put('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceUpdate'])->name('maintenance.update');
-        Route::delete('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceDestroy'])->name('maintenance.destroy');
+            // Maintenance
+            Route::get('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceIndex'])->name('maintenance.index');
+            Route::get('/maintenance/create', [\App\Http\Controllers\MobileShopController::class, 'maintenanceCreate'])->name('maintenance.create');
+            Route::post('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceStore'])->name('maintenance.store');
+            Route::get('/maintenance/{maintenance}/edit', [\App\Http\Controllers\MobileShopController::class, 'maintenanceEdit'])->name('maintenance.edit');
+            Route::put('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceUpdate'])->name('maintenance.update');
+            Route::delete('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceDestroy'])->name('maintenance.destroy');
 
-        // Sales
-        Route::get('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesIndex'])->name('sales.index');
-        Route::get('/sales/create', [\App\Http\Controllers\MobileShopController::class, 'salesCreate'])->name('sales.create');
-        Route::post('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesStore'])->name('sales.store');
-        Route::get('/sales/{sale}/edit', [\App\Http\Controllers\MobileShopController::class, 'salesEdit'])->name('sales.edit');
-        Route::put('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesUpdate'])->name('sales.update');
-        Route::delete('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesDestroy'])->name('sales.destroy');
+            // Sales
+            Route::get('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesIndex'])->name('sales.index');
+            Route::get('/sales/create', [\App\Http\Controllers\MobileShopController::class, 'salesCreate'])->name('sales.create');
+            Route::post('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesStore'])->name('sales.store');
+            Route::get('/sales/{sale}/edit', [\App\Http\Controllers\MobileShopController::class, 'salesEdit'])->name('sales.edit');
+            Route::put('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesUpdate'])->name('sales.update');
+            Route::delete('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesDestroy'])->name('sales.destroy');
 
-        // Inventory
-        Route::get('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryIndex'])->name('inventory.index');
-        Route::get('/inventory/create', [\App\Http\Controllers\MobileShopController::class, 'inventoryCreate'])->name('inventory.create');
-        Route::post('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryStore'])->name('inventory.store');
-        Route::get('/inventory/{inventory}/edit', [\App\Http\Controllers\MobileShopController::class, 'inventoryEdit'])->name('inventory.edit');
-        Route::put('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryUpdate'])->name('inventory.update');
-        Route::delete('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryDestroy'])->name('inventory.destroy');
+            // Inventory
+            Route::get('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryIndex'])->name('inventory.index');
+            Route::get('/inventory/create', [\App\Http\Controllers\MobileShopController::class, 'inventoryCreate'])->name('inventory.create');
+            Route::post('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryStore'])->name('inventory.store');
+            Route::get('/inventory/{inventory}/edit', [\App\Http\Controllers\MobileShopController::class, 'inventoryEdit'])->name('inventory.edit');
+            Route::put('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryUpdate'])->name('inventory.update');
+            Route::delete('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryDestroy'])->name('inventory.destroy');
 
-        // Debts
-        Route::get('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsIndex'])->name('debts.index');
-        Route::get('/debts/create', [\App\Http\Controllers\MobileShopController::class, 'debtsCreate'])->name('debts.create');
-        Route::post('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsStore'])->name('debts.store');
-        Route::get('/debts/{debt}/edit', [\App\Http\Controllers\MobileShopController::class, 'debtsEdit'])->name('debts.edit');
-        Route::put('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsUpdate'])->name('debts.update');
-        Route::delete('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsDestroy'])->name('debts.destroy');
+            // Debts
+            Route::get('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsIndex'])->name('debts.index');
+            Route::get('/debts/create', [\App\Http\Controllers\MobileShopController::class, 'debtsCreate'])->name('debts.create');
+            Route::post('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsStore'])->name('debts.store');
+            Route::get('/debts/{debt}/edit', [\App\Http\Controllers\MobileShopController::class, 'debtsEdit'])->name('debts.edit');
+            Route::put('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsUpdate'])->name('debts.update');
+            Route::delete('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsDestroy'])->name('debts.destroy');
 
-        // Expenses
-        Route::get('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesIndex'])->name('expenses.index');
-        Route::get('/expenses/create', [\App\Http\Controllers\MobileShopController::class, 'expensesCreate'])->name('expenses.create');
-        Route::post('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesStore'])->name('expenses.store');
-        Route::get('/expenses/{expense}/edit', [\App\Http\Controllers\MobileShopController::class, 'expensesEdit'])->name('expenses.edit');
-        Route::put('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesUpdate'])->name('expenses.update');
-        Route::delete('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesDestroy'])->name('expenses.destroy');
+            // Expenses
+            Route::get('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesIndex'])->name('expenses.index');
+            Route::get('/expenses/create', [\App\Http\Controllers\MobileShopController::class, 'expensesCreate'])->name('expenses.create');
+            Route::post('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesStore'])->name('expenses.store');
+            Route::get('/expenses/{expense}/edit', [\App\Http\Controllers\MobileShopController::class, 'expensesEdit'])->name('expenses.edit');
+            Route::put('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesUpdate'])->name('expenses.update');
+            Route::delete('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesDestroy'])->name('expenses.destroy');
+        });
     });
-
     // الصفحة الرئيسية (مبيعات اليوم)
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
 
