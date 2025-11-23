@@ -14,12 +14,20 @@ use App\Models\Debt;
 use App\Models\Purchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MobileShopController extends Controller
 {
     // ===== الصيانة =====
     public function maintenanceIndex()
     {
+        if (! Schema::hasTable('mobile_maintenance')) {
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $maintenances = new LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.maintenance.index', compact('maintenances'));
+        }
+
         $maintenances = MobileMaintenance::where('branch_id', auth()->user()->branch_id ?? null)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -117,6 +125,12 @@ class MobileShopController extends Controller
     // ===== المبيعات =====
     public function salesIndex()
     {
+        if (! Schema::hasTable('mobile_sales')) {
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $sales = new LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.sales.index', compact('sales'));
+        }
+
         $sales = MobileSale::where('branch_id', auth()->user()->branch_id ?? null)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -204,9 +218,16 @@ class MobileShopController extends Controller
     // ===== المخزون =====
     public function inventoryIndex()
     {
+        if (! Schema::hasTable('mobile_inventory')) {
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $inventory = new LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.inventory.index', compact('inventory'));
+        }
+
         $inventory = MobileInventory::where('branch_id', auth()->user()->branch_id ?? null)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
+
         return view('mobile-shop.inventory.index', compact('inventory'));
     }
 
@@ -283,6 +304,12 @@ class MobileShopController extends Controller
     // ===== الديون =====
     public function debtsIndex()
     {
+        if (! Schema::hasTable('mobile_debts')) {
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $debts = new LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.debts.index', compact('debts'));
+        }
+
         $debts = MobileDebt::where('branch_id', auth()->user()->branch_id ?? null)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -366,6 +393,12 @@ class MobileShopController extends Controller
     // ===== المصروفات =====
     public function expensesIndex()
     {
+        if (! Schema::hasTable('mobile_expenses')) {
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $expenses = new LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.expenses.index', compact('expenses'));
+        }
+
         $expenses = MobileExpense::where('branch_id', auth()->user()->branch_id ?? null)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -500,16 +533,41 @@ class MobileShopController extends Controller
     {
         $branchId = auth()->user()->branch_id;
         
-        $maintenanceCount = MobileMaintenance::where('branch_id', $branchId)->count();
-        $salesCount = MobileSale::where('branch_id', $branchId)->count();
-        $inventoryCount = MobileInventory::where('branch_id', $branchId)->sum('quantity');
-        $debtsCount = MobileDebt::where('branch_id', $branchId)->where('payment_date', null)->count();
-        $expensesCount = MobileExpense::where('branch_id', $branchId)->count();
+        $maintenanceCount = Schema::hasTable('mobile_maintenance')
+            ? MobileMaintenance::where('branch_id', $branchId)->count()
+            : 0;
 
-        $totalMaintenance = MobileMaintenance::where('branch_id', $branchId)->sum('cost');
-        $totalSales = MobileSale::where('branch_id', $branchId)->sum('cost');
-        $totalDebts = MobileDebt::where('branch_id', $branchId)->where('payment_date', null)->sum('total');
-        $totalExpenses = MobileExpense::where('branch_id', $branchId)->sum('total');
+        $salesCount = Schema::hasTable('mobile_sales')
+            ? MobileSale::where('branch_id', $branchId)->count()
+            : 0;
+
+        $inventoryCount = Schema::hasTable('mobile_inventory')
+            ? MobileInventory::where('branch_id', $branchId)->sum('quantity')
+            : 0;
+
+        $debtsCount = Schema::hasTable('mobile_debts')
+            ? MobileDebt::where('branch_id', $branchId)->where('payment_date', null)->count()
+            : 0;
+
+        $expensesCount = Schema::hasTable('mobile_expenses')
+            ? MobileExpense::where('branch_id', $branchId)->count()
+            : 0;
+
+        $totalMaintenance = Schema::hasTable('mobile_maintenance')
+            ? MobileMaintenance::where('branch_id', $branchId)->sum('cost')
+            : 0;
+
+        $totalSales = Schema::hasTable('mobile_sales')
+            ? MobileSale::where('branch_id', $branchId)->sum('cost')
+            : 0;
+
+        $totalDebts = Schema::hasTable('mobile_debts')
+            ? MobileDebt::where('branch_id', $branchId)->where('payment_date', null)->sum('total')
+            : 0;
+
+        $totalExpenses = Schema::hasTable('mobile_expenses')
+            ? MobileExpense::where('branch_id', $branchId)->sum('total')
+            : 0;
 
         return view('mobile-shop.index', compact(
             'maintenanceCount',
