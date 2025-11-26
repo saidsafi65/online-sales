@@ -46,6 +46,7 @@
                             <label for="quantity" class="form-label" style="font-weight: 600; color: #1e293b;">الكمية</label>
                             <input type="number" class="form-control @error('quantity') is-invalid @enderror" 
                                    id="quantity" name="quantity" value="{{ old('quantity') }}" required>
+                            <small class="text-muted" id="available_quantity"></small>
                             @error('quantity')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

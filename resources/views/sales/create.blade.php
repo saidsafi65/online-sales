@@ -54,6 +54,7 @@
                             <input type="number" min="1" step="1" id="quantity" name="quantity"
                                 class="form-control @error('quantity') is-invalid @enderror"
                                 value="{{ old('quantity', 1) }}">
+                            <small class="text-muted" id="available_quantity"></small>
                             @error('quantity')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -239,7 +240,5 @@
             // استدعاء فوري لضبط الحالة عند الفتح
             updateAmountFields();
         })();
-    </script>
-
     </script>
 @endpush

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // جدول المبيعا��
+        // جدول المبيعات
         Schema::create('mobile_sales', function (Blueprint $table) {
             $table->id();
             $table->string('product_name');

@@ -29,12 +29,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mobile_maintenance', function (Blueprint $table) {
-            $table->dropColumn(['cash_amount', 'bank_amount']);
-        });
+        if (Schema::hasTable('mobile_maintenance')) {
+            Schema::table('mobile_maintenance', function (Blueprint $table) {
+                $table->dropColumn(['cash_amount', 'bank_amount']);
+            });
+        }
 
-        Schema::table('mobile_sales', function (Blueprint $table) {
-            $table->dropColumn(['cash_amount', 'bank_amount']);
-        });
+        if (Schema::hasTable('mobile_sales')) {
+            Schema::table('mobile_sales', function (Blueprint $table) {
+                $table->dropColumn(['cash_amount', 'bank_amount']);
+            });
+        }
     }
 };

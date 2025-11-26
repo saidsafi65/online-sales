@@ -296,7 +296,7 @@
                                 <i class="fas fa-ban"></i>
                             </div>
                             <h3 style="color: #dc2626; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
-                                {{ $totalOutOfStock ?? $items->where('quantity', 0)->count() }}
+                                {{ $totalOutOfStock }}
                             </h3>
                             <p style="color: #64748b; margin: 0; font-weight: 500; font-size: 0.95rem;">منتجات بدون مخزون
                             </p>

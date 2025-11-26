@@ -73,7 +73,9 @@ class CatalogController extends Controller
         $totalInventoryValue = $totals->totalInventoryValue ? (float) $totals->totalInventoryValue : 0.0;
         $totalWholesaleValue = $totals->totalWholesaleValue ? (float) $totals->totalWholesaleValue : 0.0;
 
-        return view('catalog.index', compact('items', 'totalInventoryValue', 'totalWholesaleValue'));
+        $totalOutOfStock = $query->where('quantity', '=', 0)->count();
+
+        return view('catalog.index', compact('items', 'totalInventoryValue', 'totalWholesaleValue','totalOutOfStock'));
     }
 
     public function create(): View

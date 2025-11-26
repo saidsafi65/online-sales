@@ -43,6 +43,7 @@
                         <div class="col-md-3">
                             <label>الكمية</label>
                             <input type="number" name="quantity" class="form-control" value="{{ old('quantity', 1) }}" min="1" required>
+                            <small class="text-muted" id="available_quantity"></small>
                         </div>
                         <div class="col-md-3">
                             <label>طريقة الدفع</label>
