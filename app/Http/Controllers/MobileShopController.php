@@ -78,6 +78,7 @@ class MobileShopController extends Controller
                 ->first();
 
             if (!$mobileInventoryItem || $mobileInventoryItem->quantity < $requestedQty) {
+                DB::rollBack();
                 return redirect()->back()
                     ->withErrors(['quantity' => 'الكمية المطلوبة غير متوفرة في مخزون معرض الجوال'])
                     ->withInput();
@@ -90,6 +91,7 @@ class MobileShopController extends Controller
                 ->first();
 
             if (!$catalogItem || $catalogItem->quantity < $requestedQty) {
+                DB::rollBack();
                 return redirect()->back()
                     ->withErrors(['quantity' => 'الكمية المطلوبة غير متوفرة في الكتالوج الرئيسي'])
                     ->withInput();
@@ -123,12 +125,12 @@ class MobileShopController extends Controller
                 'app_amount' => $validated['bank_amount'],
                 'branch_id' => $branchId,
                 'is_returned' => false,
-                'notes' => 'تم إضافتها من معرض الجوال'
+                'notes' => '✅ مبيعة من معرض الجوال'
             ]);
 
             DB::commit();
             return redirect()->route('mobile-shop.sales.index')
-                ->with('success', 'تم إضافة المبيعة بنجاح وخصم الكمية من المخزون والكتالوج');
+                ->with('success', 'تم إضافة المبيعة بنجاح في معرض الجوال والمبيعات الرئيسية وخصم الكمية من المخزونين');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -716,4 +718,5 @@ class MobileShopController extends Controller
             'totalExpenses'
         ));
     }
+    
 }
