@@ -126,6 +126,14 @@ class BackupController extends Controller
             'debts' => 'الديون',
             'maintenance_parts' => 'قطع الصيانة',
             'users' => 'المستخدمين',
+            'branches' => 'الفروع',
+            'settings' => 'الإعدادات',
+            'roles' => 'الأدوار والصلاحيات',
+            'mobile_maintenance' => 'صيانة الموبايلات',
+            'mobile_sales' => 'مبيعات الموبايلات',
+            'mobile_inventory' => 'جرد الموبايلات',
+            'mobile_debts' => 'ديون الموبايلات',
+            'mobile_expenses' => 'مصروفات الموبايلات',
         ];
 
         foreach ($tables as $table => $description) {

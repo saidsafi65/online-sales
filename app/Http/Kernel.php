@@ -4,9 +4,53 @@ namespace App\Http;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Console\Scheduling\Schedule;
 
 class Kernel extends HttpKernel
 {
+
+     /**
+     * Define the application's command schedule.
+     */
+    protected function schedule(Schedule $schedule): void
+    {
+        // نسخة احتياطية يومية (الساعة 2 صباحاً)
+        $schedule->command('db:auto-backup --type=daily')
+            ->dailyAt('02:00')
+            ->name('daily-database-backup')
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/backup.log'));
+
+        // نسخة احتياطية أسبوعية (كل جمعة الساعة 3 صباحاً)
+        $schedule->command('db:auto-backup --type=weekly')
+            ->weeklyOn(5, '03:00')
+            ->name('weekly-database-backup')
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/backup.log'));
+
+        // نسخة احتياطية شهرية (أول يوم من كل شهر)
+        $schedule->command('db:auto-backup --type=monthly')
+            ->monthlyOn(1, '04:00')
+            ->name('monthly-database-backup')
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/backup.log'));
+
+        // تنظيف الكاش الأسبوعي
+        $schedule->command('cache:clear')
+            ->weekly()
+            ->name('clear-cache');
+    }
+
+    /**
+     * Register the commands for the application.
+     */
+    protected function commands(): void
+    {
+        $this->load(__DIR__.'/Commands');
+
+        require base_path('routes/console.php');
+    }
+
     /**
      * The application's global HTTP middleware stack.
      *

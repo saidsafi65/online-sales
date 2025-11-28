@@ -1,0 +1,7 @@
+# لا تحذف هذا المجلد - يحتوي على نسخ احتياطية محمية
+# Protected backups - DO NOT DELETE
+
+# تتبع المجلد فقط، وليس الملفات
+*
+!.gitignore
+!README.md
