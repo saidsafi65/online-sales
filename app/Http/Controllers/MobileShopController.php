@@ -64,6 +64,7 @@ class MobileShopController extends Controller
             'payment_method' => 'required|in:نقدي,تطبيق,مختلط',
             'cash_amount' => 'required|numeric|min:0',
             'bank_amount' => 'required|numeric|min:0',
+            'created_at' => 'nullable|date',
         ]);
 
         DB::beginTransaction();
@@ -107,7 +108,12 @@ class MobileShopController extends Controller
             $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
             
             // 5. إنشاء في جدول مبيعات معرض الجوال
-            MobileSale::create($validated);
+            // طبّق created_at إن أُرسل
+            $mobileSaleData = $validated;
+            if (!empty($validated['created_at'])) {
+                $mobileSaleData['created_at'] = $validated['created_at'];
+            }
+            MobileSale::create($mobileSaleData);
 
             // 6. إضافة تلقائياً في جدول المبيعات الرئيسي
             Sale::create([
@@ -125,7 +131,8 @@ class MobileShopController extends Controller
                 'app_amount' => $validated['bank_amount'],
                 'branch_id' => $branchId,
                 'is_returned' => false,
-                'notes' => '✅ مبيعة من معرض الجوال'
+                'notes' => '✅ مبيعة من معرض الجوال',
+                'created_at' => $validated['created_at'] ?? now(),
             ]);
 
             DB::commit();
@@ -168,6 +175,7 @@ class MobileShopController extends Controller
             'payment_method' => 'required|in:نقدي,تطبيق,مختلط',
             'cash_amount' => 'required|numeric|min:0',
             'bank_amount' => 'required|numeric|min:0',
+            'created_at' => 'nullable|date',
         ]);
 
         DB::beginTransaction();
@@ -278,7 +286,12 @@ class MobileShopController extends Controller
             }
 
             $validated['cost'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
-            $sale->update($validated);
+            // تمرير created_at عند التحديث إذا تم إدخاله
+            $updateData = $validated;
+            if (!empty($validated['created_at'])) {
+                $updateData['created_at'] = $validated['created_at'];
+            }
+            $sale->update($updateData);
             
             DB::commit();
             return redirect()->route('mobile-shop.sales.index')
@@ -491,6 +504,20 @@ class MobileShopController extends Controller
     }
 
     // ===== المصروفات =====
+    public function expensesIndex()
+    {
+        if (! Schema::hasTable('mobile_expenses')) {
+            $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+            $expenses = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15, $currentPage);
+            return view('mobile-shop.expenses.index', compact('expenses'));
+        }
+
+        $expenses = MobileExpense::where('branch_id', auth()->user()->branch_id ?? null)
+            ->orderBy('expense_date', 'desc')
+            ->paginate(15);
+        return view('mobile-shop.expenses.index', compact('expenses'));
+    }
+
     public function expensesCreate()
     {
         return view('mobile-shop.expenses.create');

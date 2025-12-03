@@ -86,6 +86,18 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="created_at" class="form-label" style="font-weight: 600; color: #1e293b;">تاريخ  المبيعة</label>
+                            <input type="datetime-local" class="form-control @error('created_at') is-invalid @enderror"
+                                   id="created_at" name="created_at"
+                                   value="{{ old('created_at', optional($sale->created_at)->format('Y-m-d\TH:i')) }}">
+                            @error('created_at')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success">
                             <i class="fas fa-save"></i> تحديث

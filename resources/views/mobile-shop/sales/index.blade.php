@@ -62,7 +62,7 @@
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format($sale->cash_amount, 2) }} شيكل</td>
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format($sale->bank_amount, 2) }} شيكل</td>
                                 <td style="padding: 1rem; color: #1e293b; font-weight: 600;">{{ number_format($sale->cash_amount + $sale->bank_amount, 2) }} شيكل</td>
-                                <td style="padding: 1rem; color: #475569;">{{ $sale->created_at->format('Y-m-d') }}</td>
+                                <td style="padding: 1rem; color: #475569;">{{ optional($sale->created_at)->format('Y-m-d') ?? '—' }}</td>
                                 <td style="padding: 1rem;">
                                     <a href="{{ route('mobile-shop.sales.edit', $sale) }}" class="btn btn-sm btn-primary">
                                         <i class="fas fa-edit"></i>

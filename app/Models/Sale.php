@@ -23,6 +23,7 @@ class Sale extends Model
         'app_amount',
         'is_returned',
         'notes',
+        'created_at',
     ];
 
     protected $casts = [

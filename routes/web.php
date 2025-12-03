@@ -101,6 +101,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
 
+        
         // الحصول على فرع المستخدم إذا لم يكن مدير نظام
          $user = auth()->user();
         $branchFilter = $user->isAdmin() ? null : $user->branch_id;

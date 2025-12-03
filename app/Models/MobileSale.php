@@ -19,7 +19,8 @@ class MobileSale extends Model
         'cost',
         'cash_amount',
         'bank_amount',
-        'branch_id'
+        'branch_id',
+        'created_at',
     ];
 
     protected $casts = [
