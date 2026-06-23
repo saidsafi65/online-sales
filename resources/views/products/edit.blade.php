@@ -345,7 +345,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label for="price" class="form-label">
                                 <i class="fas fa-money-bill-wave"></i>
                                 السعر (بالشيكل)
@@ -359,6 +359,41 @@
                                    placeholder="0.00"
                                    required>
                             @error('price')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="discount" class="form-label">
+                                <i class="fas fa-percent"></i>
+                                الخصم (%)
+                            </label>
+                            <input type="number" 
+                                   class="form-control @error('discount') is-invalid @enderror" 
+                                   id="discount" 
+                                   name="discount" 
+                                   step="0.01" 
+                                   min="0" 
+                                   max="100"
+                                   value="{{ old('discount', $product->discount) }}"
+                                   placeholder="0.00">
+                            @error('discount')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-12">
+                            <label for="category" class="form-label">
+                                <i class="fas fa-folder"></i>
+                                التصنيف
+                            </label>
+                            <input type="text" 
+                                   class="form-control @error('category') is-invalid @enderror" 
+                                   id="category" 
+                                   name="category" 
+                                   value="{{ old('category', $product->category) }}"
+                                   placeholder="مثال: إلكترونيات">
+                            @error('category')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
