@@ -576,7 +576,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('products')->name('products.')->group(function () {
-        Route::get('/', [ProductController::class, 'index_admin'])->name('index-admin');
+        Route::get('/', [ProductController::class, 'index_admin'])->name('index');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::get('/{products}', [ProductController::class, 'show'])->name('show');
