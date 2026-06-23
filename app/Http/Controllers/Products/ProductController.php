@@ -16,7 +16,7 @@ class ProductController extends Controller
     public function index()
 {
     if (auth()->check()) {
-        return redirect()->route('products.index-admin');
+        return $this->index_admin();
     }
 
     return view('products.index');
