@@ -68,7 +68,7 @@ class ProductController extends Controller
 
         Product::create($validated);
 
-        return redirect()->route('products.index-admin')->with('success', 'تم إضافة المنتج بنجاح');
+        return redirect()->route('products.index')->with('success', 'تم إضافة المنتج بنجاح');
     }
 
     /**
@@ -124,7 +124,7 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return redirect()->route('products.index-admin')->with('success', 'تم تحديث المنتج بنجاح');
+        return redirect()->route('products.index')->with('success', 'تم تحديث المنتج بنجاح');
     }
 
     /**
@@ -142,6 +142,6 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('products.index-admin')->with('success', 'تم حذف المنتج بنجاح');
+        return redirect()->route('products.index')->with('success', 'تم حذف المنتج بنجاح');
     }
 }
