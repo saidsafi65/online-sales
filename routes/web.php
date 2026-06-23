@@ -60,7 +60,14 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 // Products (public - available to guests)
-Route::get('/products', [ProductController::class, 'index'])->name('index');
+Route::get('/products', function () {
+
+    if (auth()->check()) {
+        return redirect()->route('products.index-admin');
+    }
+
+    return app(\App\Http\Controllers\Products\ProductController::class)->index();
+})->name('products.index');
 
 // Root: guests see the products list, authenticated users go to dashboard
 Route::get('/', function () {
