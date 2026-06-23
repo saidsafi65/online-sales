@@ -19,7 +19,9 @@ class ProductController extends Controller
         return $this->index_admin();
     }
 
-    return view('products.index');
+    $products = Product::latest()->paginate(12);
+
+    return view('products.index', compact('products'));
 }
     public function index_admin()
     {
