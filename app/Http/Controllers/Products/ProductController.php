@@ -14,10 +14,13 @@ class ProductController extends Controller
      * عرض جميع المنتجات
      */
     public function index()
-    {
-        $products = Product::latest()->paginate(12);
-        return view('products.index', compact('products'));
+{
+    if (auth()->check()) {
+        return redirect()->route('products.index-admin');
     }
+
+    return view('products.index');
+}
     public function index_admin()
     {
         $products = Product::latest()->paginate(12);
