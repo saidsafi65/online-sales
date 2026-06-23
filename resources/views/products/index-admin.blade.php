@@ -478,5 +478,4 @@
     @endif
 </div>
 
-@endpush
 @endsection
