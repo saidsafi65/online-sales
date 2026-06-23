@@ -130,18 +130,22 @@ class ProductController extends Controller
     /**
      * حذف المنتج
      */
-    public function destroy(Product $product)
-    {
-        // حذف الصورة من التخزين
-        if ($product->image) {
-            $imagePath = storage_path('app/public/' . $product->image);
-            if (file_exists($imagePath)) {
-                unlink($imagePath);
-            }
+    public function destroy($id)
+{
+    $product = Product::findOrFail($id);
+
+    if ($product->image) {
+        $imagePath = storage_path('app/public/' . $product->image);
+
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
         }
-
-        $product->delete();
-
-        return redirect()->route('products.index')->with('success', 'تم حذف المنتج بنجاح');
     }
+
+    $product->delete();
+
+    return redirect()
+        ->route('products.index')
+        ->with('success', 'تم حذف المنتج بنجاح');
+}
 }
