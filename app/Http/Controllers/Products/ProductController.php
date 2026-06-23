@@ -40,6 +40,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
+            'discount'    => 'nullable|numeric|min:0|max:100',
+            'category'    => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -57,9 +59,13 @@ class ProductController extends Controller
             $validated['image'] = null;
         }
 
+        // قيم افتراضية
+        $validated['discount'] = $validated['discount'] ?? 0;
+        $validated['category'] = $validated['category'] ?? 'عام';
+
         Product::create($validated);
 
-        return redirect()->route('products.index')->with('success', 'تم إضافة المنتج بنجاح');
+        return redirect()->route('products.index-admin')->with('success', 'تم إضافة المنتج بنجاح');
     }
 
     /**
@@ -86,6 +92,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
+            'discount'    => 'nullable|numeric|min:0|max:100',
+            'category'    => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -107,9 +115,13 @@ class ProductController extends Controller
             $validated['image'] = 'products/' . $imageName;
         }
 
+        // قيم افتراضية
+        $validated['discount'] = $validated['discount'] ?? $product->discount;
+        $validated['category'] = $validated['category'] ?? $product->category;
+
         $product->update($validated);
 
-        return redirect()->route('products.index')->with('success', 'تم تحديث المنتج بنجاح');
+        return redirect()->route('products.index-admin')->with('success', 'تم تحديث المنتج بنجاح');
     }
 
     /**
@@ -127,6 +139,6 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'تم حذف المنتج بنجاح');
+        return redirect()->route('products.index-admin')->with('success', 'تم حذف المنتج بنجاح');
     }
 }
