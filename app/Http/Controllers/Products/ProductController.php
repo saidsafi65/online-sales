@@ -124,6 +124,11 @@ class ProductController extends Controller
         $validated['discount'] = $validated['discount'] ?? $product->discount;
         $validated['category'] = $validated['category'] ?? $product->category;
 
+
+        // ✅ حفظ حالة المخزون
+        $validated['is_out_of_stock'] = $request->boolean('is_out_of_stock');
+
+
         $product->update($validated);
 
         return redirect()->route('products.index')->with('success', 'تم تحديث المنتج بنجاح');
