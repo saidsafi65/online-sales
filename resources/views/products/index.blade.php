@@ -664,8 +664,9 @@
                 line-height: 1.3;"></h2>
 
             <div id="modalDescription" style="
-                font-size: 0.95rem; color: #64748b;
-                line-height: 1.7; flex: 1;"></div>
+    font-size: 0.95rem; color: #64748b;
+    line-height: 1.7; flex: 1;
+    white-space: pre-wrap;"></div>
 
             <!-- السعر -->
             <div id="modalPriceSection" style="
