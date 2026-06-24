@@ -8,6 +8,10 @@ class Product extends Model
 {
     protected $fillable = ['name', 'price', 'discount', 'category', 'description', 'image', 'is_out_of_stock'];
 
+     protected $casts = [
+            'is_out_of_stock' => 'boolean',
+        ];
+    
     /**
      * احسب السعر بعد الخصم
      */
