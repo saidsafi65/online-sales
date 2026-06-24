@@ -467,7 +467,24 @@
                          data-category="{{ $product->category }}"
                          data-price="{{ $product->price }}"
                          data-discount="{{ $product->discount }}"
-                         data-product-id="{{ $product->id }}">
+                         data-product-id="{{ $product->id }}"
+                        
+                        data-name="{{ strtolower($product->name) }}" 
+     data-category="{{ $product->category }}"
+     data-price="{{ $product->price }}"
+     data-discount="{{ $product->discount }}"
+     data-product-id="{{ $product->id }}"
+     onclick="openProductModal(
+         '{{ addslashes($product->name) }}',
+         '{{ addslashes($product->category) }}',
+         '{{ $product->price }}',
+         '{{ $product->discount }}',
+         '{{ $product->image ? asset('storage/' . $product->image) : '' }}',
+         `{{ addslashes($product->description ?? '') }}`,
+         {{ $product->is_out_of_stock ? 'true' : 'false' }}
+     )"
+     style="cursor: pointer;">
+                        
                         <div class="product-image">
                             @if($product->image && file_exists(storage_path('app/public/' . $product->image)))
                                 <img src="{{ asset('storage/' . $product->image) }}" 
@@ -541,6 +558,172 @@
         </main>
     </div>
 </div>
+
+<!-- Product Modal -->
+<div id="productModal" style="
+    position: fixed; inset: 0; z-index: 9999;
+    display: none; align-items: center; justify-content: center;
+    padding: 1rem;">
+    
+    <!-- Backdrop -->
+    <div id="modalBackdrop" onclick="closeProductModal()" style="
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.3s ease;"></div>
+
+    <!-- Modal Content -->
+    <div id="modalContent" style="
+        position: relative;
+        background: white;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 750px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: grid;
+        grid-template-columns: 1fr 1fr;">
+
+        <!-- زر الإغلاق -->
+        <button onclick="closeProductModal()" style="
+            position: absolute; top: 1rem; left: 1rem;
+            width: 40px; height: 40px;
+            border-radius: 50%; border: none;
+            background: rgba(0,0,0,0.1);
+            color: #1e293b; font-size: 1.2rem;
+            cursor: pointer; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <!-- الصورة -->
+        <div id="modalImageSection" style="
+            border-radius: 24px 0 0 24px;
+            overflow: hidden;
+            min-height: 350px;
+            position: relative;
+            background: linear-gradient(135deg, #dbeafe, #e0e7ff);">
+            
+            <!--الصورة كاملة-->
+    <!--        <div id="modalImageSection" style="-->
+    <!--border-radius: 24px 0 0 24px;-->
+    <!--overflow: hidden;-->
+    <!--min-height: 350px;-->
+    <!--position: relative;-->
+    <!--background: linear-gradient(135deg, #dbeafe, #e0e7ff);-->
+    <!--display: flex;-->
+    <!--align-items: center;-->
+    <!--justify-content: center;">-->
+    <!--<img id="modalImage" src="" alt="" style="-->
+    <!--    width: 100%;-->
+    <!--    height: 100%;-->
+    <!--    object-fit: contain;-->
+    <!--    display: block;-->
+    <!--    padding: 1rem;">-->
+    
+    
+            <img id="modalImage" src="" alt="" style="
+                width: 100%; height: 100%;
+                object-fit: cover; display: block;">
+            <div id="modalPlaceholder" style="
+                display: none;
+                width: 100%; height: 100%; min-height: 350px;
+                align-items: center; justify-content: center;
+                font-size: 5rem; color: #6366f1;">
+                <i class="fas fa-box"></i>
+            </div>
+            <!-- Out of stock overlay -->
+            <div id="modalOutOfStock" style="
+                display: none;
+                position: absolute; inset: 0;
+                background: rgba(0,0,0,0.55);
+                flex-direction: column;
+                align-items: center; justify-content: center; gap: 0.75rem;">
+                <i class="fas fa-ban" style="font-size: 3rem; color: #ef4444;"></i>
+                <span style="
+                    color: white; font-weight: 800; font-size: 1.1rem;
+                    background: #ef4444; padding: 0.5rem 1.5rem;
+                    border-radius: 20px;">نفدت الكمية</span>
+            </div>
+        </div>
+
+        <!-- التفاصيل -->
+        <div style="padding: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+            
+            <div id="modalCategory" style="
+                font-size: 0.8rem; font-weight: 700;
+                color: #6366f1; text-transform: uppercase;
+                letter-spacing: 1px;"></div>
+
+            <h2 id="modalName" style="
+                font-size: 1.5rem; font-weight: 900;
+                color: #1e293b; margin: 0;
+                line-height: 1.3;"></h2>
+
+            <div id="modalDescription" style="
+                font-size: 0.95rem; color: #64748b;
+                line-height: 1.7; flex: 1;"></div>
+
+            <!-- السعر -->
+            <div id="modalPriceSection" style="
+                background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+                border-radius: 16px; padding: 1.25rem;
+                border: 2px solid #86efac;">
+                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem;">السعر</div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                    <span id="modalFinalPrice" style="
+                        font-size: 2rem; font-weight: 900; color: #10b981;"></span>
+                    <span id="modalOriginalPrice" style="
+                        font-size: 1rem; color: #94a3b8;
+                        text-decoration: line-through; display: none;"></span>
+                </div>
+                <div id="modalSaving" style="
+                    font-size: 0.85rem; color: #f59e0b;
+                    font-weight: 700; margin-top: 0.5rem; display: none;">
+                </div>
+            </div>
+
+            <!-- Badge الخصم -->
+            <div id="modalDiscountBadge" style="
+                display: none;
+                background: linear-gradient(135deg, #fef3c7, #fde68a);
+                color: #b45309; padding: 0.6rem 1.25rem;
+                border-radius: 50px; font-weight: 700;
+                font-size: 0.95rem; text-align: center;">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#modalContent::-webkit-scrollbar { width: 6px; }
+#modalContent::-webkit-scrollbar-track { background: #f1f5f9; }
+#modalContent::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+@media (max-width: 640px) {
+    #modalContent {
+        grid-template-columns: 1fr !important;
+        max-height: 85vh;
+    }
+    #modalImageSection {
+        border-radius: 24px 24px 0 0 !important;
+        min-height: 220px !important;
+    }
+}
+</style>
 
 @push('scripts')
 <script>
@@ -645,6 +828,73 @@
         const message = document.querySelector('.empty-message');
         if (message) message.remove();
     }
+    
+    function openProductModal(name, category, price, discount, image, description, isOutOfStock) {
+    const modal = document.getElementById('productModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalPlaceholder = document.getElementById('modalPlaceholder');
+    const modalOutOfStock = document.getElementById('modalOutOfStock');
+
+    // الاسم والتصنيف والوصف
+    document.getElementById('modalName').textContent = name;
+    document.getElementById('modalCategory').textContent = category;
+    document.getElementById('modalDescription').textContent = description || 'لا يوجد وصف متاح لهذا المنتج.';
+
+    // الصورة
+    if (image) {
+        modalImage.src = image;
+        modalImage.style.display = 'block';
+        modalPlaceholder.style.display = 'none';
+    } else {
+        modalImage.style.display = 'none';
+        modalPlaceholder.style.display = 'flex';
+    }
+
+    // نفدت الكمية
+    modalOutOfStock.style.display = isOutOfStock ? 'flex' : 'none';
+
+    // السعر
+    const finalPrice = discount > 0
+        ? (price - (price * discount / 100)).toFixed(2)
+        : parseFloat(price).toFixed(2);
+
+    document.getElementById('modalFinalPrice').textContent = finalPrice + ' شيكل';
+
+    if (discount > 0) {
+        const originalPrice = document.getElementById('modalOriginalPrice');
+        const saving = document.getElementById('modalSaving');
+        const badge = document.getElementById('modalDiscountBadge');
+
+        originalPrice.textContent = parseFloat(price).toFixed(2) + ' شيكل';
+        originalPrice.style.display = 'inline';
+
+        const savedAmount = (price * discount / 100).toFixed(2);
+        saving.textContent = 'توفير ' + savedAmount + ' شيكل';
+        saving.style.display = 'block';
+
+        badge.textContent = '🏷️ خصم ' + discount + '%';
+        badge.style.display = 'block';
+    } else {
+        document.getElementById('modalOriginalPrice').style.display = 'none';
+        document.getElementById('modalSaving').style.display = 'none';
+        document.getElementById('modalDiscountBadge').style.display = 'none';
+    }
+
+    // افتح الـ modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// إغلاق بـ Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeProductModal();
+});
+
 </script>
 
 @endsection
