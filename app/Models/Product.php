@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'price', 'discount', 'category', 'description', 'image'];
+    protected $fillable = ['name', 'price', 'discount', 'category', 'description', 'image', 'is_out_of_stock'];
 
     /**
      * احسب السعر بعد الخصم
