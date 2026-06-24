@@ -288,6 +288,7 @@
 </style>
 @endpush
 
+
 @section('content')
 <div class="container">
     <div class="form-container">
@@ -299,6 +300,7 @@
             </h1>
             <p class="form-subtitle">تحديث بيانات المنتج</p>
         </div>
+
 
         <!-- Error Messages -->
         @if ($errors->any())
@@ -318,6 +320,48 @@
                 @csrf
                 @method('PUT')
 
+
+<!-- حالة المخزون -->
+<div class="mb-4">
+    <h3 class="form-section-title">
+        <span class="section-icon">
+            <i class="fas fa-warehouse"></i>
+        </span>
+        حالة المخزون
+    </h3>
+
+    <div style="display: flex; align-items: center; gap: 1.5rem; padding: 1.5rem; 
+                background: {{ $product->is_out_of_stock ? 'linear-gradient(135deg, #fee2e2, #fecaca)' : 'linear-gradient(135deg, #d1fae5, #a7f3d0)' }};
+                border-radius: 16px; border: 2px solid {{ $product->is_out_of_stock ? '#fca5a5' : '#6ee7b7' }};"
+         id="stockStatusBox">
+        
+        <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 1.1rem; 
+                        color: {{ $product->is_out_of_stock ? '#991b1b' : '#065f46' }};"
+                 id="stockStatusText">
+                <i class="fas {{ $product->is_out_of_stock ? 'fa-times-circle' : 'fa-check-circle' }} me-2"></i>
+                {{ $product->is_out_of_stock ? 'الكمية منتهية' : 'المنتج متوفر' }}
+            </div>
+            <div style="font-size: 0.9rem; color: #64748b; margin-top: 0.25rem;">
+                اضغط الزر لتغيير حالة توفر المنتج
+            </div>
+        </div>
+
+        <!-- Hidden input -->
+        <input type="hidden" name="is_out_of_stock" id="stockInput" 
+               value="{{ $product->is_out_of_stock ? '1' : '0' }}">
+
+        <button type="button" onclick="toggleStock()" id="stockBtn"
+                style="padding: 0.75rem 1.75rem; border-radius: 50px; border: none; 
+                       font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+                       background: {{ $product->is_out_of_stock ? 'linear-gradient(135deg, #10b981, #34d399)' : 'linear-gradient(135deg, #ef4444, #f87171)' }};
+                       color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                       display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas {{ $product->is_out_of_stock ? 'fa-check' : 'fa-ban' }}" id="stockBtnIcon"></i>
+            <span id="stockBtnText">{{ $product->is_out_of_stock ? 'تعيين كمتوفر' : 'تعيين كمنتهي' }}</span>
+        </button>
+    </div>
+</div>
                 <!-- معلومات المنتج -->
                 <div class="mb-4">
                     <h3 class="form-section-title">
@@ -489,6 +533,39 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+    
+    function toggleStock() {
+    const input = document.getElementById('stockInput');
+    const box = document.getElementById('stockStatusBox');
+    const text = document.getElementById('stockStatusText');
+    const btn = document.getElementById('stockBtn');
+    const btnIcon = document.getElementById('stockBtnIcon');
+    const btnText = document.getElementById('stockBtnText');
+
+    const isOutOfStock = input.value === '1';
+
+    if (isOutOfStock) {
+        // تحويل إلى متوفر
+        input.value = '0';
+        box.style.background = 'linear-gradient(135deg, #d1fae5, #a7f3d0)';
+        box.style.borderColor = '#6ee7b7';
+        text.style.color = '#065f46';
+        text.innerHTML = '<i class="fas fa-check-circle me-2"></i>المنتج متوفر';
+        btn.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
+        btnIcon.className = 'fas fa-ban';
+        btnText.textContent = 'تعيين كمنتهي';
+    } else {
+        // تحويل إلى منتهي
+        input.value = '1';
+        box.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+        box.style.borderColor = '#fca5a5';
+        text.style.color = '#991b1b';
+        text.innerHTML = '<i class="fas fa-times-circle me-2"></i>الكمية منتهية';
+        btn.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
+        btnIcon.className = 'fas fa-check';
+        btnText.textContent = 'تعيين كمتوفر';
+    }
+}
 </script>
 @endpush
 @endsection
