@@ -576,14 +576,14 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('products')->name('products.')->group(function () {
-        Route::get('/', [ProductController::class, 'index_admin'])->name('index');
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-        Route::post('/', [ProductController::class, 'store'])->name('store');
-        Route::get('/{products}', [ProductController::class, 'show'])->name('show');
-        Route::get('/{products}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{products}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{products}', [ProductController::class, 'destroy'])->name('destroy');
-    });
+    Route::get('/', [ProductController::class, 'index_admin'])->name('index');
+    Route::get('/create', [ProductController::class, 'create'])->name('create');
+    Route::post('/', [ProductController::class, 'store'])->name('store');
+    Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+    Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+    Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+    Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+});
 
 
     // Clear config cache route
@@ -602,5 +602,3 @@ Route::middleware('auth')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-
-
