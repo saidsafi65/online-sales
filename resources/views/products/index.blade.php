@@ -486,6 +486,20 @@
                                 </div>
                             @endif
                         </div>
+                        @if($product->is_out_of_stock)
+    <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); 
+                display: flex; flex-direction: column; align-items: center; 
+                justify-content: center; z-index: 5; gap: 0.5rem;">
+        <i class="fas fa-ban" style="font-size: 2.5rem; color: #ef4444; 
+                                      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>
+        <span style="color: white; font-weight: 800; font-size: 1rem; 
+                     background: #ef4444; padding: 0.4rem 1.25rem; 
+                     border-radius: 20px; letter-spacing: 0.5px;
+                     box-shadow: 0 2px 8px rgba(239,68,68,0.5);">
+            نفدت الكمية
+        </span>
+    </div>
+@endif
                         <div class="product-info">
                             <div class="product-category">{{ $product->category }}</div>
                             <h3 class="product-title">{{ $product->name }}</h3>
@@ -632,5 +646,5 @@
         if (message) message.remove();
     }
 </script>
-@endpush
+
 @endsection
