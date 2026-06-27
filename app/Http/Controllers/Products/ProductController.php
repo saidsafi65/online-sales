@@ -11,18 +11,66 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     /**
-     * عرض جميع المنتجات
+     * عرض جميع المنتجات مع دعم الفلاتر من السيرفر
      */
-    public function index()
-{
-    if (auth()->check()) {
-        return $this->index_admin();
+    public function index(Request $request)
+    {
+        if (auth()->check()) {
+            return redirect()->route('products.index-admin');
+        }
+
+        $query = Product::query();
+
+        // ===== البحث بالاسم =====
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // ===== فلتر التصنيف =====
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // ===== نطاق السعر =====
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->price_max);
+        }
+
+        // ===== العروض فقط =====
+        if ($request->boolean('discount')) {
+            $query->where('discount', '>', 0);
+        }
+
+        // ===== المتوفرة فقط =====
+        if ($request->boolean('in_stock')) {
+            $query->where('is_out_of_stock', 0);
+        }
+
+        // ===== الترتيب =====
+        match ($request->get('sort', 'latest')) {
+            'price-asc'  => $query->orderBy('price'),
+            'price-desc' => $query->orderByDesc('price'),
+            'discount'   => $query->orderByDesc('discount'),
+            'alpha'      => $query->orderBy('name'),
+            default      => $query->latest(),
+        };
+
+        $products        = $query->paginate(12)->withQueryString();
+        $categories      = Product::distinct()->orderBy('category')->pluck('category');
+        $minPrice        = (int) floor(Product::min('price') ?? 0);
+        $maxPrice        = (int) ceil(Product::max('price') ?? 1000);
+        $discountedCount = Product::where('discount', '>', 0)->count();
+        $totalCount      = Product::count();
+
+        return view('products.index', compact(
+            'products', 'categories', 'minPrice', 'maxPrice',
+            'discountedCount', 'totalCount'
+        ));
     }
 
-    $products = Product::latest()->paginate(12);
-
-    return view('products.index', compact('products'));
-}
     public function index_admin()
     {
         $products = Product::latest()->paginate(12);
@@ -52,19 +100,14 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // حفظ الصورة بتسمية فريدة
-            $image = $request->file('image');
+            $image     = $request->file('image');
             $imageName = Str::random(20) . '.' . $image->getClientOriginalExtension();
-            
-            // حفظ الصورة في مجلد public/storage/products
             $image->storeAs('products', $imageName, 'public');
-            
             $validated['image'] = 'products/' . $imageName;
         } else {
             $validated['image'] = null;
         }
 
-        // قيم افتراضية
         $validated['discount'] = $validated['discount'] ?? 0;
         $validated['category'] = $validated['category'] ?? 'عام';
 
@@ -103,31 +146,22 @@ class ProductController extends Controller
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // معالجة الصورة إذا تم رفع صورة جديدة
         if ($request->hasFile('image')) {
-            // حذف الصورة القديمة
             if ($product->image) {
                 $oldImagePath = storage_path('app/public/' . $product->image);
                 if (file_exists($oldImagePath)) {
                     unlink($oldImagePath);
                 }
             }
-
-            // حفظ الصورة الجديدة
-            $image = $request->file('image');
+            $image     = $request->file('image');
             $imageName = Str::random(20) . '.' . $image->getClientOriginalExtension();
             $image->storeAs('products', $imageName, 'public');
             $validated['image'] = 'products/' . $imageName;
         }
 
-        // قيم افتراضية
-        $validated['discount'] = $validated['discount'] ?? $product->discount;
-        $validated['category'] = $validated['category'] ?? $product->category;
-
-
-        // ✅ حفظ حالة المخزون
+        $validated['discount']        = $validated['discount'] ?? $product->discount;
+        $validated['category']        = $validated['category'] ?? $product->category;
         $validated['is_out_of_stock'] = $request->boolean('is_out_of_stock');
-
 
         $product->update($validated);
 
@@ -138,21 +172,18 @@ class ProductController extends Controller
      * حذف المنتج
      */
     public function destroy($id)
-{
-    $product = Product::findOrFail($id);
+    {
+        $product = Product::findOrFail($id);
 
-    if ($product->image) {
-        $imagePath = storage_path('app/public/' . $product->image);
-
-        if (file_exists($imagePath)) {
-            unlink($imagePath);
+        if ($product->image) {
+            $imagePath = storage_path('app/public/' . $product->image);
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
         }
+
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'تم حذف المنتج بنجاح');
     }
-
-    $product->delete();
-
-    return redirect()
-        ->route('products.index')
-        ->with('success', 'تم حذف المنتج بنجاح');
-}
 }
