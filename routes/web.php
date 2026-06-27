@@ -66,7 +66,8 @@ Route::get('/products', function () {
         return redirect()->route('products.index-admin');
     }
 
-    return app(\App\Http\Controllers\Products\ProductController::class)->index();
+    // ✅ تم إضافة request() هنا
+    return app(\App\Http\Controllers\Products\ProductController::class)->index(request());
 })->name('products.index');
 
 // Root: guests see the products list, authenticated users go to dashboard
@@ -75,8 +76,10 @@ Route::get('/', function () {
         return redirect()->route('dashboard');
     }
 
-    return app(\App\Http\Controllers\Products\ProductController::class)->index();
+    // ✅ تم إضافة request() هنا
+    return app(\App\Http\Controllers\Products\ProductController::class)->index(request());
 })->name('home');
+
 
 // All management routes (dashboard, sales, repairs, etc.) require authentication
 Route::middleware('auth')->group(function () {
@@ -575,8 +578,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('products')->name('products.')->group(function () {
-    Route::get('/', [ProductController::class, 'index_admin'])->name('index');
+Route::prefix('products')->name('products.')->group(function () {
+    Route::get('/admin', [ProductController::class, 'index_admin'])->name('index-admin'); // ← اسم ومسار مختلف
     Route::get('/create', [ProductController::class, 'create'])->name('create');
     Route::post('/', [ProductController::class, 'store'])->name('store');
     Route::get('/{product}', [ProductController::class, 'show'])->name('show');
