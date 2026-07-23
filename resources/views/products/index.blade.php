@@ -165,13 +165,20 @@
 }
 .search-wrap { flex:1;min-width:180px;position:relative; }
 .search-wrap input {
-    width:100%;padding:.72rem 1rem .72rem 2.6rem;border:1.5px solid var(--slate-200);
+    width:100%;padding:.72rem 2.8rem .72rem 1rem;border:1.5px solid var(--slate-200);
     border-radius:var(--r-md);font-family:inherit;font-size:.93rem;color:var(--slate-700);
     background:var(--slate-50);transition:border-color var(--t),box-shadow var(--t);
 }
 .search-wrap input::placeholder { color:var(--slate-400); }
 .search-wrap input:focus { outline:none;border-color:var(--brand);background:white;box-shadow:0 0 0 3px rgba(79,70,229,.1); }
-.search-icon { position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--slate-400);pointer-events:none; }
+.search-btn {
+    position:absolute;left:.4rem;top:50%;transform:translateY(-50%);
+    width:32px;height:32px;border:none;border-radius:var(--r-sm);
+    background:var(--brand);color:white;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background var(--t);
+}
+.search-btn:hover { background:var(--brand-dark); }
 .sort-select {
     padding:.72rem 1rem;border:1.5px solid var(--slate-200);border-radius:var(--r-md);
     background:var(--slate-50);font-family:inherit;font-size:.88rem;color:var(--slate-700);
@@ -470,8 +477,11 @@
                     <div class="search-wrap">
                         <input type="text" name="search" id="searchInput"
                                value="{{ request('search') }}"
-                               placeholder="ابحث باسم المنتج...">
-                        <i class="fas fa-search search-icon"></i>
+                               placeholder="ابحث باسم المنتج..."
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('filterForm').submit();}">
+                        <button type="submit" class="search-btn" aria-label="بحث">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
                     <select name="sort" class="sort-select" onchange="document.getElementById('filterForm').submit()">
                         <option value="latest"     {{ request('sort','latest') === 'latest'     ? 'selected' : '' }}>الأحدث أولاً</option>
@@ -684,17 +694,6 @@ function selectCategory(cat) {
     pageInputs.forEach(i => i.remove());
     document.getElementById('filterForm').submit();
 }
-
-/* =====================================================
-   SEARCH (debounce 450ms)
-===================================================== */
-let searchTimer;
-document.getElementById('searchInput').addEventListener('input', function () {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-        document.getElementById('filterForm').submit();
-    }, 450);
-});
 
 /* =====================================================
    PRICE SLIDER
