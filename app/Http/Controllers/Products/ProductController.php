@@ -21,10 +21,14 @@ class ProductController extends Controller
 
         $query = Product::query();
 
-        // ===== البحث بالاسم =====
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+        // ===== البحث بالاسم أو التصنيف =====
+if ($request->filled('search')) {
+    $search = $request->search;
+    $query->where(function ($q) use ($search) {
+        $q->where('name', 'like', '%' . $search . '%')
+          ->orWhere('category', 'like', '%' . $search . '%');
+    });
+}
 
         // ===== فلتر التصنيف =====
         if ($request->filled('category')) {
