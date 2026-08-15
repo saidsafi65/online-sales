@@ -589,8 +589,7 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
 });
 
-// ===== Laptops  =====
-Route::get('/laptops', [SaleLaptopController::class, 'index'])->name('laptops.index');
+// ===== Laptops Management (Admin Only) =====
 Route::get('/laptops-admin', [SaleLaptopController::class, 'index_admin'])->name('laptops.index-admin');
 Route::get('/laptops/create', [SaleLaptopController::class, 'create'])->name('laptops.create');
 Route::post('/laptops', [SaleLaptopController::class, 'store'])->name('laptops.store');
@@ -599,14 +598,15 @@ Route::put('/laptops/{laptop}', [SaleLaptopController::class, 'update'])->name('
 Route::delete('/laptops/{laptop}', [SaleLaptopController::class, 'destroy'])->name('laptops.destroy');
 Route::delete('/laptop-images/{image}', [SaleLaptopController::class, 'destroyImage'])->name('laptops.images.destroy');
 
-// ===== Software =====
-Route::get('/software', [SoftwareController::class, 'index'])->name('software.index');
+
+// ===== Software Management (Admin Only) =====
 Route::get('/software-admin', [SoftwareController::class, 'index_admin'])->name('software.index-admin');
 Route::get('/software/create', [SoftwareController::class, 'create'])->name('software.create');
 Route::post('/software', [SoftwareController::class, 'store'])->name('software.store');
 Route::get('/software/{software}/edit', [SoftwareController::class, 'edit'])->name('software.edit');
 Route::put('/software/{software}', [SoftwareController::class, 'update'])->name('software.update');
 Route::delete('/software/{software}', [SoftwareController::class, 'destroy'])->name('software.destroy');
+
 
     Route::get('/run-migrate', function () {
     Artisan::call('migrate', ['--force' => true]);
