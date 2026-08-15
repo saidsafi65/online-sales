@@ -608,6 +608,15 @@ Route::get('/software/{software}/edit', [SoftwareController::class, 'edit'])->na
 Route::put('/software/{software}', [SoftwareController::class, 'update'])->name('software.update');
 Route::delete('/software/{software}', [SoftwareController::class, 'destroy'])->name('software.destroy');
 
+    Route::get('/run-migrate', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    $migrateOutput = Artisan::output();
+
+    Artisan::call('storage:link');
+    $linkOutput = Artisan::output();
+
+    return '<pre>' . e($migrateOutput) . "\n---\n" . e($linkOutput) . '</pre>';
+});
     // Clear config cache route
     Route::get('/fix-config', function () {
         Artisan::call('config:clear');
