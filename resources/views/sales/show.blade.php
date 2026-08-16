@@ -52,22 +52,35 @@
     @push('scripts')
     <script>
         function returnSale(saleId) {
+            const SALES_BASE_URL = "{{ url('/sales') }}";
+
             if (confirm('هل أنت متأكد من إرجاع هذه المبيعة؟')) {
-                fetch(`/sales/${saleId}/return`, {
+                fetch(`${SALES_BASE_URL}/${saleId}/return`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('تم إرجاع المبيعة بنجاح');
-                        location.reload();
-                    } else {
-                        alert('حدث خطأ أثناء إرجاع المبيعة');
+                .then(async (response) => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (parseErr) {
+                        throw new Error('استجابة غير متوقعة من السيرفر (HTTP ' + response.status + ')');
                     }
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data && data.message ? data.message : ('حدث خطأ (HTTP ' + response.status + ')'));
+                    }
+
+                    alert(data.message || 'تم إرجاع المبيعة بنجاح');
+                    location.reload();
+                })
+                .catch((error) => {
+                    console.error('returnSale error:', error);
+                    alert('حدث خطأ أثناء إرجاع المبيعة: ' + error.message);
                 });
             }
         }
