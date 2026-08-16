@@ -445,6 +445,94 @@ Route::middleware('auth')->group(function () {
     // إرجاع عملية بيع
     Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
 
+    // ==========================================================
+    // 🔍 صفحة تشخيص مؤقتة لمشكلة زر الإرجاع - احذفها بعد ما تنحل المشكلة
+    // افتحها من المتصفح مباشرة: /debug-return/{id} (حط رقم مبيعة حقيقي)
+    // ==========================================================
+    Route::get('/debug-return/{id}', function ($id) {
+        header('Content-Type: text/html; charset=utf-8');
+        $out = "<div dir='rtl' style='font-family: monospace; font-size: 15px; line-height: 1.8; padding: 20px;'>";
+
+        // 1) هل الراوت مسجل أصلاً؟
+        $route = \Illuminate\Support\Facades\Route::getRoutes()->getByName('sales.return');
+        $out .= "<h3>1) هل route اسمه sales.return مسجل؟</h3>";
+        if ($route) {
+            $out .= "✅ نعم موجود<br>";
+            $out .= "URI: <b>".$route->uri()."</b><br>";
+            $out .= "Action: <b>".$route->getActionName()."</b><br>";
+        } else {
+            $out .= "❌ غير موجود إطلاقًا! (مشكلة route cache قديم — روح على /fix-config)";
+        }
+
+        // 2) شو توقيع (signature) دالة returnSale الفعلية المحمّلة حاليًا؟
+        $out .= "<h3>2) توقيع دالة returnSale المحمّلة فعليًا</h3>";
+        try {
+            $ref = new \ReflectionMethod(\App\Http\Controllers\SalesController::class, 'returnSale');
+            $params = [];
+            foreach ($ref->getParameters() as $p) {
+                $type = $p->getType() ? $p->getType()->getName() : 'mixed';
+                $params[] = $type.' $'.$p->getName();
+            }
+            $out .= "returnSale(".implode(', ', $params).")<br>";
+            if (str_contains(implode(',', $params), 'Sale $')) {
+                $out .= "⚠️ هاد التوقيع القديم (implicit model binding) — يعني SalesController.php الجديد ما انرفع!";
+            } else {
+                $out .= "✅ هاد التوقيع الجديد (int \$saleId)";
+            }
+        } catch (\Throwable $e) {
+            $out .= "❌ خطأ بقراءة الدالة: ".$e->getMessage();
+        }
+
+        // 3) هل bootstrap/app.php الجديد فعليًا مطبق؟ (تحقق غير مباشر عبر رفع استثناء تجريبي)
+        $out .= "<h3>3) معلومات المستخدم الحالي</h3>";
+        if (auth()->check()) {
+            $user = auth()->user();
+            $out .= "user_id: ".$user->id."<br>";
+            $out .= "role: ".$user->role."<br>";
+            $out .= "isAdmin(): ".(method_exists($user, 'isAdmin') && $user->isAdmin() ? 'true' : 'false')."<br>";
+            $out .= "branch_id: ".($user->branch_id ?? 'NULL')."<br>";
+        } else {
+            $out .= "❌ مش مسجل دخول أصلاً بهاي الجلسة";
+        }
+
+        // 4) جرب فعليًا تلاقي المبيعة (بدون فلتر الفرع) وشوف قيمها
+        $out .= "<h3>4) بيانات المبيعة رقم $id</h3>";
+        $sale = \App\Models\Sale::withoutGlobalScope(\App\Models\Scopes\BranchScope::class)->find($id);
+        if ($sale) {
+            $out .= "✅ موجودة<br>";
+            $out .= "branch_id: ".($sale->branch_id ?? 'NULL')."<br>";
+            $out .= "is_returned: ".($sale->is_returned ? 'true' : 'false')."<br>";
+            $out .= "product: ".$sale->product."<br>";
+            $out .= "type: ".$sale->type."<br>";
+        } else {
+            $out .= "❌ ما في مبيعة بهاد الرقم إطلاقًا بقاعدة البيانات";
+        }
+
+        // 5) شغّل نفس منطق returnSale فعليًا وشوف شو بيصير بالضبط (بدون AJAX، بدون JS)
+        $out .= "<h3>5) تشغيل فعلي لمنطق الإرجاع</h3>";
+        if (request('confirm') !== '1') {
+            $out .= "⚠️ هاد الجزء رح <b>ينفذ عملية إرجاع حقيقية</b> على هاي المبيعة (يزيد الكمية فعليًا) إذا ما كانت مرجعة قبل هيك.<br>";
+            $out .= "إذا متأكد بدك تجربها فعليًا، افتح نفس الرابط وزود بآخره: <code>?confirm=1</code>";
+        } else {
+            try {
+                $controller = new \App\Http\Controllers\SalesController();
+                $response = $controller->returnSale((int) $id);
+                $out .= "<b>النتيجة:</b><br><pre>".htmlspecialchars(json_encode(
+                    json_decode($response->getContent()), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                ))."</pre>";
+            } catch (\Throwable $e) {
+                $out .= "❌ <b>صار استثناء فعلي:</b><br>";
+                $out .= "النوع: ".get_class($e)."<br>";
+                $out .= "الرسالة: ".$e->getMessage()."<br>";
+                $out .= "الملف: ".$e->getFile().":".$e->getLine()."<br>";
+                $out .= "<pre>".htmlspecialchars($e->getTraceAsString())."</pre>";
+            }
+        }
+
+        $out .= "</div>";
+        return $out;
+    });
+
     // Repairs routes
     Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
     Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
@@ -640,9 +728,11 @@ Route::get('/run-migrate', function () {
     Route::get('/fix-config', function () {
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
+        Artisan::call('route:clear');
+        Artisan::call('view:clear');
         Artisan::call('config:cache');
 
-        return '✅ تم مسح الكاش بنجاح';
+        return '✅ تم مسح الكاش بنجاح (config + route + view)';
     });
 
     // Profile routes
