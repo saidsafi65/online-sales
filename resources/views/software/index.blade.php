@@ -205,18 +205,21 @@
                 @if($software->count() > 0)
                 <div class="product-grid">
                     @foreach ($software as $item)
-                        <div class="product-card" onclick='openModal(@json([
-                                "name" => $item->name,
-                                "developer" => $item->developer,
-                                "version" => $item->version,
-                                "category" => $item->category,
-                                "platform" => $item->platform,
-                                "license_type" => $item->license_type,
-                                "price" => $item->price !== null ? (float) $item->price : null,
-                                "description" => $item->description,
-                                "image" => $item->image ? asset("storage/".$item->image) : "",
-                                "is_out_of_stock" => (bool) $item->is_out_of_stock,
-                            ]))'>
+                        @php
+                            $softwareData = [
+                                'name' => $item->name,
+                                'developer' => $item->developer,
+                                'version' => $item->version,
+                                'category' => $item->category,
+                                'platform' => $item->platform,
+                                'license_type' => $item->license_type,
+                                'price' => $item->price !== null ? (float) $item->price : null,
+                                'description' => $item->description,
+                                'image' => $item->image ? asset('storage/'.$item->image) : '',
+                                'is_out_of_stock' => (bool) $item->is_out_of_stock,
+                            ];
+                        @endphp
+                        <div class="product-card" onclick='openModal({{ Illuminate\Support\Js::from($softwareData) }})'>
                             <div class="card-img">
                                 @if($item->image)
                                     <img src="{{ asset('storage/'.$item->image) }}" alt="{{ $item->name }}" loading="lazy">
