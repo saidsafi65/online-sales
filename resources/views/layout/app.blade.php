@@ -706,26 +706,29 @@
                             </li>
                         @endif
                         @if (auth()->check() && auth()->user()->canViewSection('products'))
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
-                                    href="{{ route('products.index') }}">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle {{ request()->routeIs('products.*') || request()->routeIs('laptops.*') || request()->routeIs('software.*') ? 'active' : '' }}"
+                                    href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="fas fa-box"></i>
                                     <span>المنتجات</span>
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('laptops.*') ? 'active' : '' }}"
-                                    href="{{ route('laptops.index') }}">
-                                    <i class="fas fa-laptop"></i>
-                                    <span>أجهزة اللابتوب</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ request()->routeIs('software.*') ? 'active' : '' }}"
-                                    href="{{ route('software.index') }}">
-                                    <i class="fas fa-compact-disc"></i>
-                                    <span>البرامج</span>
-                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('products.index') }}">
+                                            <i class="fas fa-box"></i> المنتجات
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('laptops.index') }}">
+                                            <i class="fas fa-laptop"></i> أجهزة اللابتوب
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('software.index') }}">
+                                            <i class="fas fa-compact-disc"></i> البرامج
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         @endif
                         @if (auth()->check() && auth()->user()->canViewSection('catalog'))
