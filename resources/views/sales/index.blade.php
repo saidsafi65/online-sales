@@ -291,6 +291,8 @@ $(document).ready(function() {
 });
 
 function returnSale(saleId) {
+    const SALES_BASE_URL = "{{ url('/sales') }}";
+
     Swal.fire({
         title: 'تأكيد الإرجاع',
         text: 'هل أنت متأكد من إرجاع هذه المبيعة؟',
@@ -302,28 +304,46 @@ function returnSale(saleId) {
         cancelButtonText: 'إلغاء'
     }).then((result) => {
         if (result.isConfirmed) {
-            // إرسال طلب الإرجاع
-            fetch(`/sales/${saleId}/return`, {
+            Swal.fire({
+                title: 'جاري الإرجاع...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch(`${SALES_BASE_URL}/${saleId}/return`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('تم الإرجاع!', 'تم إرجاع المبيعة بنجاح.', 'success')
-                        .then(() => location.reload());
-                } else {
-                    Swal.fire('خطأ!', 'حدث خطأ أثناء إرجاع المبيعة.', 'error');
+            .then(async (response) => {
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (parseErr) {
+                    throw new Error('استجابة غير متوقعة من السيرفر (HTTP ' + response.status + ')');
                 }
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data && data.message ? data.message : ('حدث خطأ (HTTP ' + response.status + ')'));
+                }
+
+                Swal.fire('تم الإرجاع!', data.message || 'تم إرجاع المبيعة بنجاح.', 'success')
+                    .then(() => location.reload());
+            })
+            .catch((error) => {
+                console.error('returnSale error:', error);
+                Swal.fire('خطأ!', error.message || 'حدث خطأ أثناء إرجاع المبيعة.', 'error');
             });
         }
     });
 }
 
 function deleteSale(saleId) {
+    const SALES_BASE_URL = "{{ url('/sales') }}";
+
     Swal.fire({
         title: 'تأكيد الحذف',
         text: 'هل أنت متأكد من حذف هذه المبيعة؟ لا يمكن التراجع عن هذا الإجراء!',
@@ -336,7 +356,7 @@ function deleteSale(saleId) {
     }).then((result) => {
         if (result.isConfirmed) {
             // إرسال طلب الحذف
-            fetch(`/sales/${saleId}`, {
+            fetch(`${SALES_BASE_URL}/${saleId}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
