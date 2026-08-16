@@ -71,6 +71,26 @@ Route::get('/products', function () {
     return app(\App\Http\Controllers\Products\ProductController::class)->index(request());
 })->name('products.index');
 
+// Laptops (public - available to guests)
+Route::get('/laptops', function () {
+
+    if (auth()->check()) {
+        return redirect()->route('laptops.index-admin');
+    }
+
+    return app(\App\Http\Controllers\Products\SaleLaptopController::class)->index(request());
+})->name('laptops.index');
+
+// Software (public - available to guests)
+Route::get('/software', function () {
+
+    if (auth()->check()) {
+        return redirect()->route('software.index-admin');
+    }
+
+    return app(\App\Http\Controllers\Products\SoftwareController::class)->index(request());
+})->name('software.index');
+
 // Root: guests see the products list, authenticated users go to dashboard
 Route::get('/', function () {
     if (Auth::check()) {
