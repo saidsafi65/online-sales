@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
+use App\Models\Scopes\BranchScope;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -355,8 +356,30 @@ class SalesController extends Controller
     /**
      * Return a sale
      */
-    public function returnSale(Sale $sale): JsonResponse
+    public function returnSale(int $saleId): JsonResponse
     {
+        // نجيب المبيعة يدويًا (متجاوزين فلتر الفرع مؤقتًا) عشان نقدر نعطي رسالة خطأ واضحة
+        // بدل ما تفشل عملية الـ route model binding بصمت وترجع 404 بدون أي تفسير
+        $sale = Sale::withoutGlobalScope(BranchScope::class)->find($saleId);
+
+        if (! $sale) {
+            return response()->json([
+                'success' => false,
+                'message' => 'المبيعة غير موجودة (رقم: '.$saleId.')',
+            ], 404);
+        }
+
+        // تحقق صلاحية الفرع يدويًا (نفس منطق BranchScope) بس مع رسالة واضحة
+        $user = auth()->user();
+        if (! (method_exists($user, 'isAdmin') && $user->isAdmin())) {
+            if ((int) $sale->branch_id !== (int) $user->branch_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا تملك صلاحية إرجاع مبيعة من فرع آخر',
+                ], 403);
+            }
+        }
+
         if ($sale->is_returned) {
             return response()->json([
                 'success' => false,
@@ -386,10 +409,12 @@ class SalesController extends Controller
                     'quantity' => $currentQuantity + $restoreQty,
                 ]);
             } else {
-                // إذا لم يتم العثور على العنصر، يمكنك إرجاع خطأ أو إنشاء سجل جديد حسب الحاجة
+                // إذا لم يتم العثور على العنصر، تراجع عن كل التغييرات وأرجع خطأ واضح
+                DB::rollBack();
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'العنصر غير موجود في الكاتالوج',
+                    'message' => 'العنصر غير موجود في الكاتالوج (المنتج: '.$sale->product.' / النوع: '.$sale->type.')',
                 ], 404);
             }
 
