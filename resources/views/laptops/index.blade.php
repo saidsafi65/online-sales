@@ -363,22 +363,23 @@
                             $finalPrice = $laptop->discount > 0 ? $laptop->price * (1 - $laptop->discount / 100) : $laptop->price;
                             $saving = $laptop->price - $finalPrice;
                             $images = $laptop->images()->pluck('image');
+                            $laptopData = [
+                                'name' => $laptop->name,
+                                'brand' => $laptop->brand,
+                                'model' => $laptop->model,
+                                'processor' => $laptop->processor,
+                                'ram' => $laptop->ram,
+                                'storage' => $laptop->storage,
+                                'gpu' => $laptop->gpu,
+                                'battery_life' => $laptop->battery_life,
+                                'price' => (float) $laptop->price,
+                                'discount' => (float) $laptop->discount,
+                                'description' => $laptop->description,
+                                'is_out_of_stock' => (bool) $laptop->is_out_of_stock,
+                                'images' => $images->map(fn ($img) => asset('storage/'.$img)),
+                            ];
                         @endphp
-                        <div class="product-card" onclick='openModal(@json([
-                                "name" => $laptop->name,
-                                "brand" => $laptop->brand,
-                                "model" => $laptop->model,
-                                "processor" => $laptop->processor,
-                                "ram" => $laptop->ram,
-                                "storage" => $laptop->storage,
-                                "gpu" => $laptop->gpu,
-                                "battery_life" => $laptop->battery_life,
-                                "price" => (float) $laptop->price,
-                                "discount" => (float) $laptop->discount,
-                                "description" => $laptop->description,
-                                "is_out_of_stock" => (bool) $laptop->is_out_of_stock,
-                                "images" => $images->map(fn($img) => asset('storage/'.$img)),
-                            ]))'>
+                        <div class="product-card" onclick='openModal({{ Illuminate\Support\Js::from($laptopData) }})'>
                             <div class="card-img">
                                 @if($laptop->mainImage)
                                     <img src="{{ asset('storage/'.$laptop->mainImage->image) }}" alt="{{ $laptop->name }}" loading="lazy">
