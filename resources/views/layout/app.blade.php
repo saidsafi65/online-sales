@@ -705,6 +705,29 @@
                                 </a>
                             </li>
                         @endif
+                        @if (auth()->check() && auth()->user()->canViewSection('products'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                                    href="{{ route('products.index') }}">
+                                    <i class="fas fa-box"></i>
+                                    <span>المنتجات</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('laptops.*') ? 'active' : '' }}"
+                                    href="{{ route('laptops.index') }}">
+                                    <i class="fas fa-laptop"></i>
+                                    <span>أجهزة اللابتوب</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('software.*') ? 'active' : '' }}"
+                                    href="{{ route('software.index') }}">
+                                    <i class="fas fa-compact-disc"></i>
+                                    <span>البرامج</span>
+                                </a>
+                            </li>
+                        @endif
                         @if (auth()->check() && auth()->user()->canViewSection('catalog'))
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}"
