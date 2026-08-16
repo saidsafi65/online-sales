@@ -94,6 +94,52 @@
       opacity: 0.9;
     }
 
+    /* Guest Nav (Products / Laptops / Software) */
+    .gust-nav {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    .gust-link {
+      color: rgba(255, 255, 255, .85) !important;
+      font-weight: 700;
+      font-size: .92rem;
+      padding: .55rem 1.15rem !important;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      transition: all .25s ease;
+    }
+
+    .gust-link:hover {
+      background: rgba(255, 255, 255, .12);
+      color: #fff !important;
+    }
+
+    .gust-link.active {
+      background: #fff;
+      color: var(--primary-color) !important;
+      box-shadow: var(--shadow-md);
+    }
+
+    .navbar-toggler {
+      border-color: rgba(255, 255, 255, .4);
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255,255,255,0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    @media (max-width: 991px) {
+      .gust-nav {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, .15);
+      }
+    }
+
     /* Main Content */
     .main-content {
       flex: 1;
@@ -173,13 +219,42 @@
   <header class="header-professional">
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="{{ route('products.index') }}">
           <div class="brand-icon"><i class="fas fa-store"></i></div>
           <div class="brand-text">
             <span class="brand-title">معرض Online Sale</span>
             <span class="brand-subtitle">منتجات حصرية</span>
           </div>
         </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#gustNav" aria-controls="gustNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="gustNav">
+          <ul class="navbar-nav ms-auto gust-nav">
+            <li class="nav-item">
+              <a class="nav-link gust-link {{ request()->routeIs('products.index') ? 'active' : '' }}"
+                 href="{{ route('products.index') }}">
+                <i class="fas fa-box"></i> المنتجات
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link gust-link {{ request()->routeIs('laptops.index') ? 'active' : '' }}"
+                 href="{{ route('laptops.index') }}">
+                <i class="fas fa-laptop"></i> أجهزة اللابتوب
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link gust-link {{ request()->routeIs('software.index') ? 'active' : '' }}"
+                 href="{{ route('software.index') }}">
+                <i class="fas fa-compact-disc"></i> البرامج
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
   </header>
