@@ -9,6 +9,8 @@ class Software extends Model
 {
     use HasFactory;
 
+    protected $table = 'softwares';
+
     protected $fillable = [
         'name',
         'developer',
