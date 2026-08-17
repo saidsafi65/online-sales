@@ -91,6 +91,19 @@ Route::get('/software', function () {
     return app(\App\Http\Controllers\Products\SoftwareController::class)->index(request());
 })->name('software.index');
 
+// الصفحات الثابتة (الدعم الفني / سياسة الخصوصية / شروط الاستخدام)
+Route::get('/support', function () {
+    return view('legal.support');
+})->name('legal.support');
+
+Route::get('/privacy', function () {
+    return view('legal.privacy');
+})->name('legal.privacy');
+
+Route::get('/terms', function () {
+    return view('legal.terms');
+})->name('legal.terms');
+
 // Root: guests see the products list, authenticated users go to dashboard
 Route::get('/', function () {
     if (Auth::check()) {
