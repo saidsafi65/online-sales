@@ -29,7 +29,7 @@
                 <a href="tel:+970599971755" class="legal-contact-item">
                     <i class="fas fa-phone"></i> 0599971755
                 </a>
-                <a href="https://wa.me/970599971755" target="_blank" rel="noopener" class="legal-contact-item">
+                <a href="https://wa.me/972599971755" target="_blank" rel="noopener" class="legal-contact-item">
                     <i class="fab fa-whatsapp"></i> واتساب
                 </a>
                 <a href="mailto:said.safi.056@gmail.com" class="legal-contact-item">
