@@ -140,6 +140,46 @@
       }
     }
 
+    /* Mobile Quick Nav */
+    .mobile-quick-nav {
+      display: none;
+    }
+
+    @media (max-width: 991px) {
+      .mobile-quick-nav {
+        display: flex;
+        gap: .6rem;
+        overflow-x: auto;
+        padding: 0 1rem .9rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .mobile-quick-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .mobile-quick-link {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+        color: rgba(255, 255, 255, .85);
+        background: rgba(255, 255, 255, .1);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: .85rem;
+        padding: .5rem 1rem;
+        border-radius: 50px;
+        white-space: nowrap;
+        transition: all .2s;
+      }
+
+      .mobile-quick-link.active {
+        background: #fff;
+        color: var(--primary-color);
+      }
+    }
+
     /* Main Content */
     .main-content {
       flex: 1;
@@ -257,6 +297,19 @@
         </div>
       </div>
     </nav>
+
+    <!-- Mobile Quick Nav (always visible on small screens, no hamburger needed) -->
+    <div class="mobile-quick-nav">
+      <a href="{{ route('products.index') }}" class="mobile-quick-link {{ request()->routeIs('products.index') ? 'active' : '' }}">
+        <i class="fas fa-box"></i> المنتجات
+      </a>
+      <a href="{{ route('laptops.index') }}" class="mobile-quick-link {{ request()->routeIs('laptops.index') ? 'active' : '' }}">
+        <i class="fas fa-laptop"></i> أجهزة اللابتوب
+      </a>
+      <a href="{{ route('software.index') }}" class="mobile-quick-link {{ request()->routeIs('software.index') ? 'active' : '' }}">
+        <i class="fas fa-compact-disc"></i> البرامج
+      </a>
+    </div>
   </header>
 
   <!-- Main Content -->
