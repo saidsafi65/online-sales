@@ -868,9 +868,9 @@
                     <span class="footer-text">&copy; {{ date('Y') }} معرض Online Sale. جميع الحقوق محفوظة.</span>
                 </div>
                 <div class="footer-links">
-                    <a href="#" class="footer-link">الدعم الفني</a>
-                    <a href="#" class="footer-link">سياسة الخصوصية</a>
-                    <a href="#" class="footer-link">شروط الاستخدام</a>
+                    <a href="{{ route('legal.support') }}" class="footer-link">الدعم الفني</a>
+                    <a href="{{ route('legal.privacy') }}" class="footer-link">سياسة الخصوصية</a>
+                    <a href="{{ route('legal.terms') }}" class="footer-link">شروط الاستخدام</a>
                 </div>
             </div>
         </div>
