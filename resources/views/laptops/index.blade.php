@@ -389,7 +389,7 @@
                                 'images' => $images->map(fn ($img) => asset('storage/'.$img)),
                             ];
                         @endphp
-                        <div class="product-card" onclick='openModal({{ Illuminate\Support\Js::from($laptopData) }})'>
+                        <div class="product-card" onclick="openModal({{ Illuminate\Support\Js::from($laptopData) }})">
                             <div class="card-img">
                                 @if($laptop->mainImage)
                                     <img src="{{ asset('storage/'.$laptop->mainImage->image) }}" alt="{{ $laptop->name }}" loading="lazy">
