@@ -188,11 +188,15 @@
 /* ===== MODAL ===== */
 #modal { position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:1rem; }
 #modal.open { display:flex; }
-#modal-backdrop { position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(6px); }
+#modal-backdrop { position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);animation:fadeIn .22s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 #modal-box {
     position:relative;z-index:1;background:white;border-radius:var(--r-xl);width:100%;max-width:860px;
-    max-height:90vh;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;box-shadow:var(--sh-xl);
+    max-height:90vh;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;box-shadow:var(--sh-xl);
+    animation:slideUp .32s cubic-bezier(.175,.885,.32,1.275);
 }
+@keyframes slideUp { from{opacity:0;transform:translateY(28px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
 #modal-img-col { position:relative;background:var(--slate-100);min-height:360px;overflow:hidden;display:flex;flex-direction:column; }
 #modal-img { width:100%;height:320px;object-fit:contain;padding:16px;display:block; }
 #modal-img-placeholder { display:none;width:100%;height:320px;align-items:center;justify-content:center;font-size:5rem;color:var(--slate-300); }
@@ -204,6 +208,8 @@
 #modal-oos-overlay span { background:var(--red);color:white;font-weight:800;font-size:.95rem;padding:.45rem 1.4rem;border-radius:50px; }
 
 #modal-info-col { padding:1.85rem;display:flex;flex-direction:column;gap:.9rem;overflow-y:auto; }
+#modal-info-col::-webkit-scrollbar { width:5px; }
+#modal-info-col::-webkit-scrollbar-thumb { background:var(--slate-200);border-radius:50px; }
 #modal-brand { font-size:.73rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:1px; }
 #modal-name { font-size:1.4rem;font-weight:900;color:var(--slate-900);margin:0;line-height:1.25; }
 
@@ -221,9 +227,11 @@
 #modal-discount-badge { display:none;background:var(--amber-light);color:var(--amber);border:1.5px solid #fcd34d;border-radius:50px;padding:.45rem 1.1rem;font-weight:800;font-size:.88rem;text-align:center; }
 #modal-close {
     position:absolute;top:.85rem;left:.85rem;width:34px;height:34px;border-radius:50%;border:none;
-    background:rgba(255,255,255,.92);color:var(--slate-700);font-size:.95rem;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm);z-index:10;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(4px);color:var(--slate-700);font-size:.95rem;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm);z-index:10;
+    transition:background var(--t),transform var(--t);
 }
+#modal-close:hover { background:white;transform:scale(1.1); }
 
 @media (max-width:1024px) {
     .shop-layout { grid-template-columns:230px 1fr;gap:1.25rem; }
@@ -237,6 +245,7 @@
     .product-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem; }
     #modal-box { grid-template-columns:1fr;max-height:88vh; }
     #modal-img-col { min-height:210px; }
+    #modal-img, #modal-img-placeholder { height:210px; }
     .spec-table { grid-template-columns:1fr; }
 }
 </style>
@@ -333,9 +342,9 @@
                         <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
                     </div>
                     <select name="sort" class="sort-select" onchange="document.getElementById('filterForm').submit()">
-                        <option value="latest" {{ request('sort','latest') === 'latest' ? 'selected' : '' }}>الأحدث أولاً</option>
-                        <option value="price-asc" {{ request('sort') === 'price-asc' ? 'selected' : '' }}>السعر: تصاعدي</option>
-                        <option value="price-desc" {{ request('sort') === 'price-desc' ? 'selected' : '' }}>السعر: تنازلي</option>
+                        <option value="price-desc" {{ request('sort','price-desc') === 'price-desc' ? 'selected' : '' }}>السعر: الأعلى أولاً</option>
+                        <option value="price-asc" {{ request('sort') === 'price-asc' ? 'selected' : '' }}>السعر: الأقل أولاً</option>
+                        <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>الأحدث أولاً</option>
                         <option value="alpha" {{ request('sort') === 'alpha' ? 'selected' : '' }}>الاسم أ–ي</option>
                     </select>
                     <div class="results-count"><strong>{{ $laptops->total() }}</strong> نتيجة</div>
@@ -363,18 +372,19 @@
                             $finalPrice = $laptop->discount > 0 ? $laptop->price * (1 - $laptop->discount / 100) : $laptop->price;
                             $saving = $laptop->price - $finalPrice;
                             $images = $laptop->images()->pluck('image');
+                            $clean = fn ($v) => $v === null ? null : mb_convert_encoding((string) $v, 'UTF-8', 'UTF-8');
                             $laptopData = [
-                                'name' => $laptop->name,
-                                'brand' => $laptop->brand,
-                                'model' => $laptop->model,
-                                'processor' => $laptop->processor,
-                                'ram' => $laptop->ram,
-                                'storage' => $laptop->storage,
-                                'gpu' => $laptop->gpu,
-                                'battery_life' => $laptop->battery_life,
+                                'name' => $clean($laptop->name),
+                                'brand' => $clean($laptop->brand),
+                                'model' => $clean($laptop->model),
+                                'processor' => $clean($laptop->processor),
+                                'ram' => $clean($laptop->ram),
+                                'storage' => $clean($laptop->storage),
+                                'gpu' => $clean($laptop->gpu),
+                                'battery_life' => $clean($laptop->battery_life),
                                 'price' => (float) $laptop->price,
                                 'discount' => (float) $laptop->discount,
-                                'description' => $laptop->description,
+                                'description' => $clean($laptop->description),
                                 'is_out_of_stock' => (bool) $laptop->is_out_of_stock,
                                 'images' => $images->map(fn ($img) => asset('storage/'.$img)),
                             ];
