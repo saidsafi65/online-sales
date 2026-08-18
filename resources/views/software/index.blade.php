@@ -241,7 +241,7 @@
                                 'is_out_of_stock' => (bool) $item->is_out_of_stock,
                             ];
                         @endphp
-                        <div class="product-card" onclick='openModal({{ Illuminate\Support\Js::from($softwareData) }})'>
+                        <div class="product-card" onclick="openModal({{ Illuminate\Support\Js::from($softwareData) }})">
                             <div class="card-img">
                                 @if($item->image)
                                     <img src="{{ asset('storage/'.$item->image) }}" alt="{{ $item->name }}" loading="lazy">
