@@ -87,21 +87,38 @@
 
 #modal { position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:1rem; }
 #modal.open { display:flex; }
-#modal-backdrop { position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(6px); }
-#modal-box { position:relative;z-index:1;background:white;border-radius:var(--r-xl);width:100%;max-width:640px;max-height:88vh;overflow-y:auto;box-shadow:var(--sh-xl);padding:2rem; }
-#modal-close { position:absolute;top:.85rem;left:.85rem;width:34px;height:34px;border-radius:50%;border:none;background:var(--slate-100);color:var(--slate-700);font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center; }
-#modal-img { width:100%;max-height:220px;object-fit:contain;background:var(--slate-50);border-radius:var(--r-md);margin-bottom:1.25rem; }
+#modal-backdrop { position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);animation:fadeIn .22s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+#modal-box {
+    position:relative;z-index:1;background:white;border-radius:var(--r-xl);width:100%;max-width:780px;
+    max-height:90vh;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;box-shadow:var(--sh-xl);
+    animation:slideUp .32s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(28px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+#modal-img-col { position:relative;background:var(--slate-100);min-height:360px;overflow:hidden;display:flex;align-items:center;justify-content:center; }
+#modal-img { width:100%;height:100%;max-height:none;object-fit:contain;padding:16px;display:block;background:transparent;border-radius:0;margin:0; }
+#modal-img-placeholder { display:none;width:100%;height:100%;min-height:360px;align-items:center;justify-content:center;font-size:5rem;color:var(--slate-300);background:linear-gradient(135deg,var(--slate-100) 0%,#cffafe 100%); }
+#modal-oos-overlay { position:absolute;inset:0;background:rgba(15,23,42,.52);display:none;flex-direction:column;align-items:center;justify-content:center;gap:.7rem; }
+#modal-oos-overlay i { font-size:2.5rem;color:#f87171; }
+#modal-oos-overlay span { background:var(--red);color:white;font-weight:800;font-size:.95rem;padding:.45rem 1.4rem;border-radius:50px; }
+
+#modal-info-col { padding:1.85rem;display:flex;flex-direction:column;gap:.9rem;overflow-y:auto; }
+#modal-info-col::-webkit-scrollbar { width:5px; }
+#modal-info-col::-webkit-scrollbar-thumb { background:var(--slate-200);border-radius:50px; }
+#modal-close { position:absolute;top:.85rem;left:.85rem;width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);color:var(--slate-700);font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm);z-index:10;transition:background var(--t),transform var(--t); }
+#modal-close:hover { background:white;transform:scale(1.1); }
 #modal-category { font-size:.73rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:1px; }
-#modal-name { font-size:1.4rem;font-weight:900;color:var(--slate-900);margin:.2rem 0; }
-#modal-dev { font-size:.85rem;color:var(--slate-500);margin-bottom:1rem; }
-.spec-table { display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.1rem; }
+#modal-name { font-size:1.4rem;font-weight:900;color:var(--slate-900);margin:.2rem 0 0; line-height:1.25; }
+#modal-dev { font-size:.85rem;color:var(--slate-500); }
+.spec-table { display:grid;grid-template-columns:1fr 1fr;gap:.6rem; }
 .spec-item { background:var(--slate-50);border:1px solid var(--slate-200);border-radius:var(--r-sm);padding:.6rem .75rem; }
 .spec-item .label { font-size:.7rem;color:var(--slate-400);font-weight:700;margin-bottom:.15rem; }
 .spec-item .value { font-size:.88rem;color:var(--slate-900);font-weight:700; }
-#modal-desc { font-size:.9rem;color:var(--slate-500);line-height:1.85;white-space:pre-wrap;margin-bottom:1.1rem; }
+#modal-desc { font-size:.9rem;color:var(--slate-500);line-height:1.85;white-space:pre-wrap; }
 #modal-price-box { background:var(--green-light);border:1.5px solid #6ee7b7;border-radius:var(--r-md);padding:1.05rem; }
 #modal-price-box .label { font-size:.75rem;font-weight:700;color:var(--slate-400);margin-bottom:.35rem; }
-#modal-final-price { font-size:1.7rem;font-weight:900;color:var(--green); }
+#modal-final-price { font-size:2rem;font-weight:900;color:var(--green);line-height:1; }
 
 @media (max-width:1024px) { .shop-layout { grid-template-columns:220px 1fr;gap:1.25rem; } .product-grid { grid-template-columns:repeat(auto-fill,minmax(195px,1fr)); } }
 @media (max-width:768px) {
@@ -111,6 +128,10 @@
     .header-stats { display:none; }
     .product-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem; }
     .spec-table { grid-template-columns:1fr; }
+    #modal-box { grid-template-columns:1fr;max-height:88vh; }
+    #modal-img-col { min-height:210px; }
+    #modal-name { font-size:1.3rem; }
+    #modal-final-price { font-size:1.7rem; }
 }
 </style>
 @endpush
@@ -206,15 +227,16 @@
                 <div class="product-grid">
                     @foreach ($software as $item)
                         @php
+                            $clean = fn ($v) => $v === null ? null : mb_convert_encoding((string) $v, 'UTF-8', 'UTF-8');
                             $softwareData = [
-                                'name' => $item->name,
-                                'developer' => $item->developer,
-                                'version' => $item->version,
-                                'category' => $item->category,
-                                'platform' => $item->platform,
-                                'license_type' => $item->license_type,
+                                'name' => $clean($item->name),
+                                'developer' => $clean($item->developer),
+                                'version' => $clean($item->version),
+                                'category' => $clean($item->category),
+                                'platform' => $clean($item->platform),
+                                'license_type' => $clean($item->license_type),
                                 'price' => $item->price !== null ? (float) $item->price : null,
-                                'description' => $item->description,
+                                'description' => $clean($item->description),
                                 'image' => $item->image ? asset('storage/'.$item->image) : '',
                                 'is_out_of_stock' => (bool) $item->is_out_of_stock,
                             ];
@@ -271,15 +293,21 @@
     <div id="modal-backdrop" onclick="closeModal()"></div>
     <div id="modal-box">
         <button id="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-        <img id="modal-img" src="" alt="" style="display:none;">
-        <div id="modal-category"></div>
-        <h2 id="modal-name"></h2>
-        <div id="modal-dev"></div>
-        <div class="spec-table" id="modal-specs"></div>
-        <p id="modal-desc"></p>
-        <div id="modal-price-box">
-            <div class="label">السعر</div>
-            <div id="modal-final-price"></div>
+        <div id="modal-img-col">
+            <img id="modal-img" src="" alt="" style="display:none;">
+            <div id="modal-img-placeholder"><i class="fas fa-compact-disc"></i></div>
+            <div id="modal-oos-overlay"><i class="fas fa-ban"></i><span>غير متوفر</span></div>
+        </div>
+        <div id="modal-info-col">
+            <div id="modal-category"></div>
+            <h2 id="modal-name"></h2>
+            <div id="modal-dev"></div>
+            <div class="spec-table" id="modal-specs"></div>
+            <p id="modal-desc"></p>
+            <div id="modal-price-box">
+                <div class="label">السعر</div>
+                <div id="modal-final-price"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -300,7 +328,15 @@ function openModal(data) {
     document.getElementById('modal-desc').textContent = data.description || 'لا يوجد وصف لهذا البرنامج.';
 
     const img = document.getElementById('modal-img');
-    if (data.image) { img.src = data.image; img.style.display = 'block'; } else { img.style.display = 'none'; }
+    const ph  = document.getElementById('modal-img-placeholder');
+    if (data.image) {
+        img.src = data.image; img.alt = data.name;
+        img.style.display = 'block'; ph.style.display = 'none';
+    } else {
+        img.style.display = 'none'; ph.style.display = 'flex';
+    }
+
+    document.getElementById('modal-oos-overlay').style.display = data.is_out_of_stock ? 'flex' : 'none';
 
     const specs = [
         ['نظام التشغيل', data.platform || '—'],
