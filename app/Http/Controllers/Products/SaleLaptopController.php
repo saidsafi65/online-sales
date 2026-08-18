@@ -46,11 +46,12 @@ class SaleLaptopController extends Controller
             $query->where('is_out_of_stock', 0);
         }
 
-        match ($request->get('sort', 'latest')) {
+        match ($request->get('sort', 'price-desc')) {
             'price-asc'  => $query->orderBy('price'),
             'price-desc' => $query->orderByDesc('price'),
             'alpha'      => $query->orderBy('name'),
-            default      => $query->latest(),
+            'latest'     => $query->latest(),
+            default      => $query->orderByDesc('price'),
         };
 
         $laptops    = $query->paginate(12)->withQueryString();
