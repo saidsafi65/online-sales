@@ -79,7 +79,7 @@
 
     .status-badge-large.in-progress {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e3a8a;
+        color: #7f1d1d;
     }
 
     .status-badge-large.completed {
@@ -101,7 +101,7 @@
     }
 
     .btn-edit-order {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        background: linear-gradient(135deg, #991b1b 0%, #8b5cf6 100%);
         color: white;
         padding: 0.875rem 2rem;
         border-radius: 12px;
@@ -178,7 +178,7 @@
     }
 
     .card-icon.device {
-        background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+        background: linear-gradient(135deg, #fee2e2 0%, #ddd6fe 100%);
         color: #8b5cf6;
     }
 

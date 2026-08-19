@@ -74,7 +74,7 @@
         justify-content: center;
         font-size: 1.2rem;
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e40af;
+        color: #b91c1c;
     }
 
     .form-label {
@@ -87,7 +87,7 @@
     }
 
     .form-label i {
-        color: #6366f1;
+        color: #991b1b;
     }
 
     .form-control {
@@ -144,7 +144,7 @@
 
     .file-input-label i {
         font-size: 2rem;
-        color: #6366f1;
+        color: #991b1b;
     }
 
     .file-input-text {

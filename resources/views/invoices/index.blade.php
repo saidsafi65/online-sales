@@ -31,7 +31,7 @@
                         <p class="mb-0 text-muted">إجمالي الفواتير: <strong>{{ $invoices->total() }}</strong></p>
                     </div>
                     <a href="{{ route('invoices.create') }}" class="btn btn-lg"
-                        style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
+                        style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
                         <i class="fas fa-plus me-2"></i>
                         إضافة فاتورة جديدة
                     </a>
@@ -51,7 +51,7 @@
                             style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
                             <div>
                                 <span
-                                    style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.9rem; font-weight: 600; display: inline-block;">
+                                    style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.9rem; font-weight: 600; display: inline-block;">
                                     {{ $invoice->invoice_number }}
                                 </span>
                             </div>
@@ -65,7 +65,7 @@
                         <div style="margin-bottom: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
                                 <div
-                                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #1e40af; font-size: 1.2rem;">
+                                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #b91c1c; font-size: 1.2rem;">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div>
@@ -183,7 +183,7 @@
                     <h3 style="color: #64748b; margin-bottom: 1rem;">لا توجد فواتير</h3>
                     <p style="color: #94a3b8; margin-bottom: 2rem;">ابدأ بإضافة فاتورة جديدة لمعرضك</p>
                     <a href="{{ route('invoices.create') }}" class="btn btn-lg"
-                        style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); display: inline-flex; align-items: center; gap: 0.5rem;">
+                        style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); display: inline-flex; align-items: center; gap: 0.5rem;">
                         <i class="fas fa-plus"></i>
                         <span>إضافة فاتورة جديدة</span>
                     </a>
@@ -214,19 +214,19 @@
                 border-radius: 8px;
                 margin: 0 0.25rem;
                 border: none;
-                color: #1e40af;
+                color: #b91c1c;
                 font-weight: 600;
                 padding: 0.5rem 1rem;
             }
 
             .pagination .page-item.active .page-link {
-                background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+                background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
                 color: white;
             }
 
             .pagination .page-link:hover {
                 background: #f1f5f9;
-                color: #1e40af;
+                color: #b91c1c;
             }
         </style>
     @endpush

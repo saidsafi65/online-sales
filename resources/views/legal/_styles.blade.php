@@ -1,6 +1,6 @@
 <style>
     .legal-hero {
-        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
         color: #fff;
         padding: 3rem 0 2.5rem;
         text-align: center;
@@ -48,7 +48,7 @@
     .legal-card h2 {
         font-size: 1.15rem;
         font-weight: 800;
-        color: #3730a3;
+        color: #991b1b;
         display: flex;
         align-items: center;
         gap: 0.6rem;
@@ -61,7 +61,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #e0e7ff;
+        background: #fee2e2;
         border-radius: 10px;
         font-size: 0.95rem;
         flex-shrink: 0;
@@ -111,20 +111,20 @@
     }
 
     .legal-contact-item i {
-        color: #4f46e5;
+        color: #dc2626;
         font-size: 1.1rem;
     }
 
     .legal-contact-item:hover {
-        color: #4f46e5;
+        color: #dc2626;
     }
 
     .legal-owner-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: #e0e7ff;
-        color: #3730a3;
+        background: #fee2e2;
+        color: #991b1b;
         border-radius: 50px;
         padding: 0.4rem 1rem;
         font-size: 0.85rem;

@@ -18,8 +18,8 @@
 
     <style>
         :root {
-            --primary-color: #1e40af;
-            --secondary-color: #6366f1;
+            --primary-color: #b91c1c;
+            --secondary-color: #991b1b;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
             --border-color: #e2e8f0;

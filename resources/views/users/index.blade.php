@@ -59,7 +59,7 @@
     <!-- جدول المستخدمين -->
     <div class="card" style="border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <table class="table table-hover" style="margin: 0;">
-            <thead style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white;">
+            <thead style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); color: white;">
                 <tr>
                     <th style="padding: 1rem;">الاسم</th>
                     <th>البريد الإلكتروني</th>

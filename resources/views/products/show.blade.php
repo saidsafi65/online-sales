@@ -45,13 +45,13 @@
     }
 
     .breadcrumb-item a {
-        color: #6366f1;
+        color: #991b1b;
         text-decoration: none;
         transition: color 0.3s;
     }
 
     .breadcrumb-item a:hover {
-        color: #1e40af;
+        color: #b91c1c;
     }
 
     .breadcrumb-item + .breadcrumb-item::before {
@@ -171,7 +171,7 @@
     }
 
     .description-title i {
-        color: #6366f1;
+        color: #991b1b;
     }
 
     .product-description-text {
@@ -189,8 +189,8 @@
     .btn-back-products {
         flex: 1;
         background: white;
-        color: #1e40af;
-        border: 2px solid #1e40af;
+        color: #b91c1c;
+        border: 2px solid #b91c1c;
         padding: 1rem 2rem;
         border-radius: 50px;
         font-weight: 700;
@@ -204,7 +204,7 @@
     }
 
     .btn-back-products:hover {
-        background: #1e40af;
+        background: #b91c1c;
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);

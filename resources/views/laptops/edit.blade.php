@@ -15,10 +15,10 @@
         width: 100%; padding: .75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
         font-family: inherit; font-size: .95rem; transition: border-color .2s;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #4f46e5; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #dc2626; }
     .form-group .hint { font-size: .78rem; color: #94a3b8; margin-top: .3rem; }
     .image-drop { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 2rem; text-align: center; color: #64748b; cursor: pointer; }
-    .image-drop:hover { border-color: #4f46e5; color: #4f46e5; }
+    .image-drop:hover { border-color: #dc2626; color: #dc2626; }
     #imagePreview { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
     #imagePreview img { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
     .existing-gallery { display: flex; flex-wrap: wrap; gap: .85rem; margin-bottom: 1rem; }

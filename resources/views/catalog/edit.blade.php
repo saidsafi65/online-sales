@@ -32,14 +32,14 @@
             <!-- معلومات المنتج الأساسية -->
             <div class="service-card card-primary mb-4">
                 <h5 style="color: var(--text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-box" style="color: #1e40af;"></i>
+                    <i class="fas fa-box" style="color: #b91c1c;"></i>
                     معلومات المنتج
                 </h5>
                 
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="product" class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-tag" style="color: #1e40af;"></i>
+                            <i class="fas fa-tag" style="color: #b91c1c;"></i>
                             اسم المنتج
                         </label>
                         <input type="text" 
@@ -57,7 +57,7 @@
 
                     <div class="col-md-6">
                         <label for="type" class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-microchip" style="color: #6366f1;"></i>
+                            <i class="fas fa-microchip" style="color: #991b1b;"></i>
                             النوع / الموديل
                         </label>
                         <input type="text" 

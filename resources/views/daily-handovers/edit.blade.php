@@ -126,7 +126,7 @@
     }
 
     .total-display {
-        background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+        background: linear-gradient(135deg, #fee2e2 0%, #ddd6fe 100%);
         border-radius: 12px;
         padding: 1.5rem;
         margin-top: 1.5rem;

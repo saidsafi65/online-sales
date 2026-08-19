@@ -19,8 +19,8 @@
 
   <style>
     :root {
-      --primary-color: #1a56db;
-      --accent-color: #6366f1;
+      --primary-color: #dc2626;
+      --accent-color: #991b1b;
       --text-primary: #1e293b;
       --text-secondary: #64748b;
       --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
@@ -29,7 +29,7 @@
 
     body {
       font-family: 'Tajawal', 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+      background: linear-gradient(135deg, #f8fafc 0%, #fee2e2 100%);
       color: var(--text-primary);
       min-height: 100vh;
       display: flex;
@@ -38,7 +38,7 @@
 
     /* Header */
     .header-professional {
-      background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
       box-shadow: var(--shadow-lg);
       border-bottom: 3px solid var(--accent-color);
       position: sticky;

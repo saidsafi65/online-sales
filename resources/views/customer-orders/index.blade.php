@@ -22,7 +22,7 @@
         font-weight: 900;
         color: var(--text-primary);
         margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -131,7 +131,7 @@
     }
 
     .orders-table thead tr {
-        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
     }
 
     .orders-table thead th {
@@ -233,7 +233,7 @@
 
     .status-badge.in-progress {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e3a8a;
+        color: #7f1d1d;
     }
 
     .status-badge.completed {

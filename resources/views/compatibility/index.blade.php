@@ -18,7 +18,7 @@
         font-weight: 900;
         color: var(--text-primary);
         margin-bottom: 0.5rem;
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -81,7 +81,7 @@
     }
 
     .compatibility-table thead tr {
-        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
     }
 
     .compatibility-table thead th {
@@ -198,7 +198,7 @@
     }
 
     .manage-btn {
-        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
         color: white;
         padding: 0.875rem 2rem;
         border-radius: 12px;
@@ -247,7 +247,7 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
         color: white;
         padding: 2rem;
         position: relative;

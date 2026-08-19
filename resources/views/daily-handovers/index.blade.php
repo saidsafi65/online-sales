@@ -114,7 +114,7 @@
     }
 
     .stat-icon.month {
-        background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+        background: linear-gradient(135deg, #fee2e2 0%, #ddd6fe 100%);
         color: #8b5cf6;
     }
 
@@ -192,7 +192,7 @@
 
     .date-badge {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e3a8a;
+        color: #7f1d1d;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: 600;

@@ -16,14 +16,14 @@
             <!-- معلومات الفاتورة -->
             <div class="service-card card-primary mb-4">
                 <h5 style="color: var(--text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-info-circle" style="color: #1e40af;"></i>
+                    <i class="fas fa-info-circle" style="color: #b91c1c;"></i>
                     معلومات الفاتورة
                 </h5>
                 
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-user" style="color: #1e40af;"></i>
+                            <i class="fas fa-user" style="color: #b91c1c;"></i>
                             اسم العميل
                         </label>
                         <input type="text" 
@@ -39,7 +39,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-calendar" style="color: #1e40af;"></i>
+                            <i class="fas fa-calendar" style="color: #b91c1c;"></i>
                             التاريخ
                         </label>
                         <input type="date" 
@@ -55,7 +55,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-                            <i class="fas fa-hashtag" style="color: #1e40af;"></i>
+                            <i class="fas fa-hashtag" style="color: #b91c1c;"></i>
                             رقم الفاتورة
                         </label>
                         <input type="text" 
@@ -328,7 +328,7 @@
 @push('styles')
 <style>
     .form-control:focus {
-        border-color: #1e40af !important;
+        border-color: #b91c1c !important;
         box-shadow: 0 0 0 0.25rem rgba(30, 64, 175, 0.15) !important;
     }
 

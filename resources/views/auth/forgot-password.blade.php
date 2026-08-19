@@ -18,8 +18,8 @@
 
     <style>
         :root {
-            --primary-color: #1e40af;
-            --secondary-color: #6366f1;
+            --primary-color: #b91c1c;
+            --secondary-color: #991b1b;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
@@ -187,7 +187,7 @@
 
         .alert-info {
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            color: #1e3a8a;
+            color: #7f1d1d;
             border: 2px solid #60a5fa;
         }
 

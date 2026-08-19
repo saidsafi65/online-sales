@@ -31,7 +31,7 @@
     .product-image-placeholder { width: 70px; height: 70px; background: linear-gradient(135deg,#e2e8f0 0%,#cbd5e1 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 1.6rem; }
     .product-name { font-weight: 700; color: #1e293b; margin-bottom: .2rem; }
     .spec-mini { font-size: .78rem; color: #64748b; }
-    .product-price-badge { background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); color: #1e40af; padding: .5rem 1rem; border-radius: 8px; font-weight: 700; display: inline-block; }
+    .product-price-badge { background: linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%); color: #b91c1c; padding: .5rem 1rem; border-radius: 8px; font-weight: 700; display: inline-block; }
     .discount-badge { background: linear-gradient(135deg,#fef3c7 0%,#fde68a 100%); color: #b45309; padding: .5rem 1rem; border-radius: 8px; font-weight: 700; display: inline-block; }
     .action-buttons { display: flex; gap: .5rem; flex-wrap: wrap; }
     .btn-action { padding: .6rem 1rem; border-radius: 8px; border: none; color: white; font-weight: 600; cursor: pointer; transition: all .3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: .5rem; font-size: .9rem; }

@@ -200,7 +200,7 @@
 
     .date-badge {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e3a8a;
+        color: #7f1d1d;
         padding: 0.5rem 1rem;
         border-radius: 20px;
         font-weight: 600;
@@ -235,7 +235,7 @@
 
     .status-badge.refunded {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e3a8a;
+        color: #7f1d1d;
     }
 
     .action-buttons {

@@ -60,7 +60,7 @@
         font-weight: 900;
         color: var(--text-primary);
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -135,7 +135,7 @@
     }
 
     .part-header {
-        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        background: linear-gradient(135deg, #f8fafc 0%, #fee2e2 100%);
         padding: 1.75rem;
         border-bottom: 2px solid var(--border-color);
     }
@@ -254,7 +254,7 @@
     }
 
     .compatible-card.current {
-        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        background: linear-gradient(135deg, #dbeafe 0%, #fee2e2 100%);
         border-color: var(--primary-color);
     }
 

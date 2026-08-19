@@ -8,9 +8,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-    --brand:        #4f46e5;
-    --brand-light:  #e0e7ff;
-    --brand-dark:   #3730a3;
+    --brand:        #dc2626;
+    --brand-light:  #fee2e2;
+    --brand-dark:   #991b1b;
     --green:        #059669;
     --green-light:  #d1fae5;
     --amber:        #d97706;
@@ -49,7 +49,7 @@
     margin-bottom: 1.75rem;
     padding: 2rem 2.25rem;
     border-radius: var(--r-xl);
-    background: linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#4338ca 100%);
+    background: linear-gradient(135deg,#7f1d1d 0%,#b91c1c 45%,#dc2626 100%);
     color: white;
     position: relative;
     overflow: hidden;
@@ -193,9 +193,9 @@
 .filter-chip {
     display:inline-flex;align-items:center;gap:.4rem;background:var(--brand-light);
     color:var(--brand-dark);border-radius:50px;padding:.28rem .8rem;font-size:.8rem;
-    font-weight:700;text-decoration:none;border:1.5px solid #c7d2fe;transition:all var(--t);
+    font-weight:700;text-decoration:none;border:1.5px solid #fca5a5;transition:all var(--t);
 }
-.filter-chip:hover { background:#c7d2fe; }
+.filter-chip:hover { background:#fca5a5; }
 
 /* ===== PRODUCT GRID ===== */
 .product-grid {
@@ -209,7 +209,7 @@
     cursor:pointer;transition:transform var(--t),box-shadow var(--t),border-color var(--t);
     animation:cardIn .32s ease both;
 }
-.product-card:hover { transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:#c7d2fe; }
+.product-card:hover { transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:#fca5a5; }
 @keyframes cardIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 
 .card-img { position:relative;height:195px;overflow:hidden;background:var(--slate-100);flex-shrink:0; }
@@ -218,7 +218,7 @@
 .card-img-placeholder {
     width:100%;height:100%;display:flex;align-items:center;justify-content:center;
     font-size:2.75rem;color:var(--slate-300);
-    background:linear-gradient(135deg,var(--slate-100) 0%,#e0e7ff 100%);
+    background:linear-gradient(135deg,var(--slate-100) 0%,#fee2e2 100%);
 }
 
 .badge-wrap { position:absolute;top:.6rem;right:.6rem;display:flex;flex-direction:column;gap:.3rem;z-index:3; }
@@ -274,7 +274,7 @@
 #modal-img-col img { width:100%;height:100%;object-fit:contain;padding:16px;display:block; }
 #modal-img-placeholder {
     display:none;width:100%;height:100%;min-height:360px;align-items:center;justify-content:center;
-    font-size:5rem;color:var(--slate-300);background:linear-gradient(135deg,var(--slate-100) 0%,#e0e7ff 100%);
+    font-size:5rem;color:var(--slate-300);background:linear-gradient(135deg,var(--slate-100) 0%,#fee2e2 100%);
 }
 #modal-oos-overlay {
     position:absolute;inset:0;background:rgba(15,23,42,.52);

@@ -35,7 +35,7 @@
                         <p class="mb-0 text-muted">إجمالي المنتجات: <strong>{{ $items->total() }}</strong></p>
                     </div>
                     <a href="{{ route('catalog.create') }}" class="btn btn-lg"
-                        style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
+                        style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
                         <i class="fas fa-plus me-2"></i>
                         إضافة منتج جديد
                     </a>
@@ -145,7 +145,7 @@
             <div class="service-card card-success">
                 <div style="overflow-x: auto; border-radius: 12px; border: 2px solid #e2e8f0;">
                     <table class="table mb-0" style="min-width: 1000px;">
-                        <thead style="background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white;">
+                        <thead style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white;">
                             <tr>
                                 <th style="padding: 1rem; text-align: center; width: 60px;">#</th>
                                 <th style="padding: 1rem;">اسم المنتج</th>
@@ -167,7 +167,7 @@
                                 ">
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <span
-                                            style="background: #1e40af; color: white; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600;">
+                                            style="background: #b91c1c; color: white; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600;">
                                             {{ ($items->currentPage() - 1) * $items->perPage() + $index + 1 }}
                                         </span>
                                     </td>
@@ -176,14 +176,14 @@
                                             @if ($item->quantity == 0)
                                                 <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
                                             @else
-                                                <i class="fas fa-box" style="color: #1e40af;"></i>
+                                                <i class="fas fa-box" style="color: #b91c1c;"></i>
                                             @endif
                                             <span style="font-weight: 600; color: #1e293b;">{{ $item->product }}</span>
                                         </div>
                                     </td>
                                     <td style="padding: 0.75rem; vertical-align: middle;">
                                         <span
-                                            style="background: #dbeafe; color: #1e40af; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">
+                                            style="background: #dbeafe; color: #b91c1c; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">
                                             {{ $item->type }}
                                         </span>
                                     </td>
@@ -268,7 +268,7 @@
                     <div>
                         <div class="service-card card-primary" style="text-align: center; padding: 1.5rem; height: 100%;">
                             <div
-                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #1e40af; font-size: 1.8rem;">
+                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #b91c1c; font-size: 1.8rem;">
                                 <i class="fas fa-boxes"></i>
                             </div>
                             <h3 style="color: #1e293b; margin-bottom: 0.5rem; font-size: 1.8rem; font-weight: 700;">
@@ -361,19 +361,19 @@
                 border-radius: 8px;
                 margin: 0 0.25rem;
                 border: none;
-                color: #1e40af;
+                color: #b91c1c;
                 font-weight: 600;
                 padding: 0.5rem 1rem;
             }
 
             .pagination .page-item.active .page-link {
-                background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+                background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
                 color: white;
             }
 
             .pagination .page-link:hover {
                 background: #f1f5f9;
-                color: #1e40af;
+                color: #b91c1c;
             }
         </style>
     @endpush

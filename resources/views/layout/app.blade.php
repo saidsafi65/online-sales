@@ -23,9 +23,9 @@
 
     <style>
         :root {
-            --primary-color: #1a56db;
-            --secondary-color: #0e7490;
-            --accent-color: #6366f1;
+            --primary-color: #dc2626;
+            --secondary-color: #991b1b;
+            --accent-color: #b91c1c;
             --dark-bg: #0f172a;
             --light-bg: #f8fafc;
             --border-color: #e2e8f0;
@@ -49,7 +49,7 @@
 
         body {
             font-family: 'Tajawal', 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #fee2e2 100%);
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -58,7 +58,7 @@
 
         /* Header Styles */
         .header-professional {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
             box-shadow: var(--shadow-lg);
             position: sticky;
             top: 0;
@@ -264,7 +264,7 @@
             font-weight: 900;
             color: var(--text-primary);
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -345,12 +345,12 @@
 
         /* Card Colors */
         .card-primary {
-            --card-color: #1e40af;
-            --card-color-light: #6366f1;
+            --card-color: #b91c1c;
+            --card-color-light: #dc2626;
         }
 
         .card-primary .service-icon {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
             color: var(--card-color);
         }
 

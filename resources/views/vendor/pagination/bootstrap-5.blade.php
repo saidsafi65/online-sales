@@ -10,7 +10,7 @@
                 </li>
             @else
                 <li class="page-item">
-                    <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #1e40af; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">
+                    <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #b91c1c; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">
                         <i class="fas fa-chevron-left" style="font-size: 1rem; width: 1rem; height: 1rem;"></i>
                     </a>
                 </li>
@@ -21,7 +21,7 @@
                 {{-- "Three Dots" Separator --}}
                 @if (is_string($element))
                     <li class="page-item disabled" aria-disabled="true">
-                        <span class="page-link" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #1e40af; font-weight: 600; line-height: 1.25rem;">{{ $element }}</span>
+                        <span class="page-link" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #b91c1c; font-weight: 600; line-height: 1.25rem;">{{ $element }}</span>
                     </li>
                 @endif
 
@@ -30,11 +30,11 @@
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
                             <li class="page-item active" aria-current="page">
-                                <span class="page-link" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%); color: white; font-weight: 600; line-height: 1.25rem;">{{ $page }}</span>
+                                <span class="page-link" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; font-weight: 600; line-height: 1.25rem;">{{ $page }}</span>
                             </li>
                         @else
                             <li class="page-item">
-                                <a class="page-link" href="{{ $url }}" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #1e40af; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">{{ $page }}</a>
+                                <a class="page-link" href="{{ $url }}" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #b91c1c; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">{{ $page }}</a>
                             </li>
                         @endif
                     @endforeach
@@ -44,7 +44,7 @@
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
                 <li class="page-item">
-                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #1e40af; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">
+                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" style="display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border-radius: 8px; border: none; color: #b91c1c; font-weight: 600; line-height: 1.25rem; transition: all 0.3s ease; cursor: pointer;">
                         <i class="fas fa-chevron-right" style="font-size: 1rem; width: 1rem; height: 1rem;"></i>
                     </a>
                 </li>

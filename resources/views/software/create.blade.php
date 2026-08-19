@@ -4,7 +4,7 @@
 
 @push('styles')
 <style>
-    .form-header { background: linear-gradient(135deg, #083344 0%, #0891b2 100%); color: white; padding: 2rem; border-radius: 20px; margin-bottom: 2rem; }
+    .form-header { background: linear-gradient(135deg, #450a0a 0%, #dc2626 100%); color: white; padding: 2rem; border-radius: 20px; margin-bottom: 2rem; }
     .form-header h1 { font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 1rem; margin: 0; }
     .form-card { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,.08); padding: 2rem; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
@@ -15,10 +15,10 @@
         width: 100%; padding: .75rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
         font-family: inherit; font-size: .95rem; transition: border-color .2s;
     }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #0891b2; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #dc2626; }
     .form-group .hint { font-size: .78rem; color: #94a3b8; margin-top: .3rem; }
     .image-drop { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 2rem; text-align: center; color: #64748b; cursor: pointer; }
-    .image-drop:hover { border-color: #0891b2; color: #0891b2; }
+    .image-drop:hover { border-color: #dc2626; color: #dc2626; }
     #imagePreview img { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; margin-top: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
     .btn-submit { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; padding: .9rem 2.2rem; border: none; border-radius: 50px; font-weight: 700; font-size: 1rem; cursor: pointer; display: inline-flex; align-items: center; gap: .6rem; box-shadow: 0 4px 15px rgba(16,185,129,.3); }
     .btn-cancel { padding: .9rem 2.2rem; border-radius: 50px; font-weight: 700; text-decoration: none; color: #64748b; border: 1.5px solid #e2e8f0; }

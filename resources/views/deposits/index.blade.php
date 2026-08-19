@@ -64,7 +64,7 @@
                                     </div>
                                 </td>
                                 <td style="padding: 0.75rem; vertical-align: middle;">
-                                    <span style="background: #dbeafe; color: #1e40af; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">
+                                    <span style="background: #dbeafe; color: #b91c1c; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">
                                         {{ $deposit->type }}
                                     </span>
                                 </td>

@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .admin-header {
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         color: white;
         padding: 2rem;
         border-radius: 20px;
@@ -67,7 +67,7 @@
     }
 
     .products-table thead {
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         color: white;
         font-weight: 700;
     }
@@ -97,7 +97,7 @@
     }
 
     .product-row-id {
-        background: linear-gradient(135deg, #1e40af 0%, #6366f1 100%);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 8px;
@@ -121,7 +121,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #6366f1;
+        color: #991b1b;
         font-size: 1.8rem;
     }
 
@@ -133,13 +133,13 @@
 
     .product-category {
         font-size: 0.85rem;
-        color: #6366f1;
+        color: #991b1b;
         font-weight: 600;
     }
 
     .product-price-badge {
         background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e40af;
+        color: #b91c1c;
         padding: 0.5rem 1rem;
         border-radius: 8px;
         font-weight: 700;
@@ -428,7 +428,7 @@
         @if($products->count() > 0)
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #b91c1c;">
                         <i class="fas fa-boxes"></i>
                     </div>
                     <div class="stat-value">{{ $products->total() }}</div>

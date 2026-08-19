@@ -7,9 +7,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-    --brand:        #4f46e5;
-    --brand-light:  #e0e7ff;
-    --brand-dark:   #3730a3;
+    --brand:        #dc2626;
+    --brand-light:  #fee2e2;
+    --brand-dark:   #991b1b;
     --green:        #059669;
     --green-light:  #d1fae5;
     --amber:        #d97706;
@@ -35,7 +35,7 @@
 
 .shop-header {
     margin-bottom:1.75rem;padding:2rem 2.25rem;border-radius:var(--r-xl);
-    background:linear-gradient(135deg,#0f172a 0%,#1e293b 45%,#334155 100%);
+    background:linear-gradient(135deg,#1a0505 0%,#7f1d1d 45%,#b91c1c 100%);
     color:white;position:relative;overflow:hidden;
 }
 .shop-header-inner { position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem; }
@@ -145,7 +145,7 @@
 .active-filters { display:flex;flex-wrap:wrap;gap:.45rem;align-items:center; }
 .filter-chip {
     display:inline-flex;align-items:center;gap:.4rem;background:var(--brand-light);color:var(--brand-dark);
-    border-radius:50px;padding:.28rem .8rem;font-size:.8rem;font-weight:700;text-decoration:none;border:1.5px solid #c7d2fe;
+    border-radius:50px;padding:.28rem .8rem;font-size:.8rem;font-weight:700;text-decoration:none;border:1.5px solid #fca5a5;
 }
 
 .product-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem; }
@@ -153,13 +153,13 @@
     background:white;border-radius:var(--r-lg);box-shadow:var(--sh-sm);border:1px solid var(--slate-200);
     overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform var(--t),box-shadow var(--t),border-color var(--t);
 }
-.product-card:hover { transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:#c7d2fe; }
+.product-card:hover { transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:#fca5a5; }
 .card-img { position:relative;height:190px;overflow:hidden;background:var(--slate-100);flex-shrink:0; }
 .card-img img { width:100%;height:100%;object-fit:contain;padding:8px;transition:transform .4s ease;display:block; }
 .product-card:hover .card-img img { transform:scale(1.05); }
 .card-img-placeholder {
     width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.75rem;color:var(--slate-300);
-    background:linear-gradient(135deg,var(--slate-100) 0%,#e0e7ff 100%);
+    background:linear-gradient(135deg,var(--slate-100) 0%,#fee2e2 100%);
 }
 .badge-wrap { position:absolute;top:.6rem;right:.6rem;display:flex;flex-direction:column;gap:.3rem;z-index:3; }
 .badge { display:inline-flex;align-items:center;gap:.28rem;padding:.28rem .65rem;border-radius:50px;font-size:.72rem;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.15); }
