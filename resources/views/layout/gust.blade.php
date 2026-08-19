@@ -76,6 +76,14 @@
       color: var(--primary-color);
       font-size: 1.5rem;
       box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 4px;
     }
 
     .brand-text {
@@ -212,13 +220,19 @@
     .footer-logo {
       width: 35px;
       height: 35px;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      background: white;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: bold;
+      overflow: hidden;
+    }
+
+    .footer-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 3px;
     }
 
     .footer-text {
@@ -260,7 +274,7 @@
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
         <a class="navbar-brand" href="{{ route('products.index') }}">
-          <div class="brand-icon"><i class="fas fa-store"></i></div>
+          <div class="brand-icon"><img src="{{ asset('images/logo.png') }}" alt="Online Sale"></div>
           <div class="brand-text">
             <span class="brand-title">معرض Online Sale</span>
             <span class="brand-subtitle">منتجات حصرية</span>
@@ -324,7 +338,7 @@
     <div class="container-fluid">
       <div class="footer-content">
         <div class="footer-info d-flex align-items-center gap-2">
-          <div class="footer-logo"><i class="fas fa-store"></i></div>
+          <div class="footer-logo"><img src="{{ asset('images/logo.png') }}" alt="Online Sale"></div>
           <span class="footer-text">&copy; {{ date('Y') }} معرض Online Sale. جميع الحقوق محفوظة.</span>
         </div>
         <div class="footer-links">

@@ -97,6 +97,14 @@
             font-size: 1.5rem;
             box-shadow: var(--shadow-md);
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .brand-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
         }
 
         .brand-text {
@@ -420,7 +428,7 @@
         .footer-logo {
             width: 35px;
             height: 35px;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            background: white;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -429,6 +437,14 @@
             font-weight: bold;
             font-size: 1.2rem;
             flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .footer-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 3px;
         }
 
         .footer-text {
@@ -673,7 +689,7 @@
                 <!-- Logo -->
                 <a class="navbar-brand" href="{{ route('dashboard') }}">
                     <div class="brand-icon">
-                        <i class="fas fa-store"></i>
+                        <img src="{{ asset('images/logo.png') }}" alt="Online Sale">
                     </div>
                     <div class="brand-text">
                         <span class="brand-title">معرض Online Sale</span>
@@ -863,7 +879,7 @@
             <div class="footer-content">
                 <div class="footer-info">
                     <div class="footer-logo">
-                        <i class="fas fa-store"></i>
+                        <img src="{{ asset('images/logo.png') }}" alt="Online Sale">
                     </div>
                     <span class="footer-text">&copy; {{ date('Y') }} معرض Online Sale. جميع الحقوق محفوظة.</span>
                 </div>

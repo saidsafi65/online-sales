@@ -33,7 +33,7 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -73,7 +73,7 @@
         .logo-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             border-radius: 20px;
             display: inline-flex;
             align-items: center;
@@ -81,7 +81,15 @@
             color: white;
             font-size: 2.5rem;
             margin-bottom: 1rem;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(185, 28, 28, 0.3);
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 8px;
         }
 
         .logo-title {
@@ -262,7 +270,7 @@
             <!-- Logo Section -->
             <div class="logo-section">
                 <div class="logo-icon">
-                    <i class="fas fa-store"></i>
+                    <img src="{{ asset('images/logo.png') }}" alt="Online Sale">
                 </div>
                 <h1 class="logo-title">معرض Online Sale</h1>
                 <p class="logo-subtitle">نظام إدارة المبيعات والصيانة</p>

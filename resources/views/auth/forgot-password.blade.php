@@ -33,7 +33,7 @@
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
