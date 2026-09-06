@@ -1,0 +1,23 @@
+# To prevent access to .env and other files
+<Files .*>
+# Apache 2.2
+<IfModule !mod_authz_core.c>
+Order deny,allow
+Deny from all
+</IfModule>
+# Apache 2.4
+<IfModule mod_authz_core.c>
+Require all denied
+</IfModule>
+</Files>
+
+<IfModule mod_alias.c>
+RedirectMatch 301 ^/$ https://online-sale.site/public
+</IfModule>
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php84” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php84___lsphp .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

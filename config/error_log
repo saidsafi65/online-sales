@@ -1,0 +1,4 @@
+[08-Jan-2026 10:34:31 America/Boise] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home1/ximnlmmy/public_html/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home1/ximnlmmy/public_html/config/services.php on line 18
