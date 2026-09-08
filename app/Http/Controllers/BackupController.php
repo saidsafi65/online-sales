@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
@@ -32,8 +34,9 @@ class BackupController extends Controller
 
         try {
             $timestamp = date('Y-m-d_H-i-s');
-            $filename = 'backup_' . $timestamp . '.sql';
-            $zipFilename = 'backup_' . $timestamp . '.zip';
+            $tenantTag = $this->currentTenantTag();
+            $filename = 'backup_' . $tenantTag . $timestamp . '.sql';
+            $zipFilename = 'backup_' . $tenantTag . $timestamp . '.zip';
             $path = storage_path('app/backups/' . $filename);
             $zipPath = storage_path('app/backups/' . $zipFilename);
 
@@ -271,6 +274,11 @@ class BackupController extends Controller
     public function download($filename)
     {
         $filename = basename($filename);
+
+        if (!$this->belongsToCurrentTenant($filename)) {
+            abort(403);
+        }
+
         $path = storage_path('app/backups/' . $filename);
 
         if (!file_exists($path)) {
@@ -288,6 +296,11 @@ class BackupController extends Controller
 
         try {
             $filename = basename($filename);
+
+            if (!$this->belongsToCurrentTenant($filename)) {
+                abort(403);
+            }
+
             $path = storage_path('app/backups/' . $filename);
 
             if (!file_exists($path)) {
@@ -475,6 +488,11 @@ class BackupController extends Controller
     {
         try {
             $filename = basename($filename);
+
+            if (!$this->belongsToCurrentTenant($filename)) {
+                abort(403);
+            }
+
             $path = storage_path('app/backups/' . $filename);
 
             if (file_exists($path)) {
@@ -507,12 +525,16 @@ class BackupController extends Controller
             glob($backupPath . '/*.sql'),
             glob($backupPath . '/*.zip')
         );
-        
+
         $backups = [];
 
         foreach ($files as $file) {
             if (strpos(basename($file), 'info_') === 0) {
                 continue; // تخطي ملفات المعلومات
+            }
+
+            if (!$this->belongsToCurrentTenant(basename($file))) {
+                continue; // نسخة معرض ثاني — ما بنعرضها هون
             }
 
             $backups[] = [
@@ -567,12 +589,14 @@ class BackupController extends Controller
         return rmdir($dir);
     }
 
-    // إنشاء نسخة احتياطية تلقائية (يمكن استخدامها مع Scheduler)
-    public function autoBackup()
+    // إنشاء نسخة احتياطية تلقائية لمعرض واحد (يستخدمها الـ Scheduler عبر autoBackupAllTenants،
+    // أو تلقائياً لـ currentTenant الحالي لو انصدت من سياق طلب HTTP عادي).
+    public function autoBackup(?Tenant $tenant = null)
     {
         try {
             $timestamp = date('Y-m-d_H-i-s');
-            $filename = 'auto_backup_' . $timestamp . '.sql';
+            $tenantTag = $this->tenantTag($tenant);
+            $filename = 'auto_backup_' . $tenantTag . $timestamp . '.sql';
             $path = storage_path('app/backups/' . $filename);
 
             if (!file_exists(storage_path('app/backups'))) {
@@ -604,28 +628,91 @@ class BackupController extends Controller
 
             // ضغط الملف إذا نجح التصدير (نفس منطق store() — يوحّد صيغة كل النسخ الاحتياطية)
             if ($returnVar === 0 && file_exists($path) && filesize($path) > 0) {
-                $zipPath = storage_path('app/backups/auto_backup_' . $timestamp . '.zip');
+                $zipPath = storage_path('app/backups/auto_backup_' . $tenantTag . $timestamp . '.zip');
                 if ($this->createZipBackup($path, $zipPath)) {
                     @unlink($path);
                 }
             }
 
-            // حذف النسخ القديمة (الاحتفاظ بآخر 7 نسخ تلقائية)
-            $this->cleanOldBackups();
+            // حذف النسخ القديمة لنفس المعرض بس (الاحتفاظ بآخر 7 نسخ تلقائية)
+            $this->cleanOldBackups(7, $tenantTag);
 
             return $returnVar === 0;
 
         } catch (\Exception $e) {
-            \Log::error('Auto backup failed: ' . $e->getMessage());
+            Log::error('Auto backup failed: ' . $e->getMessage());
             return false;
         }
     }
 
-    // حذف النسخ الاحتياطية القديمة
-    private function cleanOldBackups($keepCount = 7)
+    /**
+     * تشغيل النسخ الاحتياطي التلقائي لكل معرض نشط، الواحد تلو الآخر — يستخدمها Scheduler
+     * (routes/console.php) بدل استدعاء autoBackup() مباشرة، لأن أوامر الـ Console ما بتمر
+     * عبر ResolveTenantDatabase middleware أبداً (هيدا خاص بطلبات HTTP بس)، فبدون هالحلقة
+     * كان الجدولة بتنسخ احتياطياً قاعدة بيانات واحدة بس (يلي بالصدفة متطابقة مع mysql.*
+     * الافتراضية بملف .env)، مش كل معرض مسجّل فعلياً.
+     */
+    public function autoBackupAllTenants(): void
+    {
+        $tenants = Tenant::on('central')->where('is_active', true)->get();
+
+        foreach ($tenants as $tenant) {
+            try {
+                config(['database.connections.mysql' => array_merge(
+                    config('database.connections.mysql'),
+                    [
+                        'host' => $tenant->db_host,
+                        'port' => $tenant->db_port,
+                        'database' => $tenant->db_database,
+                        'username' => $tenant->db_username,
+                        'password' => $tenant->db_password,
+                    ]
+                )]);
+                DB::purge('mysql');
+                app()->instance('currentTenant', $tenant);
+
+                $ok = $this->autoBackup($tenant);
+                Log::info('Auto backup for tenant "' . $tenant->name . '" (#' . $tenant->id . '): ' . ($ok ? 'success' : 'FAILED'));
+            } catch (\Exception $e) {
+                Log::error('Auto backup for tenant "' . $tenant->name . '" (#' . $tenant->id . ') threw: ' . $e->getMessage());
+            }
+        }
+    }
+
+    // بادئة ملف تميّز المعرض صاحب النسخة الاحتياطية (t{id}_) — أو فاضية لو ما عرفنا المعرض
+    private function tenantTag(?Tenant $tenant = null): string
+    {
+        $tenant = $tenant ?? (app()->bound('currentTenant') ? app('currentTenant') : null);
+
+        return $tenant ? 't' . $tenant->id . '_' : '';
+    }
+
+    private function currentTenantTag(): string
+    {
+        return $this->tenantTag();
+    }
+
+    /**
+     * نسخ الملفات القديمة (بدون بادئة t{id}_ إطلاقاً) بتعتبر "قديمة من قبل الفصل حسب
+     * المعرض" وبتظهر للجميع — الوضع الحالي عملياً فيه معرض حقيقي واحد بس، فهاد التوافق
+     * الخلفي آمن؛ أي ملف بيحمل بادئة معرض ثاني ما بيظهر ولا يُتاح التعامل معه.
+     */
+    private function belongsToCurrentTenant(string $filename): bool
+    {
+        $currentTag = $this->currentTenantTag();
+
+        if (preg_match('/_t(\d+)_/', $filename, $m)) {
+            return $currentTag !== '' && $currentTag === 't' . $m[1] . '_';
+        }
+
+        return true;
+    }
+
+    // حذف النسخ الاحتياطية القديمة (لنفس بادئة المعرض بس، لو انمررت)
+    private function cleanOldBackups($keepCount = 7, string $tenantTag = '')
     {
         $backupPath = storage_path('app/backups');
-        $files = glob($backupPath . '/auto_backup_*.{sql,zip}', GLOB_BRACE);
+        $files = glob($backupPath . '/auto_backup_' . $tenantTag . '*.{sql,zip}', GLOB_BRACE);
 
         if (count($files) <= $keepCount) {
             return;
