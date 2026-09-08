@@ -26,7 +26,7 @@ class ChatController extends Controller
         ]);
     }
 
-    public function conversation(ChatMember $member)
+    public function conversation(ChatMember $member, Request $request)
     {
         $me = $this->currentMember();
         $member->loadMissing('tenant');
@@ -41,6 +41,19 @@ class ChatController extends Controller
             'member_one_id' => $oneId,
             'member_two_id' => $twoId,
         ]);
+
+        // The floating chat widget resolves/creates a conversation via this same
+        // endpoint (fetch with Accept: application/json) instead of a full page load.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'conversation_id' => $conversation->id,
+                'other' => [
+                    'id' => $member->id,
+                    'name' => $member->name,
+                    'store_name' => $member->tenant->name,
+                ],
+            ]);
+        }
 
         return view('community.index', [
             'me' => $me,

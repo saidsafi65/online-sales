@@ -1236,7 +1236,7 @@
     })();
 </script>
 
-    @include('partials.chat-toast')
+    @include('partials.chat-widget')
 
     @stack('scripts')
 </body>
