@@ -40,8 +40,8 @@
         .stamp-container {
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-150%) translateY(250%) rotate(30deg);
+            right: 50%;
+            transform: translateX(150%) translateY(250%) rotate(-30deg);
             width: 250px;
             height: 150px;
             opacity: 0.6;
@@ -266,6 +266,7 @@
 </head>
 
 <body>
+    @php $__tenant = app()->bound('currentTenant') ? app('currentTenant') : null; @endphp
     <div class="print-buttons">
         <button onclick="window.print()" class="btn btn-print">🖨️ طباعة سند القبض</button>
         <a href="{{ route('invoices.index') }}" class="btn btn-back">↩️ العودة للقائمة</a>
@@ -294,7 +295,7 @@
             </div>
             <!-- الختم -->
             <div class="stamp-container">
-                <img src="{{ asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
+                <img src="{{ $__tenant && $__tenant->stamp_path ? asset('storage/'.$__tenant->stamp_path) : asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
             </div>
             <!-- مربع المبلغ -->
             <div class="amount-box">
@@ -331,19 +332,20 @@
         <!-- التوقيعات -->
         <div class="signatures">
             <div class="signature-box">
-                <div class="signature-line">
-                    <!-- الختم -->
-                    <div class="signature-container">
-                        <img src="{{ asset('assets/logo/signature.png') }}" alt="توقيع المعرض">
-                    </div>
-                </div>
-                <div class="signature-label">توقيع المستلم</div>
-                <div style="font-size: 12px; color: #999; margin-top: 5px;">Online Sale</div>
+                <div class="signature-line"></div>
+                <div class="signature-label">توقيع المدفوع</div>
             </div>
 
             <div class="signature-box">
-                <div class="signature-line"></div>
-                <div class="signature-label">توقيع المدفوع</div>
+                <div class="signature-line">
+                    @if ($__tenant && $__tenant->signature_path)
+                        <div class="signature-container">
+                            <img src="{{ asset('storage/'.$__tenant->signature_path) }}" alt="توقيع المعرض">
+                        </div>
+                    @endif
+                </div>
+                <div class="signature-label">توقيع المستلم</div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">Online Sale</div>
             </div>
         </div>
 
