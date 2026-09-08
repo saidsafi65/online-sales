@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Repair;
+use App\Notifications\RepairCompletedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
@@ -97,7 +100,7 @@ class RepairsController extends Controller
         try {
             DB::beginTransaction();
 
-            Repair::create([
+            $repair = Repair::create([
                 'customer_name' => $request->customer_name,
                 'device_name' => $request->device_name,
                 'model' => $request->model,
@@ -120,6 +123,17 @@ class RepairsController extends Controller
             ]);
 
             DB::commit();
+
+            // إيميل شكر بعد إضافة الصيانة مباشرة (سعر + ضمان 24 ساعة) — منفصل عن
+            // RepairReadyNotification يلي بترسل لاحقاً من update() لمّا تاريخ التسليم يتعبى؛
+            // فشل الإيميل ما لازم يوقف عملية حفظ الصيانة نفسها.
+            if ($repair->email) {
+                try {
+                    Notification::route('mail', $repair->email)->notify(new RepairCompletedNotification($repair));
+                } catch (\Throwable $e) {
+                    Log::warning('RepairCompletedNotification failed', ['repair_id' => $repair->id, 'error' => $e->getMessage()]);
+                }
+            }
 
             return redirect()->route('repairs.index')->with('success', 'تم إضافة الصيانة بنجاح');
         } catch (\Exception $e) {
