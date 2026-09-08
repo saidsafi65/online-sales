@@ -234,6 +234,18 @@
             min-width: 220px;
         }
 
+        /* الموضع الصحيح مضمون هون صراحة — القاعدة الجاهزة من Bootstrap (dropdown-menu-end/RTL)
+           كانت عم تخلي القائمة تنفتح بعيدة كتير عن زر فتحها بدل ما تنلزق فيه. */
+        #userAccountDropdown .dropdown-menu {
+            position: absolute !important;
+            inset: auto !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+            margin-top: 0.5rem !important;
+            transform: none !important;
+        }
+
         .dropdown-item {
             border-radius: 8px;
             padding: 0.7rem 1rem;
@@ -912,7 +924,7 @@
                         </div>
                     </div>
                         <ul class="navbar-nav">
-                            <li class="nav-item dropdown" style="position: relative;">
+                            <li class="nav-item dropdown" id="userAccountDropdown" style="position: relative;">
                                 <a class="nav-link dropdown-toggle p-0" href="#" role="button"
                                     data-bs-toggle="dropdown" data-bs-display="static">
                                     <div class="user-section">
