@@ -223,6 +223,13 @@
                                     </td>
                                     <td style="padding: 0.75rem; text-align: center; vertical-align: middle;">
                                         <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                            <a href="{{ route('catalog.barcode-label', $item->id) }}" target="_blank" class="btn btn-sm"
+                                                style="background: #64748b; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 8px; transition: all 0.3s ease;"
+                                                title="طباعة الباركود"
+                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(100, 116, 139, 0.4)';"
+                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                                <i class="fas fa-barcode"></i>
+                                            </a>
                                             <a href="{{ route('catalog.edit', $item->id) }}" class="btn btn-sm"
                                                 style="background: #0ea5e9; color: white; border: none; padding: 0.5rem 0.75rem; border-radius: 8px; transition: all 0.3s ease;"
                                                 title="تعديل"

@@ -23,6 +23,12 @@
                     @csrf
 
                     <div class="row">
+                        <div class="col-12 mb-3">
+                            <label for="barcodeScan" class="form-label"><i class="fas fa-barcode"></i> امسح الباركود</label>
+                            <input type="text" id="barcodeScan" class="form-control" placeholder="امسح أو اكتب الباركود واضغط Enter" autocomplete="off">
+                            <small class="text-muted" id="barcodeScanFeedback"></small>
+                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label for="product" class="form-label">اسم المنتج</label>
                             <select class="form-select @error('product') is-invalid @enderror" id="product" name="product"
@@ -152,8 +158,35 @@
         (function() {
             // products is an object where keys are product names and values are arrays of available types (already filtered server-side)
             const products = @json($products->map(function($arr){ return $arr->toArray(); })->toArray() ?? []);
+            const barcodeMap = @json($barcodeMap ?? []);
             const productSelect = document.getElementById('product');
             const typeSelect = document.getElementById('type');
+            const barcodeInput = document.getElementById('barcodeScan');
+            const barcodeFeedback = document.getElementById('barcodeScanFeedback');
+
+            barcodeInput.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter') return;
+                e.preventDefault();
+
+                const code = barcodeInput.value.trim();
+                if (!code) return;
+
+                const match = barcodeMap[code];
+                if (!match) {
+                    barcodeFeedback.textContent = 'ما في منتج بهاد الباركود متوفر بالمخزون';
+                    barcodeFeedback.style.color = '#dc2626';
+                    return;
+                }
+
+                fillTypes(match.product);
+                productSelect.value = match.product;
+                typeSelect.value = match.type;
+                barcodeFeedback.textContent = '✓ تم اختيار: ' + match.product + ' - ' + match.type;
+                barcodeFeedback.style.color = '#059669';
+                barcodeInput.value = '';
+                document.getElementById('quantity').focus();
+                document.getElementById('quantity').select();
+            });
 
             function fillTypes(selectedProduct) {
                 typeSelect.innerHTML = '<option value="">اختر النوع / الموديل</option>';

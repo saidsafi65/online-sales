@@ -28,6 +28,16 @@
                     <input type="text" name="type" class="form-control" value="{{ old('type') }}" required>
                 </div>
                 <div class="col-md-6">
+                    <label class="form-label">الباركود (اختياري)</label>
+                    <div class="input-group">
+                        <input type="text" name="barcode" id="barcodeInput" class="form-control @error('barcode') is-invalid @enderror" value="{{ old('barcode') }}">
+                        <button type="button" class="btn btn-outline-secondary" id="generateBarcodeBtn">توليد</button>
+                        @error('barcode')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-6">
                     <label class="form-label">الكمية</label>
                     <input type="number" name="quantity" class="form-control" value="{{ old('quantity') }}" required>
                 </div>
@@ -47,4 +57,14 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('generateBarcodeBtn').addEventListener('click', function () {
+        fetch(@json(route('catalog.generate-barcode')), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => { document.getElementById('barcodeInput').value = data.barcode; });
+    });
+</script>
+@endpush
 @endsection

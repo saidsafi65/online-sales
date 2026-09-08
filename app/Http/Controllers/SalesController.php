@@ -89,7 +89,15 @@ class SalesController extends Controller
                 return $types->isNotEmpty();
             });
 
-        return view('sales.create', compact('products'));
+        // خريطة باركود → {product, type} لدعم مسح الباركود بشاشة إضافة البيع — بس للأصناف
+        // المتوفرة فعلياً (نفس فلترة $products فوق)، حتى ما نعرض صنف نفذت كميته.
+        $barcodeMap = $catalog->filter(function ($item) {
+            return $item->barcode && isset($item->quantity) && (int) $item->quantity > 0;
+        })->mapWithKeys(function ($item) {
+            return [$item->barcode => ['product' => $item->product, 'type' => $item->type]];
+        });
+
+        return view('sales.create', compact('products', 'barcodeMap'));
     }
 
     /**

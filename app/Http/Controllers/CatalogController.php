@@ -88,13 +88,26 @@ class CatalogController extends Controller
         $validator = Validator::make($request->all(), [
             'product' => 'required|string|max:120',
             'type' => 'required|string|max:120',
+            'barcode' => 'nullable|string|max:64|unique:catalog_items,barcode',
             'quantity' => 'required|integer|min:1',
             'wholesale_price' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
+        ], [
+            'barcode.unique' => 'هذا الباركود مستخدم أصلاً لمنتج آخر',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $updateData = [
+            'quantity' => DB::raw('quantity + '.(int) $request->quantity),
+            'wholesale_price' => $request->wholesale_price,
+            'sale_price' => $request->sale_price,
+            'is_mobile_product' => false, // المنتجات المضافة يدوياً ليست من معرض الجوال
+        ];
+        if ($request->filled('barcode')) {
+            $updateData['barcode'] = $request->barcode;
         }
 
         CatalogItem::updateOrCreate(
@@ -102,12 +115,7 @@ class CatalogController extends Controller
                 'product' => $request->product,
                 'type' => $request->type,
             ],
-            [
-                'quantity' => DB::raw('quantity + '.(int) $request->quantity),
-                'wholesale_price' => $request->wholesale_price,
-                'sale_price' => $request->sale_price,
-                'is_mobile_product' => false, // المنتجات المضافة يدوياً ليست من معرض الجوال
-            ]
+            $updateData
         );
 
         return redirect()->route('catalog.index')->with('success', 'تمت الإضافة أو التحديث بنجاح');
@@ -124,9 +132,12 @@ class CatalogController extends Controller
         $validator = Validator::make($request->all(), [
             'product' => 'required|string|max:120',
             'type' => 'required|string|max:120',
+            'barcode' => 'nullable|string|max:64|unique:catalog_items,barcode,' . $id,
             'quantity' => 'required|integer|min:0',
             'wholesale_price' => 'required|numeric|min:0',
             'sale_price' => 'required|numeric|min:0',
+        ], [
+            'barcode.unique' => 'هذا الباركود مستخدم أصلاً لمنتج آخر',
         ]);
 
         if ($validator->fails()) {
@@ -134,9 +145,29 @@ class CatalogController extends Controller
         }
 
         $item = CatalogItem::findOrFail($id);
-        $item->update($request->all());
+        $data = $request->all();
+        // فاضي يعني "امسح الباركود" — لازم null صراحة، مش '' (فراغين بيتعارضوا مع unique
+        // constraint، بعكس NULL يلي MySQL بيسمح بتكراره)
+        $data['barcode'] = $request->filled('barcode') ? $request->barcode : null;
+        $item->update($data);
 
         return redirect()->route('catalog.index')->with('success', 'تم تحديث المنتج بنجاح');
+    }
+
+    // توليد رقم باركود عشوائي غير مكرر — للاستخدام لما التاجر ما عنده باركود جاهز للمنتج
+    public function generateBarcode(): \Illuminate\Http\JsonResponse
+    {
+        do {
+            $code = (string) random_int(1000000000, 9999999999);
+        } while (CatalogItem::where('barcode', $code)->exists());
+
+        return response()->json(['barcode' => $code]);
+    }
+
+    // صفحة طباعة ملصق الباركود (اسم المنتج + السعر + الباركود نفسه)
+    public function barcodeLabel(CatalogItem $item): View
+    {
+        return view('catalog.barcode-label', compact('item'));
     }
 
     public function destroy(CatalogItem $item): RedirectResponse

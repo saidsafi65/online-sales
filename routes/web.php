@@ -497,6 +497,8 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
     Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
     Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
+    Route::get('/catalog/generate-barcode', [CatalogController::class, 'generateBarcode'])->name('catalog.generate-barcode');
+    Route::get('/catalog/{item}/barcode-label', [CatalogController::class, 'barcodeLabel'])->name('catalog.barcode-label');
     });
 
     // Maintenance Deposit routes

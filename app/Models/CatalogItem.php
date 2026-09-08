@@ -12,6 +12,7 @@ class CatalogItem extends Model
     protected $fillable = [
         'product',
         'type',
+        'barcode',
         'quantity',
         'wholesale_price',
         'sale_price',

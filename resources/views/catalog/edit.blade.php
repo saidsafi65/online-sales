@@ -74,6 +74,33 @@
                     </div>
 
                     <div class="col-12">
+                        <label for="barcode" class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-barcode" style="color: #1e293b;"></i>
+                            الباركود (اختياري)
+                        </label>
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control @error('barcode') is-invalid @enderror"
+                                   id="barcode"
+                                   name="barcode"
+                                   value="{{ old('barcode', $item->barcode) }}"
+                                   placeholder="امسحه بجهاز الباركود أو ولّده تلقائياً"
+                                   style="padding: 0.75rem 1rem; border-radius: 10px 0 0 10px; border: 2px solid #e2e8f0; font-size: 1rem;">
+                            <button type="button" class="btn btn-outline-secondary" id="generateBarcodeBtn" style="border-radius: 0 10px 10px 0;">توليد</button>
+                            @error('barcode')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        @if ($item->barcode)
+                            <small class="form-text text-muted" style="display: block; margin-top: 0.5rem;">
+                                <a href="{{ route('catalog.barcode-label', $item->id) }}" target="_blank">
+                                    <i class="fas fa-print"></i> طباعة ملصق الباركود
+                                </a>
+                            </small>
+                        @endif
+                    </div>
+
+                    <div class="col-12">
                         <label for="quantity" class="form-label" style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
                             <i class="fas fa-warehouse" style="color: #10b981;"></i>
                             الكمية المتوفرة
@@ -223,6 +250,12 @@
     // حساب الربح عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', function() {
         calculateProfit();
+    });
+
+    document.getElementById('generateBarcodeBtn').addEventListener('click', function () {
+        fetch(@json(route('catalog.generate-barcode')), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.json())
+            .then(data => { document.getElementById('barcode').value = data.barcode; });
     });
 </script>
 @endpush
