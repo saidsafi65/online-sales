@@ -148,14 +148,14 @@
     <table class="sign">
         <tr>
             <td style="width: 50%;">
+                {{ $ar('ختم المعرض') }}<br>
+                <img src="{{ $tenant && $tenant->stamp_path ? public_path('storage/'.$tenant->stamp_path) : public_path('assets/logo/stamping.png') }}">
+            </td>
+            <td style="width: 50%;">
                 {{ $ar('التوقيع المعتمد') }}
                 @if($tenant && $tenant->signature_path)
                     <br><img src="{{ public_path('storage/'.$tenant->signature_path) }}">
                 @endif
-            </td>
-            <td style="width: 50%;">
-                {{ $ar('ختم المعرض') }}<br>
-                <img src="{{ $tenant && $tenant->stamp_path ? public_path('storage/'.$tenant->stamp_path) : public_path('assets/logo/stamping.png') }}">
             </td>
         </tr>
     </table>

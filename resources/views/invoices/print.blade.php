@@ -23,7 +23,7 @@
         .stamp-container {
             position: absolute;
             bottom: 120mm;
-            left: 30mm;
+            right: 30mm;
             width: 150px;
             height: 120px;
             opacity: 0.7;
@@ -41,7 +41,7 @@
         .signature-container {
             position: absolute;
             bottom: 45mm;
-            right: 30mm;
+            left: 30mm;
             width: 140px;
             z-index: 10;
             text-align: center;
