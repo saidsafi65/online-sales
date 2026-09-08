@@ -22,6 +22,7 @@ use App\Http\Controllers\TenantManagementController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\PlatformSupportController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PlatformAuthController;
 use App\Http\Controllers\PlatformSetupController;
 use App\Http\Controllers\PlatformDashboardController;
@@ -217,6 +218,10 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     // إشعارات الدفع (Web Push) — متاحة لأي موظف نشط، بغض النظر عن صلاحياته التفصيلية
     Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::delete('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+
+    // 🔍 البحث السريع الشامل (Ctrl+K) — متاح لأي موظف نشط، النتائج نفسها مفلترة داخلياً
+    // حسب canViewSection لكل قسم، فما بيشوف الموظف نتائج بقسم ما إله صلاحية عليه.
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     // Dashboard
     Route::get('/dashboard', function () {

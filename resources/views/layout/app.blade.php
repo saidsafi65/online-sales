@@ -892,12 +892,15 @@
                     <button type="button" id="pwaInstallBtn" class="notif-bell" style="display:none;" title="ثبّت التطبيق">
                         <i class="fas fa-mobile-screen-button"></i>
                     </button>
+                    <button class="notif-bell" id="gsearchTriggerBtn" type="button" title="بحث سريع (Ctrl+K)">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </button>
                     <div class="notif-bell-wrap">
                         <button class="notif-bell" id="notifBellBtn" type="button">
                             <i class="fas fa-bell"></i>
                             <span class="notif-badge" id="notifBadge">0</span>
                         </button>
-                    
+
                         <div class="notif-dropdown" id="notifDropdown">
                             <div class="notif-dropdown-header">
                                 <h6>الإشعارات</h6>
@@ -1243,6 +1246,7 @@
     })();
 </script>
 
+    @include('partials.global-search')
     @include('partials.chat-widget')
 
     @stack('scripts')
