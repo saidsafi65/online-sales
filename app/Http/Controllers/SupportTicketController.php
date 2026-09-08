@@ -53,7 +53,7 @@ class SupportTicketController extends Controller
             'status' => 'open',
         ]);
 
-        $alertEmail = config('services.error_alert.email');
+        $alertEmail = config('services.support_ticket.email');
         if ($alertEmail) {
             try {
                 Notification::route('mail', $alertEmail)->notify(new NewSupportTicketNotification($ticket));

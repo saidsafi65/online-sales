@@ -45,6 +45,12 @@ return [
         'email' => env('ERROR_ALERT_EMAIL'),
     ],
 
+    // إيميل تذاكر الدعم الفني — منفصل عن error_alert.email عمداً (هيدا لتنبيهات
+    // الأعطال التلقائية للنظام، مش نفس الشخص/الغرض بالضرورة).
+    'support_ticket' => [
+        'email' => env('SUPPORT_TICKET_EMAIL', env('ERROR_ALERT_EMAIL')),
+    ],
+
     'tenant_provisioner' => env('TENANT_PROVISIONER', 'local'),
 
 ];
