@@ -80,7 +80,12 @@
 
     <table class="top">
         <tr>
-            <td style="width: 60%;">
+            @if($tenant && $tenant->logo_path)
+                <td style="width: 14%;">
+                    <img src="{{ public_path('storage/'.$tenant->logo_path) }}" style="max-height: 36px; max-width: 100%; object-fit: contain;">
+                </td>
+            @endif
+            <td style="width: {{ $tenant && $tenant->logo_path ? '46%' : '60%' }};">
                 <div class="brand">Online Sale <span class="en">{{ $ar('أونلاين سيل') }}</span></div>
             </td>
             <td style="width: 40%; text-align: {{ $isAr ? 'left' : 'right' }};">

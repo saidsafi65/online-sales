@@ -367,7 +367,7 @@
             <div class="header">
                 <div class="logo-section">
                     <div class="logo-box">
-                        <img src="{{ asset('assets/logo/logo.png') }}" alt="Logo">
+                        <img src="{{ $__tenant && $__tenant->logo_path ? asset('storage/'.$__tenant->logo_path) : asset('assets/logo/logo.png') }}" alt="Logo">
                     </div>
                 </div>
 

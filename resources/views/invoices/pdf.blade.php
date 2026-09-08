@@ -66,7 +66,12 @@
     <div class="header">
         <table>
             <tr>
-                <td style="width: 55%;">
+                @if($tenant && $tenant->logo_path)
+                    <td style="width: 16%;">
+                        <img src="{{ public_path('storage/'.$tenant->logo_path) }}" style="max-height: 42px; max-width: 100%; object-fit: contain;">
+                    </td>
+                @endif
+                <td style="width: {{ $tenant && $tenant->logo_path ? '49%' : '55%' }};">
                     <div class="store-ar">Online Sale - {{ $ar('أونلاين سيل') }}</div>
                     <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">{{ $ar('خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري') }}</div>
                     <div style="font-size: 11px; color: #6b7280;">{{ $ar('هاتف: 0597848937') }}</div>

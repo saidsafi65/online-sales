@@ -119,9 +119,15 @@
         <a href="{{ route('financial-claims.index') }}" class="btn btn-back">↩️ {{ $isAr ? 'العودة' : 'Back' }}</a>
     </div>
 
+    @php $tenant = app()->bound('currentTenant') ? app('currentTenant') : null; @endphp
     <div class="doc">
         <div class="top-bar">
-            <div class="brand-ar">Online Sale <span style="color:#dc2626;">أونلاين سيل</span></div>
+            <div style="display:flex; align-items:center; gap:.6rem;">
+                @if($tenant && $tenant->logo_path)
+                    <img src="{{ asset('storage/'.$tenant->logo_path) }}" alt="Logo" style="max-height:34px; max-width:90px; object-fit:contain;">
+                @endif
+                <div class="brand-ar">Online Sale <span style="color:#dc2626;">أونلاين سيل</span></div>
+            </div>
             <div class="brand-tag">{{ $labels['title'] }}</div>
         </div>
 
@@ -197,7 +203,6 @@
             @endif
 
             <div class="section-title">{{ $labels['contact'] }}</div>
-            @php $tenant = app()->bound('currentTenant') ? app('currentTenant') : null; @endphp
             <table class="contact">
                 <tr>
                     <td class="label">{{ $labels['mobile'] }}</td>
