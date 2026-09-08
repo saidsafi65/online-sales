@@ -106,6 +106,20 @@
         </div>
     </div>
 
+    <!-- اختبار ذاتي لمسار إنشاء معرض جديد -->
+    <div class="card" style="border-radius: 20px; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.08); max-width: 500px; margin-top: 1.5rem; background: white;">
+        <h5 style="font-weight: 700; margin-bottom: 0.5rem;">🧪 اختبار ذاتي لعملية إنشاء معرض</h5>
+        <p style="color:#94a3b8; font-size:0.8rem; margin-bottom:1rem;">
+            بيعمل نفس خطوات "إنشاء معرض تلقائياً" الحقيقية (قاعدة بيانات + ترحيل + فروع + هوية محادثة) على معرض تجريبي مؤقت، وبيحذفه بالكامل بالنهاية — للتأكد إنه المسار شغّال صح قبل ما يتصادف معه معرض حقيقي.
+        </p>
+        <form method="POST" action="{{ route('system-admin.maintenance.self-test-provisioning') }}">
+            @csrf
+            <button type="submit" class="btn btn-outline-info" style="width: 100%; border-radius: 10px; font-weight: 600;" onclick="return confirm('رح ينشئ ويحذف معرض تجريبي مؤقت للتأكد إنه كل شي شغّال. ممكن ياخد شوي وقت. متأكد؟')">
+                🧪 تشغيل الاختبار الذاتي
+            </button>
+        </form>
+    </div>
+
     @push('scripts')
     <script>
         function toggleDeleteConfirm(id) {

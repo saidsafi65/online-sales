@@ -136,12 +136,11 @@
                                            required>
                                 </td>
                                 <td style="padding: 0.75rem;">
-                                    <input type="number" 
-                                           name="price[]" 
-                                           class="form-control price-input" 
-                                           placeholder="السعر" 
+                                    <input type="number"
+                                           name="price[]"
+                                           class="form-control price-input"
+                                           placeholder="السعر (سالب = خصم/إرجاع)"
                                            step="0.01"
-                                           min="0"
                                            style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.6rem;"
                                            required>
                                 </td>
@@ -178,13 +177,12 @@
                                             <i class="fas fa-percentage" style="color: #f59e0b;"></i>
                                             مبلغ الخصم:
                                         </label>
-                                        <input type="number" 
-                                               name="discount_amount" 
+                                        <input type="number"
+                                               name="discount_amount"
                                                id="discountInput"
-                                               class="form-control" 
+                                               class="form-control"
                                                value="{{ old('discount_amount', 0) }}"
                                                step="0.01"
-                                               min="0"
                                                placeholder="0.00"
                                                style="max-width: 200px; width: 100%; border: 2px solid #fbbf24; border-radius: 8px; padding: 0.6rem; font-weight: 600;">
                                     </div>

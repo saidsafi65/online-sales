@@ -22,34 +22,34 @@
             <button type="button" class="btn btn-sm btn-primary" style="border-radius:8px; font-weight:600;" onclick="toggleForm('add-user-form')">➕ إضافة مستخدم</button>
         </div>
 
-        <div id="add-user-form" style="display:none; background:#f8fafc; border-radius:12px; padding:1rem; margin-bottom:1.25rem;">
+        <div id="add-user-form" style="display:{{ old('role') !== null ? 'block' : 'none' }}; background:#f8fafc; border-radius:12px; padding:1rem; margin-bottom:1.25rem;">
             <form method="POST" action="{{ route('system-admin.accounts.users.store', $selectedTenant) }}" style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;">
                 @csrf
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">الاسم</label>
-                    <input type="text" name="name" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="text" name="name" value="{{ old('name') }}" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">البريد الإلكتروني</label>
-                    <input type="email" name="email" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="email" name="email" value="{{ old('email') }}" required autocomplete="off" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">كلمة المرور</label>
-                    <input type="password" name="password" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="password" name="password" required autocomplete="new-password" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">الدور</label>
                     <select name="role" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
-                        <option value="employee">موظف</option>
-                        <option value="manager">مدير فرع</option>
-                        <option value="admin">مدير النظام (المعرض)</option>
+                        <option value="employee" {{ old('role') === 'employee' ? 'selected' : '' }}>موظف</option>
+                        <option value="manager" {{ old('role') === 'manager' ? 'selected' : '' }}>مدير فرع</option>
+                        <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>مدير النظام (المعرض)</option>
                     </select>
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">الفرع</label>
                     <select name="branch_id" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                         @foreach($branches as $b)
-                            <option value="{{ $b->id }}">{{ $b->name }}</option>
+                            <option value="{{ $b->id }}" {{ (string) old('branch_id') === (string) $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -114,28 +114,28 @@
             <button type="button" class="btn btn-sm btn-primary" style="border-radius:8px; font-weight:600;" onclick="toggleForm('add-customer-form')">➕ إضافة عميل</button>
         </div>
 
-        <div id="add-customer-form" style="display:none; background:#f8fafc; border-radius:12px; padding:1rem; margin-bottom:1.25rem;">
+        <div id="add-customer-form" style="display:{{ old('phone') !== null ? 'block' : 'none' }}; background:#f8fafc; border-radius:12px; padding:1rem; margin-bottom:1.25rem;">
             <form method="POST" action="{{ route('system-admin.accounts.customers.store', $selectedTenant) }}" style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;">
                 @csrf
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">الاسم</label>
-                    <input type="text" name="name" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="text" name="name" value="{{ old('name') }}" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">الهاتف</label>
-                    <input type="text" name="phone" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="text" name="phone" value="{{ old('phone') }}" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">البريد (اختياري)</label>
-                    <input type="email" name="email" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="email" name="email" value="{{ old('email') }}" autocomplete="off" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">كلمة المرور</label>
-                    <input type="password" name="password" required style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="password" name="password" required autocomplete="new-password" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="font-size:0.8rem; font-weight:600;">المدينة (اختياري)</label>
-                    <input type="text" name="city" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
+                    <input type="text" name="city" value="{{ old('city') }}" style="display:block; border-radius:8px; border:2px solid #e2e8f0; padding:0.5rem;">
                 </div>
                 <button type="submit" class="btn btn-sm btn-success" style="border-radius:8px; font-weight:600;">حفظ</button>
             </form>

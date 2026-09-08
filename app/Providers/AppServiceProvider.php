@@ -17,7 +17,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TenantProvisioner::class, function () {
-            return env('TENANT_PROVISIONER', 'local') === 'cpanel'
+            // ملاحظة: env() مباشرة هون كانت بترجع القيمة الافتراضية 'local' دايماً بعد
+            // أول php artisan config:cache (لارافيل بيتجاهل .env الحقيقي لما يكون
+            // فيه كاش)، فكانت تفعّل مزوّد local الخاطئ بالإنتاج بصمت. config() بيقرأ
+            // القيمة الصحيحة سواء الكاش مفعّل أو لأ.
+            return config('services.tenant_provisioner') === 'cpanel'
                 ? new CPanelTenantProvisioner()
                 : new LocalTenantProvisioner();
         });

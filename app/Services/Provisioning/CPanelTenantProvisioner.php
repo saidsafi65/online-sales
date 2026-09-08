@@ -30,8 +30,10 @@ class CPanelTenantProvisioner implements TenantProvisioner
         $slug = SlugGenerator::resolve($storeName, $desiredSlug);
         $password = Str::password(20);
 
-        $this->call($host, $username, $token, 'Mysql/create_database', ['name' => $slug]);
-        $this->call($host, $username, $token, 'Mysql/create_user', ['name' => $slug, 'password' => $password]);
+        // cPanel UAPI بيرفض create_database/create_user لو الاسم ما بيبدأ ببادئة الحساب
+        // (مثلاً "ximnlmmy_") — لازم نبعت الاسم كامل مع البادئة من البداية.
+        $this->call($host, $username, $token, 'Mysql/create_database', ['name' => "{$username}_{$slug}"]);
+        $this->call($host, $username, $token, 'Mysql/create_user', ['name' => "{$username}_{$slug}", 'password' => $password]);
         $this->call($host, $username, $token, 'Mysql/set_privileges_on_database', [
             'user' => "{$username}_{$slug}",
             'database' => "{$username}_{$slug}",
@@ -57,13 +59,10 @@ class CPanelTenantProvisioner implements TenantProvisioner
             throw new RuntimeException('إعدادات cPanel API غير مكتملة (CPANEL_HOST / CPANEL_USERNAME / CPANEL_API_TOKEN).');
         }
 
-        // cPanel's delete endpoints take the bare name (no account prefix) — the same shape create_database/create_user were given.
-        $slug = Str::startsWith($tenant->db_database, "{$username}_")
-            ? Str::after($tenant->db_database, "{$username}_")
-            : $tenant->db_database;
-
-        $this->call($host, $username, $token, 'Mysql/delete_database', ['name' => $slug]);
-        $this->call($host, $username, $token, 'Mysql/delete_user', ['name' => $slug]);
+        // مثل create_database/create_user، delete_database/delete_user كمان بتاخد الاسم
+        // كامل مع بادئة الحساب (زي ما هو مخزّن أصلاً بـ db_database/db_username)، مش الاسم المجرّد.
+        $this->call($host, $username, $token, 'Mysql/delete_database', ['name' => $tenant->db_database]);
+        $this->call($host, $username, $token, 'Mysql/delete_user', ['name' => $tenant->db_username]);
     }
 
     private function call(string $host, string $username, string $token, string $endpoint, array $params): void

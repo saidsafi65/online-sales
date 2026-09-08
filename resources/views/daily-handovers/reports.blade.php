@@ -346,15 +346,31 @@
             <div class="summary-icon sales">
                 <i class="fas fa-dollar-sign"></i>
             </div>
-            <div class="summary-label">إجمالي الإيرادات (المبيعات)</div>
+            <div class="summary-label">إجمالي الإيرادات (مبيعات + صيانة)</div>
             <div class="summary-value">{{ number_format($totalSales, 2) }} شيكل</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon difference negative">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="summary-label">مصاريف نقدية بنفس الفترة (مشتريات + التزامات)</div>
+            <div class="summary-value">{{ number_format($totalExpenses, 2) }} شيكل</div>
         </div>
 
         <div class="summary-card">
             <div class="summary-icon handovers">
                 <i class="fas fa-hand-holding-usd"></i>
             </div>
-            <div class="summary-label">إجمالي التسليمات</div>
+            <div class="summary-label">الصافي المتوقع بالدرج (إيرادات − مصاريف)</div>
+            <div class="summary-value">{{ number_format($expectedCash, 2) }} شيكل</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon handovers">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="summary-label">إجمالي التسليمات الفعلية</div>
             <div class="summary-value">{{ number_format($totalHandovers, 2) }} شيكل</div>
         </div>
 
@@ -362,15 +378,15 @@
             <div class="summary-icon difference {{ $difference >= 0 ? 'positive' : 'negative' }}">
                 <i class="fas fa-{{ $difference >= 0 ? 'arrow-up' : 'arrow-down' }}"></i>
             </div>
-            <div class="summary-label">الفرق</div>
+            <div class="summary-label">الفرق (الصافي المتوقع مقابل المُسلَّم فعلياً)</div>
             <div class="summary-value">{{ number_format(abs($difference), 2) }} شيكل</div>
             <span class="summary-badge {{ $difference >= 0 ? 'badge-positive' : 'badge-negative' }}">
                 @if($difference > 0)
                     <i class="fas fa-check-circle ms-1"></i>
-                    فائض في الإيرادات
+                    فائض بالتسليم
                 @elseif($difference < 0)
                     <i class="fas fa-exclamation-triangle ms-1"></i>
-                    عجز في التسليمات
+                    عجز بالتسليم
                 @else
                     <i class="fas fa-equals ms-1"></i>
                     متطابق
@@ -393,6 +409,8 @@
                         <tr>
                             <th>التاريخ</th>
                             <th>الإيرادات</th>
+                            <th>مصاريف نقدية</th>
+                            <th>الصافي المتوقع</th>
                             <th>التسليمات</th>
                             <th>الفرق</th>
                             <th>الحالة</th>
@@ -406,6 +424,12 @@
                                 </td>
                                 <td class="amount-cell amount-sales">
                                     {{ number_format($data['sales'], 2) }} شيكل
+                                </td>
+                                <td class="amount-cell amount-negative">
+                                    {{ number_format($data['expenses'], 2) }} شيكل
+                                </td>
+                                <td class="amount-cell amount-handover">
+                                    {{ number_format($data['expected'], 2) }} شيكل
                                 </td>
                                 <td class="amount-cell amount-handover">
                                     {{ number_format($data['handover'], 2) }} شيكل

@@ -5,6 +5,8 @@
 (function () {
     const unreadUrl = @json(route('community.unread-summary'));
     const communityUrl = @json(route('community.index'));
+    const conversationUrlTemplate = @json(route('community.conversations.show', ['member' => '__ID__']));
+    const communityPathPrefix = new URL(communityUrl, window.location.origin).pathname;
     const container = document.getElementById('chatToastContainer');
 
     let baseline = null; // null = haven't polled yet this page load, don't toast on the first result
@@ -16,9 +18,9 @@
     }
 
     function onCommunityPage(conversationOtherId) {
-        if (!window.location.pathname.startsWith('/community')) return false;
+        if (!window.location.pathname.startsWith(communityPathPrefix)) return false;
         if (conversationOtherId == null) return true; // public room toast, any community page counts as "already there"
-        return window.location.pathname === '/community/conversations/' + conversationOtherId;
+        return window.location.pathname === conversationUrlTemplate.replace('__ID__', conversationOtherId);
     }
 
     function showToast(title, body, url) {
@@ -58,7 +60,7 @@
 
                 if (!isFirstPoll && data.public_unread > prevPublic && !onCommunityPage(null) && data.public_latest) {
                     showToast(
-                        data.public_latest.sender_name + ' — ' + data.public_latest.store_name + ' (الغرفة العامة)',
+                        data.public_latest.sender_name + ' (الغرفة العامة)',
                         previewText(data.public_latest),
                         communityUrl
                     );
@@ -69,9 +71,9 @@
                     const prev = prevConvUnread[c.conversation_id] || 0;
                     if (!isFirstPoll && c.unread_count > prev && !onCommunityPage(c.other_id)) {
                         showToast(
-                            c.latest.sender_name + ' — ' + c.other_store,
+                            c.other_store,
                             previewText(c.latest),
-                            '/community/conversations/' + c.other_id
+                            conversationUrlTemplate.replace('__ID__', c.other_id)
                         );
                     }
                     prevConvUnread[c.conversation_id] = c.unread_count;

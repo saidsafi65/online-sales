@@ -37,6 +37,28 @@
             object-fit: contain;
         }
 
+        /* التوقيع */
+        .signature-container {
+            position: absolute;
+            bottom: 45mm;
+            right: 30mm;
+            width: 140px;
+            z-index: 10;
+            text-align: center;
+        }
+        .signature-container img {
+            width: 100%;
+            max-height: 70px;
+            object-fit: contain;
+        }
+        .signature-container .sig-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-top: 2px;
+            border-top: 1px solid #ccc;
+            padding-top: 4px;
+        }
+
         /* التصميم الهندسي */
         .background-design {
             position: absolute;
@@ -318,11 +340,19 @@
         <a href="{{ route('invoices.index') }}" class="btn btn-back">↩️ العودة للقائمة</a>
     </div>
 
+    @php $__tenant = app()->bound('currentTenant') ? app('currentTenant') : null; @endphp
     <div class="invoice-container">
         <!-- الختم -->
         <div class="stamp-container">
-            <img src="{{ asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
+            <img src="{{ $__tenant && $__tenant->stamp_path ? asset('storage/'.$__tenant->stamp_path) : asset('assets/logo/stamping.png') }}" alt="ختم المعرض">
         </div>
+
+        @if($__tenant && $__tenant->signature_path)
+            <div class="signature-container">
+                <img src="{{ asset('storage/'.$__tenant->signature_path) }}" alt="التوقيع">
+                <div class="sig-label">التوقيع المعتمد</div>
+            </div>
+        @endif
 
         <!-- التصميم الهندسي -->
         <div class="background-design">

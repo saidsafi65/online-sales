@@ -14,12 +14,15 @@ return new class extends Migration
      */
     public function up()
     {
-        /** @var string|null $connection */
-        $connection = config('webpush.database_connection');
         /** @var string $tableName */
         $tableName = config('webpush.table_name');
 
-        Schema::connection($connection)->create($tableName, function (Blueprint $table) {
+        // ملاحظة: ما منستخدم Schema::connection(config('webpush.database_connection')) هون
+        // عن قصد — هاي القيمة ثابتة على 'mysql' دايماً (افتراضي env('DB_CONNECTION'))، فلو
+        // استخدمناها كانت هاي الميغريشن رح تتجاهل أي --database تانية بتترحّل فيها (زي ترحيل
+        // معرض جديد على قاعدة بياناته الخاصة)، وتاخد الجدول لقاعدة بيانات معرض تاني غلط.
+        // بترك Schema::create بدون connection حتى تحترم نفس اتصال بقية الميغريشنز.
+        Schema::create($tableName, function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('subscribable', 'push_subscriptions_subscribable_morph_idx');
             $table->string('endpoint', PushSubscription::ENDPOINT_MAX_LENGTH)
@@ -39,11 +42,9 @@ return new class extends Migration
      */
     public function down()
     {
-        /** @var string|null $connection */
-        $connection = config('webpush.database_connection');
         /** @var string $tableName */
         $tableName = config('webpush.table_name');
 
-        Schema::connection($connection)->dropIfExists($tableName);
+        Schema::dropIfExists($tableName);
     }
 };

@@ -151,10 +151,7 @@ class SalesController extends Controller
             DB::beginTransaction();
 
             // تحقق من الكمية المتوفرة في جدول catalog_items
-            $catalogItem = \App\Models\CatalogItem::where('product', $request->product)
-                ->where('type', $request->type)
-                ->lockForUpdate()
-                ->first();
+            $catalogItem = $this->findCatalogItemForSale($request->product, $request->type);
 
             // استفاده من الكمية المطلوبة (الافتراضية 1)
             $requestedQuantity = max(1, (int) $request->get('quantity', 1));
@@ -266,10 +263,7 @@ class SalesController extends Controller
 
             // إذا لم يتغير المنتج/النوع
             if ($oldProduct === $newProduct && $oldType === $newType) {
-                $catalogItem = \App\Models\CatalogItem::where('product', $oldProduct)
-                    ->where('type', $oldType)
-                    ->lockForUpdate()
-                    ->first();
+                $catalogItem = $this->findCatalogItemForSale($oldProduct, $oldType);
 
                 if (! $catalogItem) {
                     return redirect()->back()
@@ -292,19 +286,13 @@ class SalesController extends Controller
                 }
             } else {
                 // استعادة الكمية القديمة إلى الكاتالوج القديم
-                $oldCatalog = \App\Models\CatalogItem::where('product', $oldProduct)
-                    ->where('type', $oldType)
-                    ->lockForUpdate()
-                    ->first();
+                $oldCatalog = $this->findCatalogItemForSale($oldProduct, $oldType);
                 if ($oldCatalog) {
                     $oldCatalog->increment('quantity', $oldQuantity);
                 }
 
                 // خصم الكمية الجديدة من الكاتالوج الجديد
-                $newCatalog = \App\Models\CatalogItem::where('product', $newProduct)
-                    ->where('type', $newType)
-                    ->lockForUpdate()
-                    ->first();
+                $newCatalog = $this->findCatalogItemForSale($newProduct, $newType);
 
                 if (! $newCatalog || $newCatalog->quantity < $newQuantity) {
                     return redirect()->back()
@@ -348,13 +336,25 @@ class SalesController extends Controller
         try {
             DB::beginTransaction();
 
+            // لو المبيعة مش مرتجعة أصلاً، الكمية يلي نقصت من الكتالوج وقت البيع لازم ترجع —
+            // الحذف هون معناه "امسح السجل"، مش "خلي الكمية ناقصة للأبد". لو كانت مرتجعة
+            // مسبقاً، الكمية أصلاً رجعت وقت الإرجاع فما لازم نرجعها مرتين.
+            if (! $sale->is_returned) {
+                $catalogItem = $this->findCatalogItemForSale($sale->product, $sale->type);
+
+                if ($catalogItem) {
+                    $restoreQty = isset($sale->quantity) ? (int) $sale->quantity : 1;
+                    $catalogItem->increment('quantity', $restoreQty);
+                }
+            }
+
             $sale->delete();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم حذف المبيعة بنجاح',
+                'message' => 'تم حذف المبيعة وإرجاع الكمية للمخزون',
             ]);
 
         } catch (\Exception $e) {
@@ -420,10 +420,7 @@ class SalesController extends Controller
             ]);
 
             // البحث عن العنصر المرتبط بالمبيعة
-            $catalogItem = \App\Models\CatalogItem::where('product', $sale->product)
-                ->where('type', $sale->type)
-                ->lockForUpdate()
-                ->first();
+            $catalogItem = $this->findCatalogItemForSale($sale->product, $sale->type);
 
             if ($catalogItem) {
                 // استعادة الكمية بناءً على قيمة 'quantity' في المبيعة (افتراضي 1)
@@ -457,6 +454,28 @@ class SalesController extends Controller
                 'message' => 'حدث خطأ أثناء إرجاع المبيعة: '.$e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * يجيب صف الكتالوج المطابق لمنتج/نوع معيّن. لو مدير نظام (مالوش فرع محدد) ولاقينا
+     * أكتر من صف مطابق بفروع مختلفة، منرفض نخمّن أي صف ونطلب توضيح — غير هيك ممكن
+     * نعدّل مخزون فرع غلط بالغلط. لازم تُستدعى داخل transaction (بتستخدم lockForUpdate).
+     */
+    private function findCatalogItemForSale(string $product, string $type): ?\App\Models\CatalogItem
+    {
+        $items = \App\Models\CatalogItem::where('product', $product)
+            ->where('type', $type)
+            ->lockForUpdate()
+            ->get();
+
+        if ($items->count() > 1 && auth()->user()->isAdmin()) {
+            throw new \RuntimeException(
+                "المنتج \"{$product} - {$type}\" موجود بأكتر من فرع بنفس الاسم بالضبط — "
+                .'ما بقدر أحدد أي فرع تلقائياً. لازم يسجّل الموظف المسؤول عن الفرع نفسه هالمبيعة، أو تميّز أسماء الأصناف بين الفروع.'
+            );
+        }
+
+        return $items->first();
     }
 
     /**

@@ -752,26 +752,33 @@ class MobileShopController extends Controller
         ]);
 
         $validated['total'] = ($validated['cash_amount'] ?? 0) + ($validated['bank_amount'] ?? 0);
-        $expense->update($validated);
 
-        // نحدّث نفس البيانات على السجل المرتبط بجدول المشتريات الرئيسي حتى ما يضل نسخة قديمة
-        if ($expense->linked_purchase_id && ($linkedPurchase = Purchase::find($expense->linked_purchase_id))) {
-            $linkedPurchase->update([
-                'item'           => $validated['category'],
-                'type'           => $validated['type'],
-                'quantity'       => $validated['quantity'],
-                'payment_method' => match ($validated['payment_method']) {
-                    'نقدي'  => 'cash',
-                    'بنكي'  => 'app',
-                    'مختلط' => 'mixed',
-                    default => 'cash'
-                },
-                'amount_cash'   => $validated['cash_amount'],
-                'amount_bank'   => $validated['bank_amount'],
-                'purchase_date' => $validated['expense_date'],
-                'supplier_name' => $validated['supplier_name'] ?? null,
-                'phone'         => $validated['supplier_phone'] ?? null,
-            ]);
+        try {
+            DB::transaction(function () use ($expense, $validated) {
+                $expense->update($validated);
+
+                // نحدّث نفس البيانات على السجل المرتبط بجدول المشتريات الرئيسي حتى ما يضل نسخة قديمة
+                if ($expense->linked_purchase_id && ($linkedPurchase = Purchase::find($expense->linked_purchase_id))) {
+                    $linkedPurchase->update([
+                        'item'           => $validated['category'],
+                        'type'           => $validated['type'],
+                        'quantity'       => $validated['quantity'],
+                        'payment_method' => match ($validated['payment_method']) {
+                            'نقدي'  => 'cash',
+                            'بنكي'  => 'app',
+                            'مختلط' => 'mixed',
+                            default => 'cash'
+                        },
+                        'amount_cash'   => $validated['cash_amount'],
+                        'amount_bank'   => $validated['bank_amount'],
+                        'purchase_date' => $validated['expense_date'],
+                        'supplier_name' => $validated['supplier_name'] ?? null,
+                        'phone'         => $validated['supplier_phone'] ?? null,
+                    ]);
+                }
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'حدث خطأ: '.$e->getMessage())->withInput();
         }
 
         return redirect()->route('mobile-shop.expenses.index')->with('success', 'تم تحديث المصروف بنجاح');
@@ -779,11 +786,14 @@ class MobileShopController extends Controller
 
     public function expensesDestroy(MobileExpense $expense)
     {
-        if ($expense->linked_purchase_id) {
-            Purchase::whereKey($expense->linked_purchase_id)->delete();
-        }
+        DB::transaction(function () use ($expense) {
+            if ($expense->linked_purchase_id) {
+                Purchase::whereKey($expense->linked_purchase_id)->delete();
+            }
 
-        $expense->delete();
+            $expense->delete();
+        });
+
         return redirect()->route('mobile-shop.expenses.index')->with('success', 'تم حذف المصروف بنجاح');
     }
 
@@ -804,8 +814,13 @@ class MobileShopController extends Controller
             ? MobileExpense::where('branch_id', $branchId)->count() : 0;
         $totalMaintenance = Schema::hasTable('mobile_maintenance')
             ? MobileMaintenance::where('branch_id', $branchId)->sum('cost') : 0;
+        // نستثني أي مبيعة جوال اترجعت من صفحة المبيعات الرئيسية (MobileSale مالوش
+        // is_returned خاص فيه، فبدون هالاستثناء كان بضل يحسبها حتى بعد إرجاعها).
         $totalSales = Schema::hasTable('mobile_sales')
-            ? MobileSale::where('branch_id', $branchId)->sum('cost') : 0;
+            ? MobileSale::where('branch_id', $branchId)
+                ->whereDoesntHave('linkedSale', fn ($q) => $q->where('is_returned', true))
+                ->sum('cost')
+            : 0;
         $totalDebts = Schema::hasTable('mobile_debts')
             ? MobileDebt::where('branch_id', $branchId)->whereNull('payment_date')->sum('total') : 0;
         $totalExpenses = Schema::hasTable('mobile_expenses')

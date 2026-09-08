@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Tenant;
 use App\Services\TenantDatabase;
 use Carbon\Carbon;
@@ -42,6 +43,12 @@ class PlatformReportsController extends Controller
                     ->whereBetween('date', [$dateStart, $dateEnd])
                     ->sum(DB::raw('COALESCE(cash_amount,0) + COALESCE(bank_amount,0)'));
 
+                // طلبات المتجر الإلكتروني — كانت غير محسوبة إطلاقاً بهالتقرير قبل هالتعديل
+                $onlineOrders = (float) DB::connection($connection)->table('orders')
+                    ->whereIn('status', Order::STATUS_COUNTS_AS_PURCHASED)
+                    ->whereBetween('created_at', [$dateStart, $dateEnd])
+                    ->sum('total');
+
                 DB::purge($connection);
 
                 return [
@@ -51,13 +58,14 @@ class PlatformReportsController extends Controller
                     'repairs' => $repairs,
                     'purchases' => $purchases,
                     'obligations' => $obligations,
-                    'net' => $sales + $repairs - $purchases - $obligations,
+                    'online_orders' => $onlineOrders,
+                    'net' => $sales + $repairs + $onlineOrders - $purchases - $obligations,
                 ];
             } catch (\Throwable $e) {
                 return [
                     'tenant' => $tenant,
                     'ok' => false,
-                    'sales' => 0, 'repairs' => 0, 'purchases' => 0, 'obligations' => 0, 'net' => 0,
+                    'sales' => 0, 'repairs' => 0, 'purchases' => 0, 'obligations' => 0, 'online_orders' => 0, 'net' => 0,
                 ];
             }
         });
@@ -67,6 +75,7 @@ class PlatformReportsController extends Controller
             'repairs' => $rows->sum('repairs'),
             'purchases' => $rows->sum('purchases'),
             'obligations' => $rows->sum('obligations'),
+            'online_orders' => $rows->sum('online_orders'),
             'net' => $rows->sum('net'),
         ];
 

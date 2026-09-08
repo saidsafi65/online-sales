@@ -41,4 +41,10 @@ return [
         'token' => env('CPANEL_API_TOKEN'),
     ],
 
+    'error_alert' => [
+        'email' => env('ERROR_ALERT_EMAIL'),
+    ],
+
+    'tenant_provisioner' => env('TENANT_PROVISIONER', 'local'),
+
 ];

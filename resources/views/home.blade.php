@@ -398,14 +398,23 @@
                         </div>
                     </div>
 
-                    <!-- إجمالي العملاء -->
+                    <!-- عملاء الصيانة والمبيعات -->
                     <div class="col-6 col-md-3">
                         <div
-                            style="padding: 1.5rem; background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-radius: 12px; border: 1px solid #f5d0fe;">
-                            <div style="font-size: 2rem; font-weight: 800; color: #c026d3; margin-bottom: 0.5rem;">
-                                {{ $totalCustomers ?? '0' }}
+                            style="padding: 1.25rem 0.5rem; background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-radius: 12px; border: 1px solid #f5d0fe; display: flex; align-items: stretch; height: 100%;">
+                            <div style="flex: 1; text-align: center; padding-inline-end: 0.5rem;">
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #c026d3;">
+                                    {{ $repairCustomers ?? '0' }}
+                                </div>
+                                <div style="color: #64748b; font-weight: 600; font-size: 0.78rem; margin-top: 0.25rem;">عملاء الصيانة</div>
                             </div>
-                            <div style="color: #64748b; font-weight: 600; font-size: 0.9rem;">إجمالي العملاء</div>
+                            <div style="width: 1px; background: #f5d0fe;"></div>
+                            <div style="flex: 1; text-align: center; padding-inline-start: 0.5rem;">
+                                <div style="font-size: 1.5rem; font-weight: 800; color: #c026d3;">
+                                    {{ $salesCustomers ?? '0' }}
+                                </div>
+                                <div style="color: #64748b; font-weight: 600; font-size: 0.78rem; margin-top: 0.25rem;">عملاء المبيعات</div>
+                            </div>
                         </div>
                     </div>
 

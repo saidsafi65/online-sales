@@ -24,6 +24,7 @@
                 <th>المعرض</th>
                 <th>المبيعات</th>
                 <th>الصيانة</th>
+                <th>أونلاين</th>
                 <th>المشتريات</th>
                 <th>الالتزامات</th>
                 <th>صافي الدخل</th>
@@ -41,12 +42,13 @@
                     </td>
                     <td>{{ number_format($row['sales'], 2) }}</td>
                     <td>{{ number_format($row['repairs'], 2) }}</td>
+                    <td>{{ number_format($row['online_orders'], 2) }}</td>
                     <td>{{ number_format($row['purchases'], 2) }}</td>
                     <td>{{ number_format($row['obligations'], 2) }}</td>
                     <td style="font-weight:700; color:{{ $row['net'] >= 0 ? '#22c55e' : '#ef4444' }};">{{ number_format($row['net'], 2) }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" style="color:#94a3b8;">لا يوجد معارض فعّالة</td></tr>
+                <tr><td colspan="7" style="color:#94a3b8;">لا يوجد معارض فعّالة</td></tr>
             @endforelse
         </tbody>
         @if ($rows->isNotEmpty())
@@ -55,6 +57,7 @@
                     <td>الإجمالي</td>
                     <td>{{ number_format($totals['sales'], 2) }}</td>
                     <td>{{ number_format($totals['repairs'], 2) }}</td>
+                    <td>{{ number_format($totals['online_orders'], 2) }}</td>
                     <td>{{ number_format($totals['purchases'], 2) }}</td>
                     <td>{{ number_format($totals['obligations'], 2) }}</td>
                     <td style="color:{{ $totals['net'] >= 0 ? '#22c55e' : '#ef4444' }};">{{ number_format($totals['net'], 2) }}</td>

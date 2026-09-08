@@ -97,7 +97,12 @@
                                     <td>{{ $repair->received_by }}</td>
                                     <td>
                                         @if ($repair->is_returned)
-                                            <span class="badge bg-danger">مرجع</span>
+                                            <span class="badge bg-danger" title="{{ $repair->return_reason }}{{ $repair->return_cost ? ' — تكلفة الإرجاع: '.number_format($repair->return_cost, 2) : '' }}">
+                                                مرجع
+                                                @if($repair->return_cost)
+                                                    ({{ number_format($repair->return_cost, 2) }})
+                                                @endif
+                                            </span>
                                         @else
                                             <span class="badge bg-success">غير مرجع</span>
                                         @endif

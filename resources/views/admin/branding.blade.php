@@ -39,6 +39,35 @@
                     <small style="color:#94a3b8;">أي مقاس بيظهر صح تلقائياً — الحد الأقصى 1 ميجا.</small>
                 </div>
 
+                <hr style="margin: 1.75rem 0; border-color: #e2e8f0;">
+                <label class="form-label" style="font-weight: 700; margin-bottom: 1rem; display:block;">🖋️ الختم والتوقيع (للفواتير والمطالبات المالية)</label>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">ختم المعرض</label>
+                        <div style="width:100%; height:90px; border:2px dashed #e2e8f0; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc; margin-bottom:0.5rem;">
+                            @if($tenant->stamp_path)
+                                <img src="{{ asset('storage/'.$tenant->stamp_path) }}" style="max-width:100%; max-height:100%; object-fit:contain; padding:6px;">
+                            @else
+                                <span style="color:#94a3b8; font-size:0.75rem;">لا يوجد ختم</span>
+                            @endif
+                        </div>
+                        <input type="file" name="stamp" accept="image/png" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.6rem; font-size:0.85rem;">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">توقيع (خط اليد)</label>
+                        <div style="width:100%; height:90px; border:2px dashed #e2e8f0; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc; margin-bottom:0.5rem;">
+                            @if($tenant->signature_path)
+                                <img src="{{ asset('storage/'.$tenant->signature_path) }}" style="max-width:100%; max-height:100%; object-fit:contain; padding:6px;">
+                            @else
+                                <span style="color:#94a3b8; font-size:0.75rem;">لا يوجد توقيع</span>
+                            @endif
+                        </div>
+                        <input type="file" name="signature" accept="image/png" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.6rem; font-size:0.85rem;">
+                    </div>
+                </div>
+                <small style="color:#94a3b8; display:block; margin-bottom:1rem;">لازم يكونوا صور PNG بخلفية مفرغة (شفافة) — رح يظهروا تلقائياً بالفواتير والمطالبات المالية بدل الختم الافتراضي.</small>
+
                 <div class="mb-3">
                     <label class="form-label" style="font-weight: 600; margin-bottom: 0.75rem;">قوالب ألوان جاهزة</label>
                     <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">

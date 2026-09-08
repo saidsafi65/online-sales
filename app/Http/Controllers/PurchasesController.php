@@ -82,6 +82,12 @@ class PurchasesController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        if ((float) $request->amount_cash <= 0 && (float) $request->amount_bank <= 0) {
+            return redirect()->back()
+                ->withErrors(['amount_cash' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
+        }
+
         try {
             DB::beginTransaction();
 
@@ -113,6 +119,8 @@ class PurchasesController extends Controller
                 'return_date' => $request->return_date,
                 'notes' => $request->notes,
                 'branch_id' => auth()->user()->branch_id, // assign branch on create
+                // ملاحظة: هالمسار (شراء عادي بدون كتالوج) عن قصد ما بيربط بأي صف كتالوج —
+                // catalog_item_id بيضل null، فما بيأثر على أي مخزون لا هون ولا بالتعديل/الحذف لاحقاً.
             ]);
 
             DB::commit();
@@ -154,6 +162,12 @@ class PurchasesController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        if ((float) $request->amount_cash <= 0 && (float) $request->amount_bank <= 0 && ! $request->boolean('is_returned')) {
+            return redirect()->back()
+                ->withErrors(['amount_cash' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
+        }
+
         try {
             DB::beginTransaction();
 
@@ -169,26 +183,53 @@ class PurchasesController extends Controller
                 $idImagePath = 'uploads/purchases/'.$filename;
             }
 
-            $becomingReturned = ! $purchase->is_returned && $request->boolean('is_returned');
+            $wasReturned = (bool) $purchase->is_returned;
+            $becomingReturned = ! $wasReturned && $request->boolean('is_returned');
+            $becomingUnreturned = $wasReturned && ! $request->boolean('is_returned');
+            $newQuantity = (int) $request->quantity;
 
             $amountCash = (float) $request->amount_cash;
             $amountBank = (float) $request->amount_bank;
             $notes = $request->notes;
+            $catalogQuantityApplied = (int) $purchase->catalog_quantity_applied;
+
+            // نزامن الكتالوج بس لو هالمشترى أصلاً أثّر بصف كتالوج معيّن (مسار "شراء + كتالوج").
+            // مشترى عادي (catalog_item_id فاضي) ما بيأثر على أي مخزون هون إطلاقاً — قبل هالتعديل
+            // كان أي مشترى بيرجّع بينقص من أول صف كتالوج بنفس الاسم حتى لو مالوش علاقة فيه.
+            if ($purchase->catalog_item_id) {
+                $catalogItem = \App\Models\CatalogItem::where('id', $purchase->catalog_item_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($catalogItem) {
+                    if ($becomingReturned) {
+                        // رجّعنا البضاعة للمورد — نطلع بالضبط الكمية يلي كانت مطبّقة فعلياً
+                        // (مش الكمية الجديدة المكتوبة بالنموذج، يلي ممكن لسا ما انحفظت).
+                        $catalogItem->decrement('quantity', min($catalogQuantityApplied, (int) $catalogItem->quantity));
+                        $catalogQuantityApplied = 0;
+                    } elseif ($becomingUnreturned) {
+                        // رجعت عن الإرجاع — نطبّق الكمية الحالية من جديد
+                        $catalogItem->increment('quantity', $newQuantity);
+                        $catalogQuantityApplied = $newQuantity;
+                    } elseif (! $wasReturned) {
+                        // ضلت مو مرتجعة، بس الكمية ممكن اتغيرت بالتعديل — نزامن الفرق بس
+                        $delta = $newQuantity - $catalogQuantityApplied;
+                        if ($delta > 0) {
+                            $catalogItem->increment('quantity', $delta);
+                        } elseif ($delta < 0) {
+                            $catalogItem->decrement('quantity', min(-$delta, (int) $catalogItem->quantity));
+                        }
+                        $catalogQuantityApplied = $newQuantity;
+                    }
+                    // else: ضلت مرتجعة وهي مرتجعة أصلاً — ما تغيّر شي بالكتالوج
+                }
+            }
 
             if ($becomingReturned) {
-                // رجّعنا البضاعة للمورد واسترجعنا فلوسنا — لازم هالمصروف ما يضل محسوب،
-                // والكمية يلي دخلت الكتالوج وقت الشراء لازم تطلع منه (رجعت للمورد فعليًا).
+                // رجّعنا البضاعة للمورد واسترجعنا فلوسنا — لازم هالمصروف ما يضل محسوب.
                 $notes = ($notes ? $notes.' - ' : '')
                     .'تم إرجاع الشراء في '.now()->format('Y-m-d H:i:s')
                     ." (مبلغ مسترجع: نقدي {$amountCash} + بنكي {$amountBank})";
-
-                $catalogItem = \App\Models\CatalogItem::where('product', $request->item)
-                    ->where('type', $request->type)
-                    ->lockForUpdate()
-                    ->first();
-                if ($catalogItem) {
-                    $catalogItem->decrement('quantity', min((int) $request->quantity, (int) $catalogItem->quantity));
-                }
 
                 $amountCash = 0;
                 $amountBank = 0;
@@ -197,7 +238,7 @@ class PurchasesController extends Controller
             $purchase->update([
                 'item' => $request->item,
                 'type' => $request->type,
-                'quantity' => (int) $request->quantity,
+                'quantity' => $newQuantity,
                 'payment_method' => $request->payment_method,
                 'amount_cash' => $amountCash,
                 'amount_bank' => $amountBank,
@@ -209,6 +250,7 @@ class PurchasesController extends Controller
                 'issue' => $request->issue,
                 'return_date' => $request->return_date,
                 'notes' => $notes,
+                'catalog_quantity_applied' => $catalogQuantityApplied,
             ]);
 
             DB::commit();
@@ -223,7 +265,20 @@ class PurchasesController extends Controller
 
     public function destroy(Purchase $purchase): RedirectResponse
     {
-        $purchase->delete();
+        DB::transaction(function () use ($purchase) {
+            // الكمية يلي هالمشترى زادها فعلياً بالكتالوج (إن وجدت) لازم ترجع — الحذف
+            // هون معناه "امسح السجل"، مش "خلي المخزون الوهمي يضل موجود للأبد".
+            if ($purchase->catalog_item_id && $purchase->catalog_quantity_applied > 0) {
+                $catalogItem = \App\Models\CatalogItem::where('id', $purchase->catalog_item_id)
+                    ->lockForUpdate()
+                    ->first();
+                if ($catalogItem) {
+                    $catalogItem->decrement('quantity', min((int) $purchase->catalog_quantity_applied, (int) $catalogItem->quantity));
+                }
+            }
+
+            $purchase->delete();
+        });
 
         return redirect()->route('purchases.index')->with('success', 'تم حذف عملية الشراء');
     }
@@ -257,6 +312,12 @@ class PurchasesController extends Controller
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        if ((float) $request->amount_cash <= 0 && (float) $request->amount_bank <= 0) {
+            return redirect()->back()
+                ->withErrors(['amount_cash' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
         }
 
         try {
@@ -318,6 +379,13 @@ class PurchasesController extends Controller
                     'branch_id' => auth()->user()->isAdmin() ? null : auth()->user()->branch_id,
                 ]);
             }
+
+            // نربط المشترى بصف الكتالوج اللي أثّر فيه وبقديش بالضبط — حتى نقدر نعكس
+            // بدقة لو انحذف أو انرجّع أو اتعدلت كميته لاحقاً (شوف update()/destroy()).
+            $purchase->update([
+                'catalog_item_id' => $catalogItem->id,
+                'catalog_quantity_applied' => (int) $request->quantity,
+            ]);
 
             DB::commit();
 

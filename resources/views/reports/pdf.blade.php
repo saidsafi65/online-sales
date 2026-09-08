@@ -139,6 +139,13 @@
     <tr>
         <td style="width: 33%;">
             <div class="summary-card">
+                <div class="label">مبيعات المتجر الإلكتروني</div>
+                <div class="value">{{ number_format((float) ($onlineOrdersTotal ?? 0), 2) }}</div>
+                <div class="detail">عدد الطلبات: {{ (int) ($onlineOrdersCount ?? 0) }}</div>
+            </div>
+        </td>
+        <td style="width: 33%;">
+            <div class="summary-card">
                 <div class="label">الالتزامات الشهرية</div>
                 <div class="value">{{ number_format((float) ($monthlyObligations ?? 0), 2) }}</div>
             </div>

@@ -42,8 +42,7 @@
                     <a href="{{ route('community.conversations.show', $m['id']) }}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; text-decoration: none; color: {{ $activeOther && $activeOther->id === $m['id'] ? 'white' : '#1e293b' }}; background: {{ $activeOther && $activeOther->id === $m['id'] ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent' }}; border-bottom: 1px solid #f8fafc;">
                         <span style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: {{ $m['online'] ? '#3b82f6' : '#cbd5e1' }};"></span>
                         <div style="min-width: 0;">
-                            <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $m['name'] }}</div>
-                            <div style="font-size: 0.8rem; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $m['store_name'] }}</div>
+                            <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $m['store_name'] }}</div>
                         </div>
                     </a>
                 @empty
@@ -56,7 +55,7 @@
         <div class="community-chat" style="flex: 1; background: white; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden;">
             <div style="padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #1e293b;">
                 @if($activeOther)
-                    {{ $activeOther->name }} — {{ $activeOther->tenant->name }}
+                    {{ $activeOther->tenant->name }}
                 @else
                     الغرفة العامة (يشوفها كل المعارض)
                 @endif
@@ -85,6 +84,7 @@
         sendUrl: @json($activeConversation ? route('community.conversations.messages.send', $activeConversation) : route('community.messages.send')),
         directoryUrl: @json(route('community.directory')),
         activeOtherId: @json($activeOther?->id),
+        conversationUrlTemplate: @json(route('community.conversations.show', ['member' => '__ID__'])),
     };
 
     const messagesBox = document.getElementById('messagesBox');
@@ -104,7 +104,8 @@
         const align = m.is_me ? 'flex-end' : 'flex-start';
         const bg = m.is_me ? '#667eea' : '#f1f5f9';
         const color = m.is_me ? 'white' : '#1e293b';
-        const label = m.is_me ? '' : `<div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.25rem; color: #764ba2;">${m.sender_name}${m.store_name ? ' — ' + m.store_name : ''}</div>`;
+        // sender_name صار دايماً اسم المعرض نفسه (المحادثة بين معارض مش حسابات)، فما في داعي نكرره مع store_name
+        const label = m.is_me ? '' : `<div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.25rem; color: #764ba2;">${m.sender_name}</div>`;
         const image = m.image_url ? `<img src="${m.image_url}" style="max-width: 220px; border-radius: 10px; display: block; margin-top: ${m.body ? '0.5rem' : '0'};">` : '';
         const body = m.body ? `<div>${m.body.replace(/</g, '&lt;')}</div>` : '';
 
@@ -186,11 +187,10 @@
             const dot = m.online ? '#3b82f6' : '#cbd5e1';
 
             return `
-                <a href="/community/conversations/${m.id}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; text-decoration: none; color: ${color}; background: ${bg}; border-bottom: 1px solid #f8fafc;">
+                <a href="${config.conversationUrlTemplate.replace('__ID__', m.id)}" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; text-decoration: none; color: ${color}; background: ${bg}; border-bottom: 1px solid #f8fafc;">
                     <span style="width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: ${dot};"></span>
                     <div style="min-width: 0;">
-                        <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(m.name)}</div>
-                        <div style="font-size: 0.8rem; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(m.store_name)}</div>
+                        <div style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(m.store_name)}</div>
                     </div>
                 </a>
             `;

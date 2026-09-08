@@ -72,7 +72,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">الموظف المستلم</label>
-                        <input type="text" name="received_by" class="form-control" value="{{ old('received_by', request('type')==='software' ? 'سعيد' : '') }}" required>
+                        <input type="text" name="received_by" class="form-control" value="{{ old('received_by', auth()->user()->name ?? '') }}" required>
                     </div>
 
                     <div class="col-md-6">

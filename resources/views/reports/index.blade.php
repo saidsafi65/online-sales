@@ -80,6 +80,18 @@
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
+                            <div class="card-title">مبيعات المتجر الإلكتروني (أونلاين)</div>
+                            <div class="display-6">{{ number_format((float) ($onlineOrdersTotal ?? 0), 2) }}</div>
+                            <div class="text-muted small mt-2">
+                                عدد الطلبات المكتملة: {{ (int) ($onlineOrdersCount ?? 0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
                             <div class="card-title">الالتزامات الشهرية (رواتب، إيجار...)</div>
                             <div class="display-6">{{ number_format((float) ($monthlyObligations ?? 0), 2) }}</div>
                         </div>
@@ -89,7 +101,7 @@
                 <div class="col-md-4">
                     <div class="card h-100 {{ ($netIncome ?? 0) >= 0 ? 'border-success' : 'border-danger' }}">
                         <div class="card-body">
-                            <div class="card-title">صافي الدخل (مبيعات + صيانة − مشتريات − التزامات)</div>
+                            <div class="card-title">صافي الدخل (مبيعات + صيانة + أونلاين − مشتريات − التزامات)</div>
                             <div class="display-6 {{ ($netIncome ?? 0) >= 0 ? 'text-success' : 'text-danger' }}">
                                 {{ number_format((float) ($netIncome ?? 0), 2) }}
                             </div>

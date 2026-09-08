@@ -218,8 +218,10 @@ class ChatController extends Controller
     }
 
     /**
-     * Resolves (and refreshes) the ChatMember row for the currently logged-in
-     * admin at the tenant ResolveTenantDatabase resolved for this request.
+     * Resolves (and refreshes) the ChatMember row representing the current TENANT
+     * (store) — not the individual staff account. The community chat is store-to-store,
+     * so every staff member at the same store shares one ChatMember identity; whichever
+     * of them is active most recently just updates local_user_id/last_seen_public_at.
      */
     private function currentMember(): ChatMember
     {
@@ -230,8 +232,8 @@ class ChatController extends Controller
         $tenant = app('currentTenant');
 
         return ChatMember::on('central')->updateOrCreate(
-            ['tenant_id' => $tenant->id, 'local_user_id' => auth()->id()],
-            ['name' => auth()->user()->name, 'last_seen_public_at' => now()]
+            ['tenant_id' => $tenant->id],
+            ['name' => $tenant->name, 'local_user_id' => auth()->id(), 'last_seen_public_at' => now()]
         );
     }
 

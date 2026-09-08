@@ -54,6 +54,14 @@
         @if(session('error'))
             <div class="alert alert-danger" style="border-radius: 12px;">❌ {{ session('error') }}</div>
         @endif
+        @if($errors->any())
+            <div class="alert alert-danger" style="border-radius: 12px;">
+                ❌
+                @foreach($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
+        @endif
 
         @if(session('migrate_output'))
             <div class="alert alert-info" style="border-radius: 12px;">

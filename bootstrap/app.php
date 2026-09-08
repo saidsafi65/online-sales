@@ -22,6 +22,28 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->report(function (\Throwable $e) {
+            // ما منبعت إيميل تنبيه عن أخطاء متوقعة/روتينية (404، صلاحية، جلسة منتهية...)
+            // — بس عن الأعطال الحقيقية غير المتوقعة.
+            $routine = [
+                \Illuminate\Validation\ValidationException::class,
+                \Illuminate\Auth\AuthenticationException::class,
+                \Illuminate\Auth\Access\AuthorizationException::class,
+                \Illuminate\Session\TokenMismatchException::class,
+                \Illuminate\Database\Eloquent\ModelNotFoundException::class,
+                \Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class,
+                \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException::class,
+                \Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException::class,
+            ];
+            foreach ($routine as $type) {
+                if ($e instanceof $type) {
+                    return;
+                }
+            }
+
+            app(\App\Services\ErrorAlertMailer::class)->maybeSend($e);
+        });
+
         $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
             if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
                 $status = 500;

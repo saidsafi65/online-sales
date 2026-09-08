@@ -30,11 +30,18 @@
                         </h4>
                         <p class="mb-0 text-muted">إجمالي الفواتير: <strong>{{ $invoices->total() }}</strong></p>
                     </div>
-                    <a href="{{ route('invoices.create') }}" class="btn btn-lg"
-                        style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
-                        <i class="fas fa-plus me-2"></i>
-                        إضافة فاتورة جديدة
-                    </a>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('invoices.create') }}" class="btn btn-lg"
+                            style="background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3); transition: all 0.3s ease;">
+                            <i class="fas fa-plus me-2"></i>
+                            إضافة فاتورة جديدة
+                        </a>
+                        <a href="{{ route('financial-claims.index') }}" class="btn btn-lg"
+                            style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(2, 132, 199, 0.3); transition: all 0.3s ease;">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>
+                            مطالبة مالية
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

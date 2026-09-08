@@ -35,11 +35,15 @@ class BrandingController extends Controller
             'brand_primary_color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
             'brand_accent_color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:1024',
+            'stamp' => 'nullable|image|mimes:png|max:1024',
+            'signature' => 'nullable|image|mimes:png|max:1024',
             'contact_phone' => 'nullable|string|max:30|regex:/^[0-9+\-\s]*$/',
             'contact_whatsapp' => 'nullable|string|max:30|regex:/^[0-9+\-\s]*$/',
         ], [
             'brand_primary_color.regex' => 'صيغة اللون غير صحيحة',
             'brand_accent_color.regex' => 'صيغة اللون غير صحيحة',
+            'stamp.mimes' => 'الختم لازم يكون صورة PNG (مفرغة الخلفية)',
+            'signature.mimes' => 'التوقيع لازم يكون صورة PNG (مفرغة الخلفية)',
             'contact_phone.regex' => 'رقم الهاتف غير صحيح',
             'contact_whatsapp.regex' => 'رقم الواتساب غير صحيح',
         ]);
@@ -50,6 +54,18 @@ class BrandingController extends Controller
             $logoName = Str::random(20).'.'.$request->file('logo')->getClientOriginalExtension();
             $request->file('logo')->storeAs('logos', $logoName, 'public');
             $validated['logo_path'] = 'logos/'.$logoName;
+        }
+
+        if ($request->hasFile('stamp')) {
+            $stampName = Str::random(20).'.png';
+            $request->file('stamp')->storeAs('stamps', $stampName, 'public');
+            $validated['stamp_path'] = 'stamps/'.$stampName;
+        }
+
+        if ($request->hasFile('signature')) {
+            $signatureName = Str::random(20).'.png';
+            $request->file('signature')->storeAs('signatures', $signatureName, 'public');
+            $validated['signature_path'] = 'signatures/'.$signatureName;
         }
 
         $tenant->update($validated);

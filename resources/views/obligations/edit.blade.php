@@ -51,12 +51,12 @@
 
                             <li class="list-group-item">
                                 <label for="cash_amount" class="form-label">المبلغ النقدي</label>
-                                <input type="number" step="0.01" class="form-control" id="cash_amount" name="cash_amount" value="{{ $obligation->cash_amount }}">
+                                <input type="number" step="0.01" min="0" class="form-control" id="cash_amount" name="cash_amount" value="{{ $obligation->cash_amount }}">
                             </li>
 
                             <li class="list-group-item">
                                 <label for="bank_amount" class="form-label">المبلغ البنكي</label>
-                                <input type="number" step="0.01" class="form-control" id="bank_amount" name="bank_amount" value="{{ $obligation->bank_amount }}">
+                                <input type="number" step="0.01" min="0" class="form-control" id="bank_amount" name="bank_amount" value="{{ $obligation->bank_amount }}">
                             </li>
 
                             <li class="list-group-item">

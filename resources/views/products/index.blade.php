@@ -82,7 +82,30 @@
 
 .sidebar { display:flex;flex-direction:column;gap:1rem; }
 @media (min-width: 992px) {
-    .sidebar.offcanvas-lg { position:sticky;top:1.5rem; }
+    /* Bootstrap 5.3 بيحط بشكل غير مشروط (بدون أي media query) على .offcanvas و
+       .offcanvas.offcanvas-start: position:fixed, right:0, width:400px, transform,
+       visibility:hidden... ومافي أي قاعدة عندهم بترجعهم لوضعهم الطبيعي فوق 992px،
+       فلازم نصفّرهم كلهم يدوياً حتى تشتغل كعمود عادي بجدول الصفحة. */
+    .sidebar.offcanvas-lg {
+        position: sticky !important;
+        top: 1.5rem !important;
+        right: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        width: auto !important;
+        max-width: none !important;
+        visibility: visible !important;
+        transform: none !important;
+        border-left: 0 !important;
+        z-index: auto !important;
+    }
+    /* Bootstrap بيفرض display:flex بدون flex-direction (يعني row) على offcanvas-body
+       فوق 992px، فكانت كل بطاقات الفلتر (تصنيفات/سعر/خيارات) بتصطف جنب بعض أفقياً
+       بعمود ضيق بدل ما تترتب فوق بعض عمودياً. */
+    .sidebar.offcanvas-lg .offcanvas-body {
+        flex-direction: column !important;
+        gap: 1rem;
+    }
 }
 .offcanvas-footer {
     padding:.9rem 1.2rem;border-top:1px solid var(--slate-200);background:white;
@@ -96,9 +119,9 @@
     background:var(--brand);color:white;border-radius:50px;font-size:.7rem;font-weight:800;
     min-width:19px;height:19px;display:flex;align-items:center;justify-content:center;padding:0 .3rem;
 }
-@media (min-width: 992px) {
-    .filters-trigger-btn { display:none; }
-}
+/* زر الفلاتر الأصلي بالتولبار صار مستبدل بشريط الفلاتر السريع تحت قائمة الموقع
+   على الجوال (شوف mobile-filter-bar بالأسفل) — نخفيه بكل الأحجام تفادياً للتكرار. */
+.filters-trigger-btn { display:none; }
 @media (min-width: 992px) {
     .offcanvas-lg .offcanvas-footer { display:none; }
 }
@@ -362,6 +385,29 @@
     #modal-img-placeholder { min-height:210px !important; }
 }
 </style>
+@endpush
+
+@push('mobile-filter-bar')
+    @php
+        $__mfbActiveCount = collect(request()->only(['search','category','price_min','price_max','discount','in_stock']))
+            ->filter(fn($v) => $v !== null && $v !== '')->count();
+    @endphp
+    <div class="mobile-filter-chip-bar">
+        <button type="button" class="filter-chip-btn chip-trigger" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+            <i class="fas fa-sliders-h"></i> فلاتر
+            @if($__mfbActiveCount > 0)
+                <span class="filter-chip-badge">{{ $__mfbActiveCount }}</span>
+            @endif
+        </button>
+        <button type="button" class="filter-chip-btn {{ !request('category') ? 'active' : '' }}" onclick="selectCategory('')">
+            جميع المنتجات
+        </button>
+        @foreach($categories as $cat => $cnt)
+            <button type="button" class="filter-chip-btn {{ request('category') === $cat ? 'active' : '' }}" onclick="selectCategory('{{ $cat }}')">
+                {{ $cat }}
+            </button>
+        @endforeach
+    </div>
 @endpush
 
 @section('content')

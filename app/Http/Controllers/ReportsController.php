@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\Obligation;
+use App\Models\Order;
 use App\Models\Purchase;
 use App\Models\Repair;
 use App\Models\Sale;
@@ -237,9 +238,18 @@ class ReportsController extends Controller
         $monthlyObligations = (float) $obligationsQuery->clone()->sum('cash_amount')
             + (float) $obligationsQuery->clone()->sum('bank_amount');
 
-        // صافي الدخل الحقيقي = (مبيعات + صيانة) - (مشتريات + التزامات شهرية)
+        // طلبات المتجر الإلكتروني — دايمًا محسوبة (بغض النظر عن $type) لأنها لازمة لصافي
+        // الدخن. مافيها branch_id (المتجر مشترك بين الفروع، مش مربوط بفرع معيّن)، فمنحسبها
+        // كاملة بغض النظر عن فلترة الفرع. قبل هالتعديل كانت غير محسوبة إطلاقاً بأي تقرير.
+        $onlineOrdersQuery = Order::query()
+            ->whereIn('status', Order::STATUS_COUNTS_AS_PURCHASED)
+            ->whereBetween('created_at', [$dateStart, $dateEnd]);
+        $onlineOrdersCount = (int) $onlineOrdersQuery->clone()->count();
+        $onlineOrdersTotal = (float) $onlineOrdersQuery->clone()->sum('total');
+
+        // صافي الدخل الحقيقي = (مبيعات + صيانة + طلبات أونلاين) - (مشتريات + التزامات شهرية)
         // ملاحظة: مبيعات معرض الجوال ومشترياته منعكسة أصلاً جوا sales/purchases (مزامنة تلقائية)، فمش محتاجين نضيفها لحالها هون.
-        $netIncome = (float) ($monthlySales ?? 0) + (float) ($monthlycostRepair ?? 0)
+        $netIncome = (float) ($monthlySales ?? 0) + (float) ($monthlycostRepair ?? 0) + $onlineOrdersTotal
             - (float) ($monthlyPurchases ?? 0) - $monthlyObligations;
 
         // أسماء الفروع (بدل ما نعرض #id خام بجداول التفصيل)
@@ -279,8 +289,10 @@ class ReportsController extends Controller
             // Role flags
             'isAdmin',
 
-            // Obligations + net income
+            // Obligations + Online orders + net income
             'monthlyObligations',
+            'onlineOrdersCount',
+            'onlineOrdersTotal',
             'netIncome'
         );
     }

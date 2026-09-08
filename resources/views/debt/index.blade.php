@@ -14,6 +14,11 @@
         </div>
     @endif
 
+    <div class="alert {{ $totalDebts >= 0 ? 'alert-success' : 'alert-danger' }} d-flex justify-content-between align-items-center">
+        <strong>صافي الديون (لنا − علينا، غير المسدَّدة فقط)</strong>
+        <span class="fs-5 fw-bold">{{ number_format($totalDebts, 2) }} شيكل</span>
+    </div>
+
     <div class="card">
         <div class="card-body">
             <table class="table table-hover">

@@ -115,8 +115,27 @@ class DailyHandoverController extends Controller
         }
         $totalSalesrepairs = $totalSalesrepairsQuery->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
-        $totalSales  = $totalSalessales + $totalSalesrepairs;
-        $difference  = $totalSales - $totalHandovers;
+        // المصاريف اللي خرجت فعلياً من نفس الدرج بنفس الفترة (مشتريات + التزامات) — لازم
+        // تُطرح قبل ما نقارن بالتسليم الفعلي، وإلا أي مشترى نقدي مشروع بيظهر كأنه "عجز".
+        $totalPurchasesQuery = DB::table('purchases')
+            ->whereBetween(DB::raw('DATE(purchase_date)'), [$startDate, $endDate])
+            ->whereNull('deleted_at');
+        if (!auth()->user()->isAdmin()) {
+            $totalPurchasesQuery->where('branch_id', auth()->user()->branch_id);
+        }
+        $totalPurchases = $totalPurchasesQuery->sum(DB::raw('COALESCE(amount_cash, 0) + COALESCE(amount_bank, 0)'));
+
+        $totalObligationsQuery = DB::table('obligations')
+            ->whereBetween(DB::raw('DATE(date)'), [$startDate, $endDate]);
+        if (!auth()->user()->isAdmin()) {
+            $totalObligationsQuery->where('branch_id', auth()->user()->branch_id);
+        }
+        $totalObligations = $totalObligationsQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+        $totalSales    = $totalSalessales + $totalSalesrepairs;
+        $totalExpenses = $totalPurchases + $totalObligations;
+        $expectedCash  = $totalSales - $totalExpenses;
+        $difference    = $expectedCash - $totalHandovers;
 
         $dailyData = DailyHandover::whereBetween('handover_date', [$startDate, $endDate])
             ->selectRaw('handover_date, SUM(cash + bank) as daily_handover')
@@ -143,16 +162,36 @@ class DailyHandoverController extends Controller
 
                 $sales = $salesFromSales + $salesFromRepairs;
 
+                $purchasesQuery = DB::table('purchases')
+                    ->whereDate('purchase_date', $handover->handover_date)
+                    ->whereNull('deleted_at');
+                if (!auth()->user()->isAdmin()) {
+                    $purchasesQuery->where('branch_id', auth()->user()->branch_id);
+                }
+                $purchases = $purchasesQuery->sum(DB::raw('COALESCE(amount_cash, 0) + COALESCE(amount_bank, 0)'));
+
+                $obligationsQuery = DB::table('obligations')
+                    ->whereDate('date', $handover->handover_date);
+                if (!auth()->user()->isAdmin()) {
+                    $obligationsQuery->where('branch_id', auth()->user()->branch_id);
+                }
+                $obligations = $obligationsQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+
+                $expenses = $purchases + $obligations;
+                $expected = $sales - $expenses;
+
                 return [
                     'date'       => $handover->handover_date,
                     'handover'   => $handover->daily_handover,
                     'sales'      => $sales,
-                    'difference' => $sales - $handover->daily_handover,
+                    'expenses'   => $expenses,
+                    'expected'   => $expected,
+                    'difference' => $expected - $handover->daily_handover,
                 ];
             });
 
         return view('daily-handovers.reports', compact(
-            'startDate', 'endDate', 'totalHandovers', 'totalSales', 'difference', 'dailyData'
+            'startDate', 'endDate', 'totalHandovers', 'totalSales', 'totalExpenses', 'expectedCash', 'difference', 'dailyData'
         ));
     }
 }

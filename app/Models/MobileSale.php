@@ -34,4 +34,9 @@ class MobileSale extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function linkedSale()
+    {
+        return $this->belongsTo(Sale::class, 'linked_sale_id');
+    }
 }

@@ -28,6 +28,8 @@ class Purchase extends Model
         'issue',
         'return_date',
         'notes',
+        'catalog_item_id',
+        'catalog_quantity_applied',
     ];
 
     protected $casts = [
@@ -37,5 +39,12 @@ class Purchase extends Model
         'purchase_date' => 'datetime',
         'return_date' => 'datetime',
         'is_returned' => 'boolean',
+        'catalog_item_id' => 'integer',
+        'catalog_quantity_applied' => 'integer',
     ];
+
+    public function catalogItem()
+    {
+        return $this->belongsTo(CatalogItem::class);
+    }
 }

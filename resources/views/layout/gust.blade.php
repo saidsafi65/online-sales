@@ -258,6 +258,62 @@
       }
     }
 
+    /* شريط الفلاتر السريع للجوال — ثابت مع الهيدر (مش عالق بحافة الشاشة)، وبينسحب
+       بالإصبع يمين/يسار زي شريط القوائم فوقه بالظبط */
+    .mobile-filter-chip-bar {
+      display: none;
+    }
+    @media (max-width: 991px) {
+      .mobile-filter-chip-bar {
+        display: flex;
+        gap: .55rem;
+        overflow-x: auto;
+        padding: 0 1rem .9rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .mobile-filter-chip-bar::-webkit-scrollbar {
+        display: none;
+      }
+      .filter-chip-btn {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        border: none;
+        background: rgba(255, 255, 255, .14);
+        color: rgba(255, 255, 255, .9);
+        font-weight: 700;
+        font-size: .82rem;
+        padding: .5rem 1.05rem;
+        border-radius: 50px;
+        white-space: nowrap;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all .2s;
+      }
+      .filter-chip-btn.active {
+        background: #fff;
+        color: var(--primary-color);
+      }
+      .filter-chip-btn.chip-trigger {
+        background: rgba(0, 0, 0, .18);
+        color: #fff;
+        position: relative;
+      }
+      .filter-chip-badge {
+        background: #fff;
+        color: var(--primary-color);
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        font-size: .7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 .3rem;
+      }
+    }
+
     /* Main Content */
     .main-content {
       flex: 1;
@@ -461,6 +517,8 @@
         <i class="fas fa-compact-disc"></i> البرامج
       </a>
     </div>
+
+    @stack('mobile-filter-bar')
 
     <div class="mobile-account-row">
       @auth('customer')

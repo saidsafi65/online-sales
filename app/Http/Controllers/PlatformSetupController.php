@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\PlatformAdmin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -13,11 +15,19 @@ use Illuminate\Validation\Rules\Password;
  * SSH/artisan access on production, so this is a plain web form instead of
  * a console command — but it self-locks the moment one platform_admins row
  * exists, so it can never be used to add a second/rogue account later.
+ *
+ * Also self-bootstraps the central database's schema itself on first visit:
+ * a fresh production deployment has a `central` DB connection configured but
+ * no tables in it yet (no SSH means no `php artisan migrate` either), so this
+ * is the one place that can safely run those migrations before anything else
+ * on the platform (this page included) can function.
  */
 class PlatformSetupController extends Controller
 {
     public function show()
     {
+        $this->ensureCentralSchema();
+
         if (PlatformAdmin::on('central')->exists()) {
             return redirect()->route('system-admin.login')->with('error', 'تم إعداد حساب مدير النظام مسبقاً.');
         }
@@ -27,6 +37,8 @@ class PlatformSetupController extends Controller
 
     public function store(Request $request)
     {
+        $this->ensureCentralSchema();
+
         if (PlatformAdmin::on('central')->exists()) {
             return redirect()->route('system-admin.login')->with('error', 'تم إعداد حساب مدير النظام مسبقاً.');
         }
@@ -51,5 +63,18 @@ class PlatformSetupController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('system-admin.dashboard')->with('success', 'تم إنشاء حساب مدير النظام بنجاح');
+    }
+
+    private function ensureCentralSchema(): void
+    {
+        if (Schema::connection('central')->hasTable('platform_admins')) {
+            return;
+        }
+
+        Artisan::call('migrate', [
+            '--path' => 'database/migrations/central',
+            '--database' => 'central',
+            '--force' => true,
+        ]);
     }
 }

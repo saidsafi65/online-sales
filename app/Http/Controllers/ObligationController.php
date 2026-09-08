@@ -49,7 +49,15 @@ class ObligationController extends Controller
             'expense_type' => 'required|string',
             'payment_type' => 'required|string',
             'datetime' => 'required|date',
+            'cash_amount' => 'nullable|numeric|min:0',
+            'bank_amount' => 'nullable|numeric|min:0',
         ]);
+
+        if ((float) $request->cash_amount <= 0 && (float) $request->bank_amount <= 0) {
+            return redirect()->back()
+                ->withErrors(['cash_amount' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
+        }
 
         // تنبيه غير ملزم لو نفس البند اتسجل هالشهر قبل هيك (منع تكرار بالغلط، مثلاً دبل-كليك)
         $duplicateWarning = null;
@@ -97,7 +105,15 @@ class ObligationController extends Controller
             'expense_type' => 'required|string',
             'payment_type' => 'required|string',
             'datetime' => 'required|date',
+            'cash_amount' => 'nullable|numeric|min:0',
+            'bank_amount' => 'nullable|numeric|min:0',
         ]);
+
+        if ((float) $request->cash_amount <= 0 && (float) $request->bank_amount <= 0) {
+            return redirect()->back()
+                ->withErrors(['cash_amount' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
+        }
 
         $obligation->update([
             'expense_type' => $request->expense_type,

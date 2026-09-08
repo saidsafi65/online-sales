@@ -80,10 +80,12 @@
                             case 'today':
                                 break;
                             case 'week':
-                                const day = (now.getDay() + 6) % 7; // Monday-based week
-                                start.setDate(now.getDate() - day);
-                                end = new Date(start);
-                                end.setDate(start.getDate() + 6);
+                                const weekNum = Math.ceil(now.getDate() / 7);
+                                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                                const weekStartDay = (weekNum - 1) * 7 + 1;
+                                const weekEndDay = Math.min(weekNum * 7, daysInMonth);
+                                start = new Date(now.getFullYear(), now.getMonth(), weekStartDay);
+                                end = new Date(now.getFullYear(), now.getMonth(), weekEndDay);
                                 break;
                             case 'month':
                                 start = new Date(now.getFullYear(), now.getMonth(), 1);

@@ -12,14 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $connection = config('webpush.database_connection');
+        // نفس ملاحظة create_push_subscriptions_table: ما منستخدم config('webpush.database_connection')
+        // لأنها ثابتة على 'mysql' وبتخلي هاي الميغريشن تتجاهل --database (بتكسر ترحيل معارض جديدة).
         $table = config('webpush.table_name');
 
-        Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
+        Schema::table($table, function (Blueprint $blueprint): void {
             $blueprint->dropUnique(['endpoint']);
         });
 
-        Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
+        Schema::table($table, function (Blueprint $blueprint): void {
             $blueprint->string('endpoint', PushSubscription::ENDPOINT_MAX_LENGTH)
                 ->charset('ascii')
                 ->unique()
@@ -32,14 +33,13 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $connection = config('webpush.database_connection');
         $table = config('webpush.table_name');
 
-        Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
+        Schema::table($table, function (Blueprint $blueprint): void {
             $blueprint->dropUnique(['endpoint']);
         });
 
-        Schema::connection($connection)->table($table, function (Blueprint $blueprint): void {
+        Schema::table($table, function (Blueprint $blueprint): void {
             $blueprint->string('endpoint', 500)
                 ->unique()
                 ->change();

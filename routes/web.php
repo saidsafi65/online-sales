@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\FinancialClaimController;
 use App\Http\Controllers\LaptopCompatibilityController;
 use App\Http\Controllers\MaintenanceDepositController;
 use App\Http\Controllers\ObligationController;
@@ -209,220 +210,126 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
 
-        
         // الحصول على فرع المستخدم إذا لم يكن مدير نظام
-         $user = auth()->user();
+        $user = auth()->user();
         $branchFilter = $user->isAdmin() ? null : $user->branch_id;
 
-        
         // ===== إحصائيات المبيعات =====
-        $salesQuery = Sale::where('is_returned', false);
+        $todaySalesCountQuery = Sale::where('is_returned', false)
+            ->whereDate('created_at', today());
         if ($branchFilter) {
-            $salesQuery->where('branch_id', $branchFilter);
+            $todaySalesCountQuery->where('branch_id', $branchFilter);
         }
-        
-        $monthlySales = $salesQuery
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->sum(DB::raw('cash_amount + app_amount'));
+        $todaySalesCount = $todaySalesCountQuery->count();
 
-        $todaySalesCount = $salesQuery
-            ->whereDate('created_at', today())
-            ->count();
+        // ✅ إجمالي المبيعات لهذا الشهر فقط (غير المرجعة) مع فلتر الفرع
+        // (نفلتر على sale_date، مش created_at، حتى يتطابق هالرقم مع صفحة "التقارير" — الاثنين
+        // لازم يستخدموا نفس تاريخ العملية الفعلي، مش تاريخ إدخالها بالنظام)
+        $monthlySalesQuery = Sale::where('is_returned', false)
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year);
+        if ($branchFilter) {
+            $monthlySalesQuery->where('branch_id', $branchFilter);
+        }
+        $monthlySales = $monthlySalesQuery->sum(DB::raw('cash_amount + app_amount'));
 
         // ===== إحصائيات الصيانة =====
-        $repairsQuery = Repair::where('is_returned', false);
-        if ($branchFilter) {
-            $repairsQuery->where('branch_id', $branchFilter);
-        }
-
-        $deliveredRepairs = $repairsQuery
-            ->whereNotNull('delivery_date')
-            ->whereMonth('delivery_date', now()->month)
-            ->count();
-
-        $monthlycost_cashRepair = $repairsQuery
-            ->whereMonth('delivery_date', now()->month)
-            ->sum('cost_cash');
-
-        $monthlycost_bankRepair = $repairsQuery
-            ->whereMonth('delivery_date', now()->month)
-            ->sum('cost_bank');
-
-        $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
-
-        $pendingRepairs = Repair::query();
-        if ($branchFilter) {
-            $pendingRepairs->where('branch_id', $branchFilter);
-        }
-        $pendingRepairs = max($pendingRepairs->where('status', 'pending')->count() - $deliveredRepairs, 0);
-
-        // ===== إحصائيات المشتريات =====
-        $purchasesQuery = Purchase::where('is_returned', false);
-        if ($branchFilter) {
-            $purchasesQuery->where('branch_id', $branchFilter);
-        }
-
-        $cashPurchases = $purchasesQuery
-            ->whereMonth('purchase_date', now()->month)
-            ->sum('amount_cash');
-
-        $bankPurchases = $purchasesQuery
-            ->whereMonth('purchase_date', now()->month)
-            ->sum('amount_bank');
-
-        $monthlyPurchases = $cashPurchases + $bankPurchases;
-
-        // ===== إحصائيات الالتزامات =====
-        $obligationsQuery = Obligation::query();
-        if ($branchFilter) {
-            $obligationsQuery->where('branch_id', $branchFilter);
-        }
-
-        $obligationsCash = $obligationsQuery
-            ->whereMonth('date', now()->month)
-            ->sum('cash_amount');
-
-        $obligationsBank = $obligationsQuery
-            ->whereMonth('date', now()->month)
-            ->sum('bank_amount');
-
-        $monthlyObligations = $obligationsCash + $obligationsBank;
-        $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
-
-        // ===== إحصائيات الديون =====
-        $debtsQuery = Debt::query();
-        if ($branchFilter) {
-            $debtsQuery->where('branch_id', $branchFilter);
-        }
-
-        // دائن = "لي عنده" = دين لنا (receivable) | مدين = "عليّ له" = دين علينا (payable)
-        $totalReceivables = $debtsQuery
-            ->where('type', 'دائن')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
-
-        $totalPayables = $debtsQuery
-            ->where('type', 'مدين')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
-
-        $totalDebts = $totalReceivables - $totalPayables;
-
-        // ===== الحسابات النهائية =====
-        $monthlyIncome = $monthlySales + $monthlycostRepair;
-        $netRevenue = $monthlyIncome - $totalMonthlyPurchases;
-
-        // ===== بيانات إضافية =====
-        $catalogQuery = CatalogItem::query();
-        if ($branchFilter) {
-            $catalogQuery->where('branch_id', $branchFilter);
-        }
-        $totalProducts = $catalogQuery->count();
-
-        $repairCount = Repair::query();
-        if ($branchFilter) {
-            $repairCount->where('branch_id', $branchFilter);
-        }
-        $totalCustomers = $repairCount->count();       
-
-        // عدد الصيانات المسلمة (مع تطبيق فلتر الفرع إذا لم يكن مدير)
+        // عدد الصيانات المسلَّمة (كل الأوقات — تُستخدم فقط لتصحيح عدّاد "المعلّقة")
         $deliveredRepairsQuery = Repair::whereNotNull('delivery_date');
         if ($branchFilter) {
             $deliveredRepairsQuery->where('branch_id', $branchFilter);
         }
         $deliveredRepairs = $deliveredRepairsQuery->count();
 
-        // إجمالي تكلفة الصيانات لهذا الشهر (غير المرجعة) مع فلتر الفرع
-        $monthlycost_cashRepairQuery = Repair::whereMonth('delivery_date', now()->month)
-            ->whereYear('delivery_date', now()->year)
-            ->where('is_returned', false);
+        // إجمالي تكلفة الصيانات لهذا الشهر فقط (غير المرجعة) مع فلتر الفرع
+        $monthlycostCashRepairQuery = Repair::where('is_returned', false)
+            ->whereMonth('delivery_date', now()->month)
+            ->whereYear('delivery_date', now()->year);
         if ($branchFilter) {
-            $monthlycost_cashRepairQuery->where('branch_id', $branchFilter);
+            $monthlycostCashRepairQuery->where('branch_id', $branchFilter);
         }
-        $monthlycost_cashRepair = $monthlycost_cashRepairQuery->sum('cost_cash');
+        $monthlycostCashRepair = $monthlycostCashRepairQuery->sum('cost_cash');
 
-        $monthlycost_bankRepairQuery = Repair::whereMonth('delivery_date', now()->month)
-            ->whereYear('delivery_date', now()->year)
-            ->where('is_returned', false);
+        $monthlycostBankRepairQuery = Repair::where('is_returned', false)
+            ->whereMonth('delivery_date', now()->month)
+            ->whereYear('delivery_date', now()->year);
         if ($branchFilter) {
-            $monthlycost_bankRepairQuery->where('branch_id', $branchFilter);
+            $monthlycostBankRepairQuery->where('branch_id', $branchFilter);
         }
-        $monthlycost_bankRepair = $monthlycost_bankRepairQuery->sum('cost_bank');
+        $monthlycostBankRepair = $monthlycostBankRepairQuery->sum('cost_bank');
 
-        $monthlycostRepair = $monthlycost_cashRepair + $monthlycost_bankRepair;
+        $monthlycostRepair = $monthlycostCashRepair + $monthlycostBankRepair;
 
-        // عدد الصيانات المعلقة (قبل الخصم) مع فلتر الفرع
+        // عدد الصيانات المعلقة (قبل الخصم) مع فلتر الفرع — حالة حالية، غير مرتبطة بالشهر
         $pendingRepairsRawQuery = Repair::where('status', 'pending');
         if ($branchFilter) {
             $pendingRepairsRawQuery->where('branch_id', $branchFilter);
         }
         $pendingRepairsRaw = $pendingRepairsRawQuery->count();
+        $pendingRepairs = max($pendingRepairsRaw - $deliveredRepairs, 0);
 
-        // ✅ إجمالي المبيعات لهذا الشهر (غير المرجعة) مع فلتر الفرع
-        // (نفلتر على sale_date، مش created_at، حتى يتطابق هالرقم مع صفحة "التقارير" — الاثنين
-        // لازم يستخدموا نفس تاريخ العملية الفعلي، مش تاريخ إدخالها بالنظام)
-        $monthlySalesQuery = Sale::whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->where('is_returned', false);
+        // ===== إحصائيات المشتريات =====
+        // ✅ إجمالي المشتريات لهذا الشهر فقط (غير المرجعة) مع فلتر الفرع
+        $cashPurchasesQuery = Purchase::where('is_returned', false)
+            ->whereMonth('purchase_date', now()->month)
+            ->whereYear('purchase_date', now()->year);
         if ($branchFilter) {
-            $monthlySalesQuery->where('branch_id', $branchFilter);
+            $cashPurchasesQuery->where('branch_id', $branchFilter);
         }
-        $monthlySales = $monthlySalesQuery->sum(DB::raw('cash_amount + app_amount'));
+        $cashPurchases = $cashPurchasesQuery->sum('amount_cash');
 
-        // ✅ إجمالي المشتريات لهذا الشهر (غير المرجعة) مع فلتر الفرع
-        $cashTotalQuery = Purchase::whereMonth('purchase_date', now()->month)
-            ->whereYear('purchase_date', now()->year)
-            ->where('is_returned', false);
+        $bankPurchasesQuery = Purchase::where('is_returned', false)
+            ->whereMonth('purchase_date', now()->month)
+            ->whereYear('purchase_date', now()->year);
         if ($branchFilter) {
-            $cashTotalQuery->where('branch_id', $branchFilter);
+            $bankPurchasesQuery->where('branch_id', $branchFilter);
         }
-        $cashTotal = $cashTotalQuery->sum('amount_cash');
+        $bankPurchases = $bankPurchasesQuery->sum('amount_bank');
 
-        $bankTotalQuery = Purchase::whereMonth('purchase_date', now()->month)
-            ->whereYear('purchase_date', now()->year)
-            ->where('is_returned', false);
-        if ($branchFilter) {
-            $bankTotalQuery->where('branch_id', $branchFilter);
-        }
-        $bankTotal = $bankTotalQuery->sum('amount_bank');
+        $monthlyPurchases = $cashPurchases + $bankPurchases;
 
-        // إجمالي الالتزامات الشهرية مع فلتر الفرع
-        $obligationsCashTotalQuery = Obligation::whereMonth('date', now()->month)
+        // ===== إحصائيات الالتزامات (لهذا الشهر فقط) =====
+        $obligationsCashQuery = Obligation::whereMonth('date', now()->month)
             ->whereYear('date', now()->year);
         if ($branchFilter) {
-            $obligationsCashTotalQuery->where('branch_id', $branchFilter);
+            $obligationsCashQuery->where('branch_id', $branchFilter);
         }
-        $obligationsCashTotal = $obligationsCashTotalQuery->sum('cash_amount');
+        $obligationsCash = $obligationsCashQuery->sum('cash_amount');
 
-        $obligationsBankTotalQuery = Obligation::whereMonth('date', now()->month)
+        $obligationsBankQuery = Obligation::whereMonth('date', now()->month)
             ->whereYear('date', now()->year);
         if ($branchFilter) {
-            $obligationsBankTotalQuery->where('branch_id', $branchFilter);
+            $obligationsBankQuery->where('branch_id', $branchFilter);
         }
-        $obligationsBankTotal = $obligationsBankTotalQuery->sum('bank_amount');
+        $obligationsBank = $obligationsBankQuery->sum('bank_amount');
 
-        $monthlyObligations = $obligationsCashTotal + $obligationsBankTotal;
-        // جمع المشتريات مع الالتزامات
-        $monthlyPurchases = $cashTotal + $bankTotal;
-
+        $monthlyObligations = $obligationsCash + $obligationsBank;
         $totalMonthlyPurchases = $monthlyPurchases + $monthlyObligations;
 
-        // صافي الدخل = (إجمالي المبيعات + إجمالي تكلفة الصيانات) - إجمالي المشتريات
-        $netRevenue = ($monthlySales + $monthlycostRepair) - $totalMonthlyPurchases;
-        $monthlyIncome = $monthlySales + $monthlycostRepair;
+        // طلبات المتجر الإلكتروني لهذا الشهر — الطلبات مش مربوطة بفرع معيّن (المتجر
+        // مشترك بين كل الفروع)، فمنضيفها بس لعرض المدير (كل الفروع)، مش لعرض فرع محدد.
+        $monthlyOnlineOrders = 0;
+        if (! $branchFilter) {
+            $monthlyOnlineOrders = \App\Models\Order::whereIn('status', \App\Models\Order::STATUS_COUNTS_AS_PURCHASED)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total');
+        }
 
-        // حساب الديون المتراكمة مع فلتر الفرع
+        // ===== الحسابات النهائية (لهذا الشهر فقط) =====
+        $monthlyIncome = $monthlySales + $monthlycostRepair + $monthlyOnlineOrders;
+        $netRevenue = $monthlyIncome - $totalMonthlyPurchases;
+
+        // ===== إحصائيات الديون المتراكمة (كل الأوقات، غير المسدَّدة فقط) =====
         // دائن = "لي عنده" = دين لنا (receivable) | مدين = "عليّ له" = دين علينا (payable)
-        $totalReceivablesQuery = Debt::where('type', 'دائن')
-            ->whereNull('payment_date');
+        // أي دين له تاريخ سداد (payment_date) يعتبر مسدَّد ولا يُحسب هون
+        $totalReceivablesQuery = Debt::where('type', 'دائن')->whereNull('payment_date');
         if ($branchFilter) {
             $totalReceivablesQuery->where('branch_id', $branchFilter);
         }
         $totalReceivables = $totalReceivablesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
-        $totalPayablesQuery = Debt::where('type', 'مدين')
-            ->whereNull('payment_date');
+        $totalPayablesQuery = Debt::where('type', 'مدين')->whereNull('payment_date');
         if ($branchFilter) {
             $totalPayablesQuery->where('branch_id', $branchFilter);
         }
@@ -430,13 +337,38 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
 
         $totalDebts = $totalReceivables - $totalPayables;
 
+        // ===== بيانات إضافية (إجماليات كلية، غير مرتبطة بالشهر) =====
+        $catalogQuery = CatalogItem::query();
+        if ($branchFilter) {
+            $catalogQuery->where('branch_id', $branchFilter);
+        }
+        $totalProducts = $catalogQuery->count();
+
+        // عملاء الصيانة لهذا الشهر فقط: كل سجل صيانة استُلم هذا الشهر يُحسب كزبون (مع فلتر الفرع)
+        $repairCustomersQuery = Repair::whereMonth('received_date', now()->month)
+            ->whereYear('received_date', now()->year);
+        if ($branchFilter) {
+            $repairCustomersQuery->where('branch_id', $branchFilter);
+        }
+        $repairCustomers = $repairCustomersQuery->count();
+
+        // عملاء المبيعات لهذا الشهر فقط: كل مبيعة غير مرجعة هذا الشهر تُحسب كزبون (مع فلتر الفرع)
+        $salesCustomersQuery = Sale::where('is_returned', false)
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year);
+        if ($branchFilter) {
+            $salesCustomersQuery->where('branch_id', $branchFilter);
+        }
+        $salesCustomers = $salesCustomersQuery->count();
+
         return view('home', [
             // المبيعات اليوم مع فلتر الفرع
             'todaySales' => $todaySalesCount,
             // صيانات معلقة بعد خصم المسلَّمة (مصدر مرشح بحسب الفرع)
-            'pendingRepairs' => max($pendingRepairsRaw - $deliveredRepairs, 0),
-            // عدد العملاء والمنتجات مع فلتر الفرع
-            'totalCustomers' => $totalCustomers,
+            'pendingRepairs' => $pendingRepairs,
+            // عملاء الصيانة والمبيعات والمنتجات مع فلتر الفرع
+            'repairCustomers' => $repairCustomers,
+            'salesCustomers' => $salesCustomers,
             'totalProducts' => $totalProducts,
             // الأرقام المالية (مصادر محلية مفلترة للفرع أو جميع الفروع للمسؤول)
             'monthlyRevenue' => $netRevenue,
@@ -515,15 +447,6 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/sales/{sale}/edit', [SalesController::class, 'edit'])->name('sales.edit');
     Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
 
-    // عرض إحصائيات الدخل اليومي
-    Route::get('/sales/daily-income', [SalesController::class, 'dailyIncome'])->name('sales.dailyIncome');
-
-    // عرض إحصائيات الدخل الأسبوعي
-    Route::get('/sales/weekly-income', [SalesController::class, 'weeklyIncome'])->name('sales.weeklyIncome');
-
-    // عرض إحصائيات الدخل الشهري
-    Route::get('/sales/monthly-income', [SalesController::class, 'monthlyIncome'])->name('sales.monthlyIncome');
-
     // إرجاع عملية بيع
     Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
     });
@@ -596,6 +519,14 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
     Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::get('/invoices/{id}/receipt', [InvoiceController::class, 'receipt'])->name('invoices.receipt');
+
+    // مطالبة مالية (Financial Claim) — نفس صلاحية الفواتير
+    Route::get('/financial-claims', [FinancialClaimController::class, 'index'])->name('financial-claims.index');
+    Route::get('/financial-claims/create', [FinancialClaimController::class, 'create'])->name('financial-claims.create');
+    Route::post('/financial-claims', [FinancialClaimController::class, 'store'])->name('financial-claims.store');
+    Route::get('/financial-claims/{id}/print', [FinancialClaimController::class, 'print'])->name('financial-claims.print');
+    Route::get('/financial-claims/{id}/download-pdf', [FinancialClaimController::class, 'downloadPdf'])->name('financial-claims.download-pdf');
+    Route::delete('/financial-claims/{id}', [FinancialClaimController::class, 'destroy'])->name('financial-claims.destroy');
     });
 
     // صفحة المتطابقات الرئيسية
@@ -778,6 +709,7 @@ Route::prefix('system-admin')->name('system-admin.')->group(function () {
             Route::post('/migrate', [TenantManagementController::class, 'maintenanceMigrate'])->name('migrate');
             Route::post('/clear-cache', [TenantManagementController::class, 'maintenanceClearCache'])->name('clear-cache');
             Route::post('/migrate-all', [TenantManagementController::class, 'migrateAll'])->name('migrate-all');
+            Route::post('/self-test-provisioning', [TenantManagementController::class, 'selfTestProvisioning'])->name('self-test-provisioning');
         });
 
         Route::prefix('accounts')->name('accounts.')->group(function () {
