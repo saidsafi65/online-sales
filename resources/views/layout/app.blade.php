@@ -912,9 +912,9 @@
                         </div>
                     </div>
                         <ul class="navbar-nav">
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown" style="position: relative;">
                                 <a class="nav-link dropdown-toggle p-0" href="#" role="button"
-                                    data-bs-toggle="dropdown">
+                                    data-bs-toggle="dropdown" data-bs-display="static">
                                     <div class="user-section">
                                         <img src="https://ui-avatars.com/api/?name=Admin&background=fff&color=1e40af&bold=true"
                                             alt="User" class="user-avatar">
