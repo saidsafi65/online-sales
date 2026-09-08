@@ -5,8 +5,10 @@ namespace App\Providers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Models\ActivityLog;
+use App\Models\SupportTicket;
 use Illuminate\Pagination\Paginator;
 use App\Services\Provisioning\TenantProvisioner;
 use App\Services\Provisioning\CPanelTenantProvisioner;
@@ -39,7 +41,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
          Paginator::useBootstrapFive();
-         
+
+        // نافذة الدعم الفني ظاهرة بشريط التنقل بكل صفحات لوحة مدير النظام، فبنحسب
+        // عدد التذاكر المفتوحة مرة وحدة هون بدل ما كل PlatformController يمررها يدوياً.
+        View::composer('layout.platform', function ($view) {
+            $view->with('openSupportCount', Auth::guard('platform')->check()
+                ? SupportTicket::whereIn('status', ['open', 'in_progress'])->count()
+                : 0);
+        });
+
         Event::listen('eloquent.created: *', function ($event, $data) {
             $this->log('created', $data[0] ?? null);
         });

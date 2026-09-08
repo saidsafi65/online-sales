@@ -20,6 +20,8 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TenantManagementController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\SupportTicketController;
+use App\Http\Controllers\PlatformSupportController;
 use App\Http\Controllers\PlatformAuthController;
 use App\Http\Controllers\PlatformSetupController;
 use App\Http\Controllers\PlatformDashboardController;
@@ -201,6 +203,15 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         Route::get('/conversations/{member}', [ChatController::class, 'conversation'])->name('conversations.show');
         Route::get('/conversations/{conversation}/messages', [ChatController::class, 'privateMessages'])->name('conversations.messages');
         Route::post('/conversations/{conversation}/messages', [ChatController::class, 'sendPrivateMessage'])->name('conversations.messages.send')->middleware('throttle:30,1');
+    });
+
+    // 🎧 الدعم الفني (تذاكر داخلية للموظفين) — متاح لأي موظف نشط بغض النظر عن صلاحياته
+    // التفصيلية (نفس منطق /notifications). مسار /support-tickets مقصود، مش /support —
+    // هيدا الأخير محجوز أصلاً لصفحة "الدعم الفني" العامة الثابتة (legal.support) للزوار.
+    Route::prefix('support-tickets')->name('support.')->group(function () {
+        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
+        Route::get('/create', [SupportTicketController::class, 'create'])->name('create');
+        Route::post('/', [SupportTicketController::class, 'store'])->name('store')->middleware('throttle:10,1');
     });
 
     // إشعارات الدفع (Web Push) — متاحة لأي موظف نشط، بغض النظر عن صلاحياته التفصيلية
@@ -722,6 +733,13 @@ Route::prefix('system-admin')->name('system-admin.')->group(function () {
             Route::delete('/{tenant}/customers/{customer}', [PlatformAccountController::class, 'destroyCustomer'])->name('customers.destroy');
             Route::post('/{tenant}/customers/{customer}/toggle', [PlatformAccountController::class, 'toggleCustomer'])->name('customers.toggle');
             Route::post('/{tenant}/customers/{customer}/reset-password', [PlatformAccountController::class, 'resetCustomerPassword'])->name('customers.reset-password');
+        });
+
+        Route::prefix('support')->name('support.')->group(function () {
+            Route::get('/', [PlatformSupportController::class, 'index'])->name('index');
+            Route::get('/{ticket}', [PlatformSupportController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [PlatformSupportController::class, 'reply'])->name('reply');
+            Route::patch('/{ticket}/status', [PlatformSupportController::class, 'updateStatus'])->name('update-status');
         });
 
         Route::get('/reports', [PlatformReportsController::class, 'index'])->name('reports');

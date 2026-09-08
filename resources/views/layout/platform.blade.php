@@ -45,6 +45,12 @@
         <a href="{{ route('system-admin.tenants.index') }}" class="{{ request()->routeIs('system-admin.tenants.*') ? 'active' : '' }}">المعارض</a>
         <a href="{{ route('system-admin.accounts.index') }}" class="{{ request()->routeIs('system-admin.accounts.*') ? 'active' : '' }}">الحسابات</a>
         <a href="{{ route('system-admin.reports') }}" class="{{ request()->routeIs('system-admin.reports') ? 'active' : '' }}">التقارير</a>
+        <a href="{{ route('system-admin.support.index') }}" class="{{ request()->routeIs('system-admin.support.*') ? 'active' : '' }}">
+            الدعم الفني
+            @if(($openSupportCount ?? 0) > 0)
+                <span style="background:#ef4444; color:white; font-size:.7rem; font-weight:900; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 4px; margin-right:4px; vertical-align:middle;">{{ $openSupportCount > 99 ? '99+' : $openSupportCount }}</span>
+            @endif
+        </a>
     </div>
 
     <div class="platform-content">

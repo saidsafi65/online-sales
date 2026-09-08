@@ -986,6 +986,13 @@
                                             </a>
                                         </li>
                                     @endif
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('support.index') }}"
+                                            style="color: rgb(0 0 0 / 90%) !important;">
+                                            <i class="fas fa-headset" style="color: blue;"></i>
+                                            الدعم الفني
+                                        </a>
+                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
