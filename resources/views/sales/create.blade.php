@@ -205,9 +205,30 @@
                 });
             }
 
+            // اختيار المنتج والنوع يدوياً (بدون مسح) — لو الصنف المختار إله باركود
+            // مسجّل، منعبّي خانة الباركود فيه تلقائياً كتأكيد. ولو ما إله باركود،
+            // منسيبها فاضية عادي من غير أي رسالة أو خطأ.
+            function syncBarcodeFromSelection() {
+                const product = productSelect.value;
+                const type = typeSelect.value;
+                if (!product || !type) {
+                    barcodeInput.value = '';
+                    return;
+                }
+
+                const foundCode = Object.keys(barcodeMap).find(code =>
+                    barcodeMap[code].product === product && barcodeMap[code].type === type
+                );
+                barcodeInput.value = foundCode || '';
+                barcodeFeedback.textContent = '';
+            }
+
             productSelect.addEventListener('change', function() {
                 fillTypes(this.value);
+                syncBarcodeFromSelection();
             });
+
+            typeSelect.addEventListener('change', syncBarcodeFromSelection);
 
             document.addEventListener('DOMContentLoaded', function() {
                 const initial = productSelect.value || @json(old('product')) || '';
