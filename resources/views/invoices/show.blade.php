@@ -114,6 +114,111 @@
             </div>
         </div>
 
+        <!-- الدفعات -->
+        <div class="service-card card-primary mb-4">
+            @php
+                $statusColors = [
+                    'open' => ['bg' => '#fee2e2', 'text' => '#b91c1c'],
+                    'partial' => ['bg' => '#fef3c7', 'text' => '#b45309'],
+                    'paid' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+                ];
+                $sc = $statusColors[$invoice->payment_status];
+            @endphp
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h5 style="color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-hand-holding-dollar" style="color: #b91c1c;"></i>
+                    الدفعات
+                </h5>
+                <span class="badge" style="background: {{ $sc['bg'] }}; color: {{ $sc['text'] }}; font-weight: 700; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    {{ \App\Models\Invoice::PAYMENT_STATUS_LABELS[$invoice->payment_status] }}
+                </span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div style="background: #f8fafc; border-radius: 10px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #64748b;">المطلوب</div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b;">{{ number_format($invoice->afterDiscount_amount, 2) }} شيكل</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #f0fdf4; border-radius: 10px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #059669;">المدفوع</div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #059669;">{{ number_format($invoice->paid_amount, 2) }} شيكل</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #fef2f2; border-radius: 10px; padding: 1rem; text-align: center;">
+                        <div style="font-size: 0.8rem; color: #b91c1c;">المتبقي</div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: #b91c1c;">{{ number_format($invoice->remaining_amount, 2) }} شيكل</div>
+                    </div>
+                </div>
+            </div>
+
+            @if ($invoice->payments->isNotEmpty())
+                <div style="overflow-x: auto; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 1rem;">
+                    <table class="table mb-0" style="font-size: 0.9rem;">
+                        <thead style="background: #f8fafc;">
+                            <tr>
+                                <th style="padding: 0.6rem 0.9rem;">التاريخ</th>
+                                <th>نقدي</th>
+                                <th>بنكي</th>
+                                <th>المبلغ</th>
+                                <th>استلمها</th>
+                                <th>ملاحظات</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($invoice->payments->sortByDesc('payment_date') as $payment)
+                                <tr>
+                                    <td style="padding: 0.6rem 0.9rem;">{{ $payment->payment_date->format('Y-m-d') }}</td>
+                                    <td>{{ number_format($payment->cash_amount, 2) }}</td>
+                                    <td>{{ number_format($payment->bank_amount, 2) }}</td>
+                                    <td style="font-weight: 700;">{{ number_format($payment->total_amount, 2) }}</td>
+                                    <td>{{ $payment->received_by }}</td>
+                                    <td>{{ $payment->notes }}</td>
+                                    <td>
+                                        <form action="{{ route('invoices.payments.destroy', [$invoice->id, $payment->id]) }}" method="POST" onsubmit="return confirm('حذف هذه الدفعة؟')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #b91c1c; border: none; padding: 0.3rem 0.6rem; border-radius: 6px;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            @if ($invoice->remaining_amount > 0)
+                <form action="{{ route('invoices.payments.store', $invoice->id) }}" method="POST" class="row g-2 align-items-end" style="background: #f8fafc; border-radius: 10px; padding: 1rem;">
+                    @csrf
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">نقدي</label>
+                        <input type="number" name="cash_amount" step="0.01" min="0" class="form-control" value="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">بنكي</label>
+                        <input type="number" name="bank_amount" step="0.01" min="0" class="form-control" value="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">تاريخ الدفعة</label>
+                        <input type="date" name="payment_date" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-plus"></i> تسجيل دفعة</button>
+                    </div>
+                    <div class="col-12">
+                        <input type="text" name="notes" class="form-control" placeholder="ملاحظات (اختياري)">
+                    </div>
+                </form>
+            @endif
+        </div>
+
         @if ($invoice->notes)
             <div class="service-card card-warning mb-4">
                 <h5 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">

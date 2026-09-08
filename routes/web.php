@@ -24,6 +24,7 @@ use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\PlatformSupportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\InvoicePaymentController;
 use App\Http\Controllers\PlatformAuthController;
 use App\Http\Controllers\PlatformSetupController;
 use App\Http\Controllers\PlatformDashboardController;
@@ -549,6 +550,8 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
     Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::get('/invoices/{id}/receipt', [InvoiceController::class, 'receipt'])->name('invoices.receipt');
+    Route::post('/invoices/{invoice}/payments', [InvoicePaymentController::class, 'store'])->name('invoices.payments.store');
+    Route::delete('/invoices/{invoice}/payments/{payment}', [InvoicePaymentController::class, 'destroy'])->name('invoices.payments.destroy');
 
     // مطالبة مالية (Financial Claim) — نفس صلاحية الفواتير
     Route::get('/financial-claims', [FinancialClaimController::class, 'index'])->name('financial-claims.index');

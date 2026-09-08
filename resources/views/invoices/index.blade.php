@@ -68,6 +68,21 @@
                             </span>
                         </div>
 
+                        @php
+                            $paymentStatusColors = [
+                                'open' => ['bg' => '#fee2e2', 'text' => '#b91c1c'],
+                                'partial' => ['bg' => '#fef3c7', 'text' => '#b45309'],
+                                'paid' => ['bg' => '#d1fae5', 'text' => '#065f46'],
+                            ];
+                            $psc = $paymentStatusColors[$invoice->payment_status];
+                        @endphp
+                        <div style="margin-bottom: 1rem;">
+                            <span style="background: {{ $psc['bg'] }}; color: {{ $psc['text'] }}; padding: 0.35rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">
+                                <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                                {{ \App\Models\Invoice::PAYMENT_STATUS_LABELS[$invoice->payment_status] }}
+                            </span>
+                        </div>
+
                         <!-- Customer Info -->
                         <div style="margin-bottom: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">

@@ -13,7 +13,7 @@ class InvoiceController extends Controller
     // عرض جميع الفواتير
     public function index()
     {
-        $invoices = Invoice::orderBy('created_at', 'desc')->paginate(15);
+        $invoices = Invoice::with(['items', 'payments'])->orderBy('created_at', 'desc')->paginate(15);
         // تحويل جميع تواريخ الفواتير إلى كائنات Carbon
         foreach ($invoices as $invoice) {
             $invoice->invoice_date = Carbon::parse($invoice->invoice_date);
@@ -113,7 +113,7 @@ class InvoiceController extends Controller
     // عرض الفاتورة
     public function show($id)
     {
-        $invoice = Invoice::with('items')->findOrFail($id);
+        $invoice = Invoice::with(['items', 'payments'])->findOrFail($id);
 
         return view('invoices.show', compact('invoice'));
     }
