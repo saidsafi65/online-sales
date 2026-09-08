@@ -18,7 +18,7 @@ class PurchasesController extends Controller
 
         // إذا كان المستخدم ليس مدير نظام، اعرض فقط مشتريات فرعه
         if (!auth()->user()->isAdmin()) {
-             $query->where('branch_id', auth()->user()->branch_id);
+             \App\Support\BranchFilter::apply($query);
         }
 
         if ($request->filled('start_date')) {
@@ -360,7 +360,7 @@ class PurchasesController extends Controller
             $catalogQuery = \App\Models\CatalogItem::where('product', $request->item)
                 ->where('type', $request->type);
             if (!auth()->user()->isAdmin()) {
-                $catalogQuery->where('branch_id', auth()->user()->branch_id);
+                \App\Support\BranchFilter::apply($catalogQuery);
             }
             $catalogItem = $catalogQuery->lockForUpdate()->first();
 

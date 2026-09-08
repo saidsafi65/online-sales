@@ -20,7 +20,7 @@ class RepairsController extends Controller
 
         // إذا كان المستخدم ليس مدير نظام، اعرض فقط صيانة فرعه
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
         
         if ($request->filled('start_date')) {

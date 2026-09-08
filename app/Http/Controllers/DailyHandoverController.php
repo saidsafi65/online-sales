@@ -18,7 +18,7 @@ class DailyHandoverController extends Controller
         $query = DailyHandover::query();
 
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
 
         $handovers = $query->latest('handover_date')->latest('handover_time')->paginate(15);
@@ -103,7 +103,7 @@ class DailyHandoverController extends Controller
             ->whereNull('deleted_at')
             ->where('is_returned', false);
         if (!auth()->user()->isAdmin()) {
-            $totalSalessalesQuery->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($totalSalessalesQuery);
         }
         $totalSalessales = $totalSalessalesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
 
@@ -111,7 +111,7 @@ class DailyHandoverController extends Controller
             ->whereBetween(DB::raw('DATE(delivery_date)'), [$startDate, $endDate])
             ->where('is_returned', false);
         if (!auth()->user()->isAdmin()) {
-            $totalSalesrepairsQuery->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($totalSalesrepairsQuery);
         }
         $totalSalesrepairs = $totalSalesrepairsQuery->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
@@ -121,14 +121,14 @@ class DailyHandoverController extends Controller
             ->whereBetween(DB::raw('DATE(purchase_date)'), [$startDate, $endDate])
             ->whereNull('deleted_at');
         if (!auth()->user()->isAdmin()) {
-            $totalPurchasesQuery->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($totalPurchasesQuery);
         }
         $totalPurchases = $totalPurchasesQuery->sum(DB::raw('COALESCE(amount_cash, 0) + COALESCE(amount_bank, 0)'));
 
         $totalObligationsQuery = DB::table('obligations')
             ->whereBetween(DB::raw('DATE(date)'), [$startDate, $endDate]);
         if (!auth()->user()->isAdmin()) {
-            $totalObligationsQuery->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($totalObligationsQuery);
         }
         $totalObligations = $totalObligationsQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 
@@ -148,7 +148,7 @@ class DailyHandoverController extends Controller
                     ->whereNull('deleted_at')
                     ->where('is_returned', false);
                 if (!auth()->user()->isAdmin()) {
-                    $salesFromSalesQuery->where('branch_id', auth()->user()->branch_id);
+                    \App\Support\BranchFilter::apply($salesFromSalesQuery);
                 }
                 $salesFromSales = $salesFromSalesQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(app_amount, 0)'));
 
@@ -156,7 +156,7 @@ class DailyHandoverController extends Controller
                     ->whereDate('delivery_date', $handover->handover_date)
                     ->where('is_returned', false);
                 if (!auth()->user()->isAdmin()) {
-                    $salesFromRepairsQuery->where('branch_id', auth()->user()->branch_id);
+                    \App\Support\BranchFilter::apply($salesFromRepairsQuery);
                 }
                 $salesFromRepairs = $salesFromRepairsQuery->sum(DB::raw('COALESCE(cost_cash, 0) + COALESCE(cost_bank, 0)'));
 
@@ -166,14 +166,14 @@ class DailyHandoverController extends Controller
                     ->whereDate('purchase_date', $handover->handover_date)
                     ->whereNull('deleted_at');
                 if (!auth()->user()->isAdmin()) {
-                    $purchasesQuery->where('branch_id', auth()->user()->branch_id);
+                    \App\Support\BranchFilter::apply($purchasesQuery);
                 }
                 $purchases = $purchasesQuery->sum(DB::raw('COALESCE(amount_cash, 0) + COALESCE(amount_bank, 0)'));
 
                 $obligationsQuery = DB::table('obligations')
                     ->whereDate('date', $handover->handover_date);
                 if (!auth()->user()->isAdmin()) {
-                    $obligationsQuery->where('branch_id', auth()->user()->branch_id);
+                    \App\Support\BranchFilter::apply($obligationsQuery);
                 }
                 $obligations = $obligationsQuery->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
 

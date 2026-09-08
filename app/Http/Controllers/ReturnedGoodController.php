@@ -17,7 +17,7 @@ class ReturnedGoodController extends Controller
         $query = ReturnedGood::query();
 
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
 
         // ✅ استخدام $query بدلاً من ReturnedGood::latest()

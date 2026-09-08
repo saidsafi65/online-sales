@@ -32,7 +32,12 @@ class BranchScope implements Scope
                 return;
             }
 
-            $builder->where($table . '.branch_id', $user->branch_id);
+            // سجل بدون فرع محدد (branch_id = NULL) لازم يضل مرئي للجميع، مش يختفي بصمت —
+            // صار فعلياً يصير هيك لو المستخدم يلي أنشأه (عادة أدمن) وقتها ما كان إله فرع محدد.
+            $builder->where(function ($q) use ($table, $user) {
+                $q->where($table . '.branch_id', $user->branch_id)
+                    ->orWhereNull($table . '.branch_id');
+            });
         } catch (\Exception $e) {
             // Fail-safe: if anything goes wrong (no DB connection during some commands), do not apply scope.
             return;

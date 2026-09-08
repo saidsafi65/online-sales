@@ -23,7 +23,7 @@ class SalesController extends Controller
 
         // إذا كان المستخدم ليس مدير نظام، اعرض فقط مبيعات فرعه
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
         // Apply filters
         if ($request->filled('start_date')) {
@@ -75,7 +75,7 @@ class SalesController extends Controller
         // جلب كتالوج المنتجات لتعبئة القوائم (فلترة حسب الفرع للمستخدمين غير الإدمن)
         $catalogQuery = \App\Models\CatalogItem::orderBy('product')->orderBy('type');
         if (! auth()->user()->isAdmin()) {
-            $catalogQuery->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($catalogQuery);
         }
         $catalog = $catalogQuery->get();
 

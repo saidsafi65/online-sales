@@ -18,7 +18,7 @@ class DebtController extends Controller
 
         // ✅ إذا كان المستخدم ليس مدير، اعرض فقط ديون فرعه
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
 
         // ✅ استخدام $query بدلاً من Debt::latest()
@@ -34,7 +34,7 @@ class DebtController extends Controller
         $query = Debt::query();
 
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
 
         // دائن = "لي عنده" = دين لنا (receivable) | مدين = "عليّ له" = دين علينا (payable)

@@ -15,7 +15,7 @@ class StoreController extends Controller
         $query = Store::query();
 
     if (!auth()->user()->isAdmin()) {
-        $query->where('branch_id', auth()->user()->branch_id);
+        \App\Support\BranchFilter::apply($query);
     }
         // البحث
         if ($request->has('search') && $request->search != '') {

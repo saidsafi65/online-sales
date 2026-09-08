@@ -16,7 +16,7 @@ class CatalogController extends Controller
         $query = CatalogItem::query();
         
         if (!auth()->user()->isAdmin()) {
-            $query->where('branch_id', auth()->user()->branch_id);
+            \App\Support\BranchFilter::apply($query);
         }
         
         // البحث بالاسم أو النوع
