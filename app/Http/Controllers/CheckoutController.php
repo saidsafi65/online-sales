@@ -55,9 +55,18 @@ class CheckoutController extends Controller
             $lockedProducts[$item->id] = $product;
         }
 
+        // الخصم لازم يُحسب من جديد هون، مش يوصل جاهز من الطلب — الكوبون المطبّق على السلة
+        // بينحسب سيرفرياً (مش من أي قيمة جاي من الطلب نفسه) حتى ما يصير فيه تلاعب بمبلغ
+        // الخصم قبل ما يوصل على initiatePayment().
+        $appliedCoupon = $cart->applied_coupon;
+        $discountAmount = $appliedCoupon ? $appliedCoupon->calculateDiscount($cart->total) : 0;
+        $finalTotal = max(0, round($cart->total - $discountAmount, 2));
+
         $order = Order::create([
             'customer_id'      => $customer->id,
-            'total'            => $cart->total,
+            'total'            => $finalTotal,
+            'coupon_code'      => $appliedCoupon?->code,
+            'discount_amount'  => $discountAmount,
             'status'           => 'pending',
             'payment_method'   => 'jawwalpay',
             'customer_name'    => $validated['customer_name'],
@@ -65,6 +74,10 @@ class CheckoutController extends Controller
             'shipping_address' => $validated['shipping_address'],
             'shipping_city'    => $validated['shipping_city'] ?? null,
         ]);
+
+        if ($appliedCoupon) {
+            $appliedCoupon->increment('used_count');
+        }
 
         foreach ($cart->items as $item) {
             $product = $lockedProducts[$item->id];
@@ -86,8 +99,9 @@ class CheckoutController extends Controller
             \App\Services\NotificationService::syncStock($product->fresh());
         }
 
-        // تفريغ السلة بعد إنشاء الطلب
+        // تفريغ السلة وإلغاء الكوبون المطبّق بعد إنشاء الطلب
         $cart->items()->delete();
+        $cart->update(['coupon_code' => null]);
 
         // إشعار طلب جديد
         \App\Services\NotificationService::notifyNewOrder($order);

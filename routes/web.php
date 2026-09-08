@@ -23,6 +23,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\PlatformSupportController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\PlatformAuthController;
 use App\Http\Controllers\PlatformSetupController;
 use App\Http\Controllers\PlatformDashboardController;
@@ -179,6 +180,17 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
             Route::get('/', [BrandingController::class, 'edit'])->name('edit');
             Route::post('/', [BrandingController::class, 'update'])->name('update');
             Route::post('/icon', [BrandingController::class, 'updateIcon'])->name('icon');
+        });
+
+        // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني — فقط لمدير المعرض
+        Route::prefix('coupons')->name('coupons.')->group(function () {
+            Route::get('/', [CouponController::class, 'index'])->name('index');
+            Route::get('/create', [CouponController::class, 'create'])->name('create');
+            Route::post('/', [CouponController::class, 'store'])->name('store');
+            Route::get('/{coupon}/edit', [CouponController::class, 'edit'])->name('edit');
+            Route::put('/{coupon}', [CouponController::class, 'update'])->name('update');
+            Route::post('/{coupon}/toggle', [CouponController::class, 'toggle'])->name('toggle');
+            Route::delete('/{coupon}', [CouponController::class, 'destroy'])->name('destroy');
         });
 
         // الاشعارات
@@ -782,6 +794,8 @@ Route::middleware('auth:customer')->group(function () {
         Route::post('/add/{product}', [CartController::class, 'add'])->name('add');
         Route::patch('/update/{cartItem}', [CartController::class, 'update'])->name('update');
         Route::delete('/remove/{cartItem}', [CartController::class, 'remove'])->name('remove');
+        Route::post('/coupon', [CartController::class, 'applyCoupon'])->name('coupon.apply');
+        Route::delete('/coupon', [CartController::class, 'removeCoupon'])->name('coupon.remove');
     });
 
     Route::prefix('checkout')->name('checkout.')->group(function () {

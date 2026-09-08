@@ -88,6 +88,14 @@
         font-size: .95rem;
         color: var(--text-secondary);
     }
+    .cart-summary-discount-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: .8rem;
+        font-size: .95rem;
+        color: #059669;
+        font-weight: 700;
+    }
     .cart-summary-total {
         display: flex;
         justify-content: space-between;
@@ -98,6 +106,15 @@
         padding-top: 1rem;
         margin-top: .5rem;
     }
+    .cart-coupon-box { margin-bottom: 1rem; }
+    .cart-coupon-box .input-group input { border-radius: 8px 0 0 8px; }
+    .cart-coupon-box .input-group button { border-radius: 0 8px 8px 0; }
+    .cart-coupon-applied {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+        padding: .5rem .8rem; margin-bottom: 1rem; font-size: .88rem; color: #047857;
+    }
+    .cart-coupon-applied button { background: none; border: none; color: #dc2626; font-size: .8rem; cursor: pointer; }
     .btn-checkout {
         width: 100%;
         padding: .9rem;
@@ -184,13 +201,42 @@
 
             <div class="col-lg-4">
                 <div class="cart-summary">
+                    @if ($cart->applied_coupon)
+                        <div class="cart-coupon-applied">
+                            <span><i class="fas fa-check-circle"></i> كود "{{ $cart->coupon_code }}" مطبّق</span>
+                            <form method="POST" action="{{ route('cart.coupon.remove') }}" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">إلغاء</button>
+                            </form>
+                        </div>
+                    @else
+                        <div class="cart-coupon-box">
+                            <form method="POST" action="{{ route('cart.coupon.apply') }}" class="input-group">
+                                @csrf
+                                <input type="text" name="code" class="form-control" placeholder="كود الخصم" required>
+                                <button type="submit" class="btn btn-outline-secondary">تطبيق</button>
+                            </form>
+                        </div>
+                    @endif
+
                     <div class="cart-summary-row">
                         <span>عدد القطع</span>
                         <span>{{ $cart->items->sum('quantity') }}</span>
                     </div>
+                    <div class="cart-summary-row">
+                        <span>المجموع الفرعي</span>
+                        <span>{{ number_format($cart->total, 2) }} ₪</span>
+                    </div>
+                    @if ($cart->discount > 0)
+                        <div class="cart-summary-discount-row">
+                            <span>الخصم</span>
+                            <span>- {{ number_format($cart->discount, 2) }} ₪</span>
+                        </div>
+                    @endif
                     <div class="cart-summary-total">
                         <span>الإجمالي</span>
-                        <span>{{ number_format($cart->total, 2) }} ₪</span>
+                        <span>{{ number_format($cart->grand_total, 2) }} ₪</span>
                     </div>
 
                     <a href="{{ route('checkout.index') }}" class="btn-checkout d-block text-center text-decoration-none">

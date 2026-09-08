@@ -54,6 +54,21 @@
     .order-line:last-of-type { border-bottom: none; }
     .order-line-name { color: var(--text-primary); font-weight: 600; }
     .order-line-meta { color: var(--text-secondary); font-size: .82rem; }
+    .order-subtotal-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: .95rem;
+        color: var(--text-secondary);
+        margin-top: .8rem;
+    }
+    .order-discount-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: .95rem;
+        color: #059669;
+        font-weight: 700;
+        margin-top: .4rem;
+    }
     .order-total-row {
         display: flex;
         justify-content: space-between;
@@ -169,9 +184,19 @@
                         </div>
                     @endforeach
 
+                    <div class="order-subtotal-row">
+                        <span>المجموع الفرعي</span>
+                        <span>{{ number_format($cart->total, 2) }} ₪</span>
+                    </div>
+                    @if ($cart->discount > 0)
+                        <div class="order-discount-row">
+                            <span>الخصم ({{ $cart->coupon_code }})</span>
+                            <span>- {{ number_format($cart->discount, 2) }} ₪</span>
+                        </div>
+                    @endif
                     <div class="order-total-row">
                         <span>الإجمالي</span>
-                        <span>{{ number_format($cart->total, 2) }} ₪</span>
+                        <span>{{ number_format($cart->grand_total, 2) }} ₪</span>
                     </div>
 
                     <button type="submit" class="btn-place-order mt-3">

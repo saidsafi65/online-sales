@@ -979,6 +979,13 @@
                                                 هوية المعرض
                                             </a>
                                         </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('coupons.index') }}"
+                                                style="color: rgb(0 0 0 / 90%) !important;">
+                                                <i class="fas fa-tags" style="color: blue;"></i>
+                                                أكواد الخصم
+                                            </a>
+                                        </li>
                                     @endif
                                     @if (auth()->user()->canViewSection('community'))
                                         <li class="nav-item">
