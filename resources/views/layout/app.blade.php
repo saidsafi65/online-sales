@@ -934,6 +934,10 @@
                                     <a href="{{ route('activity-log.index') }}" class="notif-view-all">
                                         <i class="fas fa-list-ul me-1"></i>عرض جميع السجلات
                                     </a>
+                                    <span class="text-muted">·</span>
+                                    <a href="{{ route('sms-logs.index') }}" class="notif-view-all">
+                                        <i class="fas fa-comment-sms me-1"></i>سجل الرسائل النصية
+                                    </a>
                                 </div>
                             @endif
                         </div>

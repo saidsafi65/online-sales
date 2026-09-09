@@ -538,6 +538,9 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     // سجل النشاطات — لمسؤول النظام بس (تتبع كل إضافة/تعديل/حذف بالنظام مين عملها ومتى)
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
+    // سجل الرسائل النصية (SMS) — لمسؤول النظام بس
+    Route::get('/sms-logs', [\App\Http\Controllers\SmsLogController::class, 'index'])->name('sms-logs.index');
+
     // Obligation routes
     Route::middleware('section.permission:obligations')->group(function () {
     Route::get('/obligations', [ObligationController::class, 'index'])->name('obligations.index');

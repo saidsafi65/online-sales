@@ -135,6 +135,21 @@ class RepairsController extends Controller
                 }
             }
 
+            // رسالة SMS شكر بنفس مضمون الإيميل (سعر + ضمان 24 ساعة) — الجوال حقل
+            // إلزامي بعكس الإيميل، فهاي بتنبعت لكل صيانة تقريباً.
+            if ($repair->phone) {
+                try {
+                    $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
+                    $totalCost = (float) $repair->cost_cash + (float) $repair->cost_bank;
+                    $smsMessage = "شكراً {$repair->customer_name} لثقتك بـ{$storeName}. تمت صيانة {$repair->device_name} بنجاح بتكلفة "
+                        . number_format($totalCost, 2) . ' شيكل. معك ضمان 24 ساعة على الصيانة من تاريخ الاستلام.';
+
+                    app(\App\Services\SmsService::class)->send($repair->phone, $smsMessage, 'repair_completed');
+                } catch (\Throwable $e) {
+                    Log::warning('Repair completion SMS failed', ['repair_id' => $repair->id, 'error' => $e->getMessage()]);
+                }
+            }
+
             return redirect()->route('repairs.index')->with('success', 'تم إضافة الصيانة بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();
