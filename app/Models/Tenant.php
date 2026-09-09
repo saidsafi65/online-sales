@@ -11,7 +11,7 @@ class Tenant extends Model
     protected $fillable = [
         'name', 'domain', 'db_host', 'db_port', 'db_database', 'db_username', 'db_password', 'is_active',
         'logo_path', 'brand_primary_color', 'brand_accent_color',
-        'contact_phone', 'contact_whatsapp',
+        'contact_phone', 'contact_whatsapp', 'contact_email', 'contact_address',
         'stamp_path', 'signature_path',
     ];
 

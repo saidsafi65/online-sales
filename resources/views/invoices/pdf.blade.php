@@ -72,9 +72,12 @@
                     </td>
                 @endif
                 <td style="width: {{ $tenant && $tenant->logo_path ? '49%' : '55%' }};">
-                    <div class="store-ar">Online Sale - {{ $ar('أونلاين سيل') }}</div>
-                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">{{ $ar('خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري') }}</div>
-                    <div style="font-size: 11px; color: #6b7280;">{{ $ar('هاتف: 0597848937') }}</div>
+                    <div class="store-ar">{{ $ar($tenant->name ?? 'أونلاين سيل') }}</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">{{ $ar($tenant->contact_address ?? 'خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري') }}</div>
+                    <div style="font-size: 11px; color: #6b7280;">{{ $ar('هاتف: ' . ($tenant->contact_phone ?? '0597848937')) }}</div>
+                    @if($tenant && $tenant->contact_email)
+                        <div style="font-size: 11px; color: #6b7280;">{{ $tenant->contact_email }}</div>
+                    @endif
                 </td>
                 <td style="width: 45%; text-align: left;">
                     <span class="title-box">{{ $ar('فـاتـورة') }} / INVOICE</span>
@@ -161,7 +164,10 @@
     </table>
 
     <div class="footer">
-        📞 059-784-8937&nbsp;&nbsp;&nbsp;💬 +970592552702&nbsp;&nbsp;&nbsp;📍 {{ $ar('خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري') }}
+        📞 {{ $tenant->contact_phone ?? '059-784-8937' }}&nbsp;&nbsp;&nbsp;💬 {{ $tenant->contact_whatsapp ?? '+970592552702' }}&nbsp;&nbsp;&nbsp;📍 {{ $ar($tenant->contact_address ?? 'خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري') }}
+        @if($tenant && $tenant->contact_email)
+            &nbsp;&nbsp;&nbsp;✉️ {{ $tenant->contact_email }}
+        @endif
     </div>
 
 </body>

@@ -345,17 +345,20 @@
                     @endif
                 </div>
                 <div class="signature-label">توقيع المستلم</div>
-                <div style="font-size: 12px; color: #999; margin-top: 5px;">Online Sale</div>
+                <div style="font-size: 12px; color: #999; margin-top: 5px;">{{ $__tenant->name ?? 'Online Sale' }}</div>
             </div>
         </div>
 
         <!-- الفوتر -->
         <div class="receipt-footer">
             <div class="footer-info">
-                <strong>Online Sale - أونلاين سيل</strong><br>
-                📍 خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري<br>
-                📞 059-784-8937 | <img style="width: 15px" src="{{ asset('assets/logo/whatsapp.png') }}">
-                00970592552702
+                <strong>{{ $__tenant->name ?? 'أونلاين سيل' }}</strong><br>
+                📍 {{ $__tenant->contact_address ?? 'خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري' }}<br>
+                📞 {{ $__tenant->contact_phone ?? '059-784-8937' }} | <img style="width: 15px" src="{{ asset('assets/logo/whatsapp.png') }}">
+                {{ $__tenant->contact_whatsapp ?? '00970592552702' }}
+                @if($__tenant && $__tenant->contact_email)
+                    <br>✉️ {{ $__tenant->contact_email }}
+                @endif
             </div>
         </div>
     </div>

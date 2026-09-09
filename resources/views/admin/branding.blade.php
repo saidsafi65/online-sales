@@ -115,6 +115,17 @@
                     <small style="color:#94a3b8;">حط الرقم مع رمز الدولة (بدون + أو أصفار بالبداية) حتى يشتغل رابط واتساب صح.</small>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">الإيميل</label>
+                    <input type="email" name="contact_email" value="{{ old('contact_email', $tenant->contact_email) }}" placeholder="مثال: info@yourstore.com" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.75rem;">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">العنوان / الموقع</label>
+                    <input type="text" name="contact_address" value="{{ old('contact_address', $tenant->contact_address) }}" placeholder="مثال: خانيونس - شمال مفترق النص" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.75rem;">
+                    <small style="color:#94a3b8;">رح يظهر بالضبط زي ما تكتبه هون بكل الفواتير وسندات القبض والمطالبات المالية.</small>
+                </div>
+
                 <button type="submit" class="btn btn-primary" style="width:100%; padding: 0.875rem; border-radius: 10px; font-weight: 600; margin-top:1rem;">
                     💾 حفظ التعديلات
                 </button>

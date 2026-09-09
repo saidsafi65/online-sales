@@ -126,7 +126,7 @@
                 @if($tenant && $tenant->logo_path)
                     <img src="{{ asset('storage/'.$tenant->logo_path) }}" alt="Logo" style="max-height:34px; max-width:90px; object-fit:contain;">
                 @endif
-                <div class="brand-ar">Online Sale <span style="color:#dc2626;">أونلاين سيل</span></div>
+                <div class="brand-ar">{{ $tenant->name ?? 'أونلاين سيل' }}</div>
             </div>
             <div class="brand-tag">{{ $labels['title'] }}</div>
         </div>
@@ -208,11 +208,17 @@
                     <td class="label">{{ $labels['mobile'] }}</td>
                     <td class="label">{{ $labels['whatsapp'] }}</td>
                     <td class="label">{{ $labels['location'] }}</td>
+                    @if($tenant && $tenant->contact_email)
+                        <td class="label">{{ $isAr ? 'البريد الإلكتروني' : 'Email' }}</td>
+                    @endif
                 </tr>
                 <tr>
                     <td>{{ $tenant->contact_phone ?? '0597848937' }}</td>
                     <td>{{ $tenant->contact_whatsapp ?? '00970592552702' }}</td>
-                    <td>{{ $isAr ? 'خانيونس - شمال مفترق النص' : 'Khan Younis - North of Al-Nisf Junction' }}</td>
+                    <td>{{ $tenant->contact_address ?? ($isAr ? 'خانيونس - شمال مفترق النص' : 'Khan Younis - North of Al-Nisf Junction') }}</td>
+                    @if($tenant && $tenant->contact_email)
+                        <td>{{ $tenant->contact_email }}</td>
+                    @endif
                 </tr>
             </table>
 
@@ -233,7 +239,7 @@
         </div>
 
         <div class="footer">
-            Online Sale | Laptop Sales &amp; Services | Khan Younis – 50 m north of Al-Nisf Junction
+            {{ $tenant->name ?? 'Online Sale' }} | {{ $tenant->contact_address ?? 'Khan Younis – 50 m north of Al-Nisf Junction' }}@if($tenant && $tenant->contact_email) | {{ $tenant->contact_email }}@endif
         </div>
     </div>
 

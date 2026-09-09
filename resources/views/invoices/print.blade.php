@@ -377,11 +377,14 @@
                 </div>
 
                 <div class="invoice-title-box">
-                    <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">Online Sale - أونلاين سيل</div>
+                    <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">{{ $__tenant->name ?? 'أونلاين سيل' }}</div>
                     <div class="store-title-ar" style="font-size: 14px; margin: 0 0 15px 0; text-align: left;">
-                        العنوان: خانيونس - شمال مفترق النص<br>- بجانب مجوهرات الترتوري
+                        العنوان: {{ $__tenant->contact_address ?? 'خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري' }}
                     </div>
-                    <div class="store-title-ar" style="font-size: 14px; margin: 0; text-align: left;">رقم الهاتف: 0597848937</div>
+                    <div class="store-title-ar" style="font-size: 14px; margin: 0; text-align: left;">رقم الهاتف: {{ $__tenant->contact_phone ?? '0597848937' }}</div>
+                    @if($__tenant && $__tenant->contact_email)
+                        <div class="store-title-ar" style="font-size: 14px; margin: 0; text-align: left;">{{ $__tenant->contact_email }}</div>
+                    @endif
                 </div>
             </div>
 
@@ -470,18 +473,21 @@
             <div class="contact-info">
                 <div class="contact-item">
                     <div class="contact-icon">📞</div>
-                    <span>059-784-8937</span>
+                    <span>{{ $__tenant->contact_phone ?? '059-784-8937' }}</span>
                 </div>
 
                 <div class="contact-item">
                     <div class="contact-icon">💬</div>
-                    <span>+970592552702</span>
+                    <span>{{ $__tenant->contact_whatsapp ?? '+970592552702' }}</span>
                 </div>
             </div>
 
             <div class="address">
                 <span class="address-icon">📍</span>
-                <span>خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري</span>
+                <span>{{ $__tenant->contact_address ?? 'خانيونس - شمال مفترق النص - بجانب مجوهرات الترتوري' }}</span>
+                @if($__tenant && $__tenant->contact_email)
+                    <span style="margin-right: 10px;">✉️ {{ $__tenant->contact_email }}</span>
+                @endif
             </div>
         </div>
     </div>

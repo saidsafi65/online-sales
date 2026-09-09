@@ -86,7 +86,7 @@
                 </td>
             @endif
             <td style="width: {{ $tenant && $tenant->logo_path ? '46%' : '60%' }};">
-                <div class="brand">Online Sale <span class="en">{{ $ar('أونلاين سيل') }}</span></div>
+                <div class="brand">{{ $ar($tenant->name ?? 'أونلاين سيل') }}</div>
             </td>
             <td style="width: 40%; text-align: {{ $isAr ? 'left' : 'right' }};">
                 <span class="tag">{{ $labels['title'] }}</span>
@@ -164,11 +164,17 @@
             <td class="label">{{ $labels['mobile'] }}</td>
             <td class="label">{{ $labels['whatsapp'] }}</td>
             <td class="label">{{ $labels['location'] }}</td>
+            @if($tenant && $tenant->contact_email)
+                <td class="label">{{ $isAr ? $ar('البريد الإلكتروني') : 'Email' }}</td>
+            @endif
         </tr>
         <tr>
             <td>{{ $tenant->contact_phone ?? '0597848937' }}</td>
             <td>{{ $tenant->contact_whatsapp ?? '00970592552702' }}</td>
-            <td>{{ $isAr ? $ar('خانيونس - شمال مفترق النص') : 'Khan Younis - North of Al-Nisf Junction' }}</td>
+            <td>{{ $tenant->contact_address ? $ar($tenant->contact_address) : ($isAr ? $ar('خانيونس - شمال مفترق النص') : 'Khan Younis - North of Al-Nisf Junction') }}</td>
+            @if($tenant && $tenant->contact_email)
+                <td>{{ $tenant->contact_email }}</td>
+            @endif
         </tr>
     </table>
 
@@ -187,7 +193,7 @@
         </tr>
     </table>
 
-    <div class="footer">Online Sale | Laptop Sales &amp; Services | Khan Younis - 50 m north of Al-Nisf Junction</div>
+    <div class="footer">{{ $tenant->name ?? 'Online Sale' }}@if($tenant->contact_address ?? null) | {{ $ar($tenant->contact_address) }}@else | Khan Younis - 50 m north of Al-Nisf Junction @endif@if($tenant->contact_email ?? null) | {{ $tenant->contact_email }}@endif</div>
 
 </body>
 </html>

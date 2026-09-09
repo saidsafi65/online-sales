@@ -39,6 +39,8 @@ class BrandingController extends Controller
             'signature' => 'nullable|image|mimes:png|max:1024',
             'contact_phone' => 'nullable|string|max:30|regex:/^[0-9+\-\s]*$/',
             'contact_whatsapp' => 'nullable|string|max:30|regex:/^[0-9+\-\s]*$/',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_address' => 'nullable|string|max:255',
         ], [
             'brand_primary_color.regex' => 'صيغة اللون غير صحيحة',
             'brand_accent_color.regex' => 'صيغة اللون غير صحيحة',
@@ -46,6 +48,7 @@ class BrandingController extends Controller
             'signature.mimes' => 'التوقيع لازم يكون صورة PNG (مفرغة الخلفية)',
             'contact_phone.regex' => 'رقم الهاتف غير صحيح',
             'contact_whatsapp.regex' => 'رقم الواتساب غير صحيح',
+            'contact_email.email' => 'صيغة الإيميل غير صحيحة',
         ]);
 
         $tenant = app('currentTenant');
