@@ -30,7 +30,7 @@ class DebtController extends Controller
 
     private function calculateTotalDebts()
     {
-        $query = Debt::with('payments')->query();
+        $query = Debt::with('payments');
 
         if (!auth()->user()->isAdmin()) {
             \App\Support\BranchFilter::apply($query);
