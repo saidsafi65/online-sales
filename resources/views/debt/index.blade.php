@@ -82,7 +82,13 @@
                             </td>
                             <td>{{ $debt->debt_date->format('Y-m-d') }}</td>
                             <td>
-                                <a href="{{ route('debts.show', $debt) }}" class="btn btn-sm btn-info text-white">عرض</a>
+                                @if ($debt->payment_status !== 'paid')
+                                    <a href="{{ route('debts.show', $debt) }}" class="btn btn-sm btn-success" title="تسجيل دفعة">
+                                        <i class="fas fa-money-bill-wave"></i> تسجيل دفعة
+                                    </a>
+                                @else
+                                    <a href="{{ route('debts.show', $debt) }}" class="btn btn-sm btn-info text-white">عرض</a>
+                                @endif
                                 <a href="{{ route('debts.edit', $debt) }}" class="btn btn-sm btn-warning">تعديل</a>
                                 <form action="{{ route('debts.destroy', $debt) }}" method="POST" class="d-inline">
                                     @csrf

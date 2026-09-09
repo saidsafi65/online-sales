@@ -9,6 +9,12 @@
                     <h4>تعديل الدين</h4>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="fas fa-circle-info me-1"></i> هاي الصفحة لتعديل بيانات الدين نفسه بس. لتسجيل دفعة (كاملة أو جزئية) وتشوف سجل الدفعات، روح لصفحة "عرض الدين".</span>
+                        <a href="{{ route('debts.show', $debt) }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-money-bill-wave"></i> تسجيل دفعة
+                        </a>
+                    </div>
                     <form action="{{ route('debts.update', $debt) }}" method="POST">
                         @csrf
                         @method('PUT')
