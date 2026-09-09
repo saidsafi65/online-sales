@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CatalogController;
@@ -529,6 +530,9 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export-pdf');
     });
+
+    // سجل النشاطات — لمسؤول النظام بس (تتبع كل إضافة/تعديل/حذف بالنظام مين عملها ومتى)
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
     // Obligation routes
     Route::middleware('section.permission:obligations')->group(function () {

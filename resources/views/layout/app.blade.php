@@ -747,7 +747,15 @@
         .notif-desc { font-size: .8rem; color: var(--text-secondary); }
         .notif-time { font-size: .72rem; color: #94a3b8; margin-top: .2rem; }
         .notif-empty { padding: 2rem 1rem; text-align: center; color: var(--text-secondary); font-size: .85rem; }
-        
+        .notif-dropdown-footer {
+            padding: .7rem 1.1rem; text-align: center; border-top: 1px solid #f1f5f9;
+            position: sticky; bottom: 0; background: white;
+        }
+        .notif-view-all {
+            color: var(--primary-color); font-size: .8rem; font-weight: 700; text-decoration: none;
+        }
+        .notif-view-all:hover { text-decoration: underline; }
+
         .notif-icon.type-catalog_created { background: #d1fae5; color: #047857; }
         .notif-icon.type-catalog_updated { background: #dbeafe; color: #1d4ed8; }
         .notif-icon.type-catalog_deleted { background: #fee2e2; color: #b91c1c; }
@@ -921,6 +929,13 @@
                             <div id="notifContent">
                                 <div class="notif-empty">جاري التحميل...</div>
                             </div>
+                            @if ($isAdmin)
+                                <div class="notif-dropdown-footer">
+                                    <a href="{{ route('activity-log.index') }}" class="notif-view-all">
+                                        <i class="fas fa-list-ul me-1"></i>عرض جميع السجلات
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                         <ul class="navbar-nav">

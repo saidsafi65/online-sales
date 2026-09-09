@@ -160,6 +160,16 @@ class NotificationService
         }
     }
 
+    /**
+     * رابط سجل النشاطات المفلتر على عنصر معيّن — نستخدمه بدل رابط صفحة التعديل
+     * بإشعارات الإضافة/التعديل/الحذف، عشان الضغط على الإشعار يوريك "شو صار"
+     * (القيمة القديمة والجديدة) مش يودّيك مباشرة لفورم التعديل.
+     */
+    public static function activityLogUrl(string $modelClass, int $modelId): string
+    {
+        return url('/activity-log?model_type=' . urlencode($modelClass) . '&model_id=' . $modelId);
+    }
+
     public static function notifyCrud(
         string $type,
         string $title,

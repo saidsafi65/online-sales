@@ -22,7 +22,7 @@ class Product extends Model
                 'product_created',
                 'منتج جديد',
                 $product->name,
-                '/products/' . $product->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $product->id),
                 $product->branch_id,
                 static::class,
                 $product->id
@@ -43,7 +43,7 @@ class Product extends Model
                 'product_updated',
                 'تعديل على منتج',
                 $product->name,
-                '/products/' . $product->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $product->id),
                 $product->branch_id,
                 static::class,
                 $product->id
@@ -55,7 +55,7 @@ class Product extends Model
                 'product_deleted',
                 'حذف منتج',
                 $product->name,
-                null,
+                NotificationService::activityLogUrl(static::class, $product->id),
                 $product->branch_id,
                 static::class,
                 $product->id

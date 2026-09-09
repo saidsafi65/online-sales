@@ -31,7 +31,7 @@ class CatalogItem extends Model
                 'catalog_created',
                 'عنصر جديد بالكتالوج',
                 $item->product . ($item->type ? ' — ' . $item->type : ''),
-                '/catalog/' . $item->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $item->id),
                 $item->branch_id,
                 static::class,
                 $item->id
@@ -44,7 +44,7 @@ class CatalogItem extends Model
                 'catalog_updated',
                 'تعديل على الكتالوج',
                 $item->product . ($item->type ? ' — ' . $item->type : ''),
-                '/catalog/' . $item->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $item->id),
                 $item->branch_id,
                 static::class,
                 $item->id
@@ -57,7 +57,7 @@ class CatalogItem extends Model
                 'catalog_deleted',
                 'حذف من الكتالوج',
                 $item->product . ($item->type ? ' — ' . $item->type : ''),
-                null,
+                NotificationService::activityLogUrl(static::class, $item->id),
                 $item->branch_id,
                 static::class,
                 $item->id

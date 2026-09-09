@@ -38,7 +38,7 @@ class SaleLaptop extends Model
                 'laptop_created',
                 'لابتوب جديد',
                 $laptop->name,
-                '/laptops/' . $laptop->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $laptop->id),
                 $laptop->branch_id,
                 static::class,
                 $laptop->id
@@ -57,7 +57,7 @@ class SaleLaptop extends Model
                 'laptop_updated',
                 'تعديل على لابتوب',
                 $laptop->name,
-                '/laptops/' . $laptop->id . '/edit',
+                NotificationService::activityLogUrl(static::class, $laptop->id),
                 $laptop->branch_id,
                 static::class,
                 $laptop->id
@@ -69,7 +69,7 @@ class SaleLaptop extends Model
                 'laptop_deleted',
                 'حذف لابتوب',
                 $laptop->name,
-                null,
+                NotificationService::activityLogUrl(static::class, $laptop->id),
                 $laptop->branch_id,
                 static::class,
                 $laptop->id

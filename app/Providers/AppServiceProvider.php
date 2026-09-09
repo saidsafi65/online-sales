@@ -111,6 +111,17 @@ class AppServiceProvider extends ServiceProvider
         $label = $model->name
             ?? $model->title
             ?? $model->customer_name
+            ?? $model->product ?? null;
+
+        if ($label && !empty($model->type ?? null)) {
+            $label .= ' — ' . $model->type;
+        }
+
+        $label ??= $model->device_name
+            ?? $model->supplier_name
+            ?? $model->organization_name
+            ?? $model->invoice_number
+            ?? $model->claim_reference
             ?? ('#' . $model->getKey());
 
         try {
