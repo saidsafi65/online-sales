@@ -50,7 +50,15 @@ class Debt extends Model
 
     public function getPaidAmountAttribute(): float
     {
-        return (float) $this->payments->sum(fn ($p) => (float) $p->cash_amount + (float) $p->bank_amount);
+        $fromPayments = (float) $this->payments->sum(fn ($p) => (float) $p->cash_amount + (float) $p->bank_amount);
+
+        // ديون قديمة اتحطلها تاريخ سداد يدوياً (الطريقة القديمة قبل نظام الدفعات)
+        // بدون أي دفعة مسجّلة فعلياً — لازم تضل تُحسب "مسددة بالكامل"، مش "غير مسدد".
+        if ($this->payment_date && $fromPayments <= 0) {
+            return (float) $this->total_amount;
+        }
+
+        return $fromPayments;
     }
 
     public function getRemainingAmountAttribute(): float
@@ -61,6 +69,12 @@ class Debt extends Model
     /** open | partial | paid */
     public function getPaymentStatusAttribute(): string
     {
+        // القاعدة الأساسية: إله تاريخ سداد = مسدد، ماله تاريخ = لسا مو مسدد بالكامل —
+        // بغض النظر عن المبلغ (بيغطي حالة دين بمبلغ صفر متعلّم "مسدد" يدوياً).
+        if ($this->payment_date) {
+            return 'paid';
+        }
+
         if ($this->paid_amount <= 0) {
             return 'open';
         }
