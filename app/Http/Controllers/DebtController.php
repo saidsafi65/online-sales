@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class DebtController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $query = Debt::query();
 
@@ -20,8 +20,39 @@ class DebtController extends Controller
             \App\Support\BranchFilter::apply($query);
         }
 
-        // ✅ استخدام $query بدلاً من Debt::latest()
-        $debts = $query->with('payments')->latest()->paginate(10);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('reason', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('debt_date', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('debt_date', '<=', $request->end_date);
+        }
+
+        // تصنيف حسب حالة السداد — "مسدد" = إله تاريخ سداد، "غير مسدد" = ماله تاريخ
+        // (سواء ما انسدد شيء منه أصلاً "غير مسدد"، أو انسدد جزء وبعده مش مكتمل "مسدد جزئياً").
+        if ($request->filled('status')) {
+            match ($request->status) {
+                'paid' => $query->whereNotNull('payment_date'),
+                'open' => $query->whereNull('payment_date')->whereDoesntHave('payments'),
+                'partial' => $query->whereNull('payment_date')->whereHas('payments'),
+                default => null,
+            };
+        }
+
+        $debts = $query->with('payments')->latest()->paginate(10)->withQueryString();
 
         $totalDebts = $this->calculateTotalDebts();
 

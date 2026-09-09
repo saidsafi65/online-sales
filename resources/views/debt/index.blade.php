@@ -19,6 +19,28 @@
         <span class="fs-5 fw-bold">{{ number_format($totalDebts, 2) }} شيكل</span>
     </div>
 
+    <x-filter-bar :action="route('debts.index')" :show-search="true" search-placeholder="ابحث بالاسم أو الجوال أو السبب...">
+        <x-slot:extra>
+            <div class="col-auto">
+                <label class="form-label small mb-1">النوع</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">الكل</option>
+                    <option value="دائن" {{ request('type') === 'دائن' ? 'selected' : '' }}>دائن (لي عنده)</option>
+                    <option value="مدين" {{ request('type') === 'مدين' ? 'selected' : '' }}>مدين (عليّ له)</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label small mb-1">حالة السداد</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">الكل</option>
+                    <option value="open" {{ request('status') === 'open' ? 'selected' : '' }}>غير مسدد</option>
+                    <option value="partial" {{ request('status') === 'partial' ? 'selected' : '' }}>مسدد جزئياً</option>
+                    <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>مسدد بالكامل</option>
+                </select>
+            </div>
+        </x-slot:extra>
+    </x-filter-bar>
+
     <div class="card">
         <div class="card-body">
             <table class="table table-hover">
