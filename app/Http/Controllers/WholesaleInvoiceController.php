@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Debt;
 use App\Models\WholesaleInvoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -32,8 +33,9 @@ class WholesaleInvoiceController extends Controller
             'buyer_address' => 'nullable|string|max:255',
             'invoice_date' => 'required|date',
             'invoice_number' => 'required|string|unique:wholesale_invoices,invoice_number',
-            'payment_terms' => 'required|in:cash,credit',
-            'due_date' => 'nullable|date|required_if:payment_terms,credit',
+            'payment_terms' => 'required|in:cash,credit,mixed',
+            'due_date' => 'nullable|date|required_if:payment_terms,credit,mixed',
+            'cash_paid_now' => 'nullable|numeric|min:0.01|required_if:payment_terms,mixed',
             'notes' => 'nullable|string',
             'discount_amount' => 'nullable|numeric',
             'description' => 'required|array',
@@ -43,7 +45,8 @@ class WholesaleInvoiceController extends Controller
             'price' => 'required|array',
             'price.*' => 'required|numeric',
         ], [
-            'due_date.required_if' => 'اختر تاريخ الاستحقاق للفاتورة الآجلة',
+            'due_date.required_if' => 'اختر تاريخ الاستحقاق للجزء الآجل من الفاتورة',
+            'cash_paid_now.required_if' => 'اكتب المبلغ النقدي اللي انقبض فوراً',
         ]);
 
         $total = 0;
@@ -76,6 +79,9 @@ class WholesaleInvoiceController extends Controller
         }
 
         DB::transaction(function () use ($request, $total, $discountAmount, $afterDiscountAmount, $items) {
+            $paymentTerms = $request->payment_terms;
+            $isCredit = in_array($paymentTerms, ['credit', 'mixed'], true);
+
             $invoice = WholesaleInvoice::create([
                 'buyer_store_name' => $request->buyer_store_name,
                 'buyer_tax_number' => $request->buyer_tax_number,
@@ -83,8 +89,9 @@ class WholesaleInvoiceController extends Controller
                 'buyer_address' => $request->buyer_address,
                 'invoice_date' => $request->invoice_date,
                 'invoice_number' => $request->invoice_number,
-                'payment_terms' => $request->payment_terms,
-                'due_date' => $request->payment_terms === 'credit' ? $request->due_date : null,
+                'payment_terms' => $paymentTerms,
+                'due_date' => $isCredit ? $request->due_date : null,
+                'cash_paid_now' => $paymentTerms === 'mixed' ? (float) $request->cash_paid_now : null,
                 'notes' => $request->notes,
                 'total_amount' => $total,
                 'discount_amount' => $discountAmount,
@@ -93,6 +100,41 @@ class WholesaleInvoiceController extends Controller
 
             foreach ($items as $item) {
                 $invoice->items()->create($item);
+            }
+
+            // نقدي = المبلغ كامل مقبوض فوراً. جزء نقدي وجزء آجل = بس جزء منه.
+            // آجل بالكامل = ولا شيء مقبوض الآن.
+            $cashNow = match ($paymentTerms) {
+                'cash' => $afterDiscountAmount,
+                'mixed' => (float) $request->cash_paid_now,
+                default => 0,
+            };
+
+            if ($cashNow > 0) {
+                $invoice->payments()->create([
+                    'cash_amount' => min($cashNow, $afterDiscountAmount),
+                    'bank_amount' => 0,
+                    'payment_date' => $request->invoice_date,
+                    'received_by' => auth()->user()->name,
+                    'notes' => $paymentTerms === 'cash'
+                        ? 'دفعة نقدية كاملة عند إصدار الفاتورة'
+                        : 'دفعة نقدية جزئية عند إصدار الفاتورة',
+                ]);
+            }
+
+            // الباقي (لو في) بيصير دين على المحل المشتري — يظهر بصفحة الديون كمان
+            $remaining = round($afterDiscountAmount - $cashNow, 2);
+            if ($isCredit && $remaining > 0.01) {
+                $debt = Debt::create([
+                    'customer_name' => $request->buyer_store_name,
+                    'phone' => $request->buyer_phone ?: 'غير محدد',
+                    'type' => 'دائن',
+                    'cash_amount' => $remaining,
+                    'bank_amount' => 0,
+                    'reason' => 'فاتورة بيع بالجملة رقم ' . $invoice->invoice_number,
+                    'debt_date' => $request->invoice_date,
+                ]);
+                $invoice->update(['debt_id' => $debt->id]);
             }
         });
 
@@ -127,6 +169,11 @@ class WholesaleInvoiceController extends Controller
     public function destroy($id)
     {
         $invoice = WholesaleInvoice::findOrFail($id);
+
+        if ($invoice->debt_id) {
+            Debt::where('id', $invoice->debt_id)->delete();
+        }
+
         $invoice->delete();
 
         return redirect()->route('wholesale-invoices.index')

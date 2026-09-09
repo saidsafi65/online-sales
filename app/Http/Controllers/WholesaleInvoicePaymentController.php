@@ -41,6 +41,8 @@ class WholesaleInvoicePaymentController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        $wholesaleInvoice->syncDebtStatus();
+
         return back()->with('success', 'تم تسجيل الدفعة بنجاح');
     }
 
@@ -49,6 +51,8 @@ class WholesaleInvoicePaymentController extends Controller
         abort_if($payment->wholesale_invoice_id !== $wholesaleInvoice->id, 404);
 
         $payment->delete();
+
+        $wholesaleInvoice->syncDebtStatus();
 
         return back()->with('success', 'تم حذف الدفعة');
     }

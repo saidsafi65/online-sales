@@ -109,23 +109,37 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label" style="font-weight: 600; color: #1e293b;">
                             <i class="fas fa-hand-holding-usd"></i> شروط الدفع
                         </label>
                         <select name="payment_terms" id="paymentTermsSelect" class="form-control @error('payment_terms') is-invalid @enderror"
                                 style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;" required>
-                            <option value="cash" {{ old('payment_terms') === 'cash' ? 'selected' : '' }}>نقدي</option>
-                            <option value="credit" {{ old('payment_terms') === 'credit' ? 'selected' : '' }}>آجل</option>
+                            <option value="cash" {{ old('payment_terms', 'cash') === 'cash' ? 'selected' : '' }}>نقدي (مدفوعة بالكامل فوراً)</option>
+                            <option value="credit" {{ old('payment_terms') === 'credit' ? 'selected' : '' }}>آجل (دين كامل، بظهر بصفحة الديون)</option>
+                            <option value="mixed" {{ old('payment_terms') === 'mixed' ? 'selected' : '' }}>جزء نقدي وجزء آجل</option>
                         </select>
                         @error('payment_terms')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="col-md-3" id="dueDateWrap" style="{{ old('payment_terms') === 'credit' ? '' : 'display:none;' }}">
+                    <div class="col-md-4" id="cashPaidNowWrap" style="{{ old('payment_terms') === 'mixed' ? '' : 'display:none;' }}">
                         <label class="form-label" style="font-weight: 600; color: #1e293b;">
-                            <i class="fas fa-calendar-check"></i> تاريخ الاستحقاق
+                            <i class="fas fa-money-bill-wave"></i> المبلغ النقدي المقبوض الآن
+                        </label>
+                        <input type="number" name="cash_paid_now" step="0.01" min="0" class="form-control @error('cash_paid_now') is-invalid @enderror"
+                               value="{{ old('cash_paid_now') }}"
+                               style="padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0;">
+                        @error('cash_paid_now')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small style="color:#94a3b8;">والباقي بيصير دين على المحل، بيظهر بصفحة الديون.</small>
+                    </div>
+
+                    <div class="col-md-4" id="dueDateWrap" style="{{ in_array(old('payment_terms'), ['credit', 'mixed']) ? '' : 'display:none;' }}">
+                        <label class="form-label" style="font-weight: 600; color: #1e293b;">
+                            <i class="fas fa-calendar-check"></i> تاريخ استحقاق الباقي
                         </label>
                         <input type="date" name="due_date" class="form-control @error('due_date') is-invalid @enderror"
                                value="{{ old('due_date') }}"
@@ -262,7 +276,8 @@
     let itemCount = 1;
 
     document.getElementById('paymentTermsSelect').addEventListener('change', function () {
-        document.getElementById('dueDateWrap').style.display = this.value === 'credit' ? '' : 'none';
+        document.getElementById('dueDateWrap').style.display = (this.value === 'credit' || this.value === 'mixed') ? '' : 'none';
+        document.getElementById('cashPaidNowWrap').style.display = this.value === 'mixed' ? '' : 'none';
     });
 
     function addItem() {

@@ -179,6 +179,13 @@
                 </span>
             </div>
 
+            @if ($invoice->debt_id)
+                <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 10px;">
+                    <span><i class="fas fa-link me-1"></i> المبلغ المتبقي على هاي الفاتورة ظاهر كمان بصفحة الديون باسم "{{ $invoice->buyer_store_name }}".</span>
+                    <a href="{{ route('debts.index') }}" class="btn btn-sm btn-warning">عرض صفحة الديون</a>
+                </div>
+            @endif
+
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
                     <div style="background: #f8fafc; border-radius: 10px; padding: 1rem; text-align: center;">
