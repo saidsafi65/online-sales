@@ -1,11 +1,11 @@
 @extends('layout.app')
 
-@section('title', 'سجل الرسائل النصية')
+@section('title', 'سجل الرسائل المرسلة')
 
 @section('content')
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📱 سجل الرسائل النصية (SMS)</h2>
+        <h2>📱 سجل الرسائل المرسلة</h2>
     </div>
 
     <div class="alert alert-warning">
