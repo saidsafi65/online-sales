@@ -44,4 +44,17 @@ class Repair extends Model
         'return_cost' => 'decimal:2',
         'is_returned' => 'boolean',
     ];
+
+    /**
+     * نص رسالة الشكر الجاهزة (تكلفة الصيانة + الضمان) — نفس النص المستخدم بالإرسال
+     * التلقائي عند إضافة الصيانة، ومستخدم كمان كبداية جاهزة لزر "إرسال رسالة" اليدوي.
+     */
+    public function getCompletionSmsTextAttribute(): string
+    {
+        $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
+        $totalCost = (float) $this->cost_cash + (float) $this->cost_bank;
+
+        return "شكراً {$this->customer_name} لثقتك بـ{$storeName}. تمت صيانة {$this->device_name} بنجاح بتكلفة "
+            . number_format($totalCost, 2) . ' شيكل. معك ضمان 24 ساعة على الصيانة من تاريخ الاستلام.';
+    }
 }

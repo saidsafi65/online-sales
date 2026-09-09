@@ -493,6 +493,7 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
     Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
     Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])->name('repairs.destroy');
+    Route::post('/repairs/{repair}/send-sms', [RepairsController::class, 'sendSms'])->name('repairs.send-sms');
     });
 
     // Purchases routes

@@ -136,15 +136,11 @@ class RepairsController extends Controller
             }
 
             // رسالة SMS شكر بنفس مضمون الإيميل (سعر + ضمان 24 ساعة) — الجوال حقل
-            // إلزامي بعكس الإيميل، فهاي بتنبعت لكل صيانة تقريباً.
+            // إلزامي بعكس الإيميل، فهاي بتنبعت لكل صيانة تقريباً. لو الرقم كان مؤقت/غلط
+            // (مثلاً "0")، الموظف بيقدر يصححه ويعيد الإرسال يدوياً من زر "إرسال رسالة".
             if ($repair->phone) {
                 try {
-                    $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
-                    $totalCost = (float) $repair->cost_cash + (float) $repair->cost_bank;
-                    $smsMessage = "شكراً {$repair->customer_name} لثقتك بـ{$storeName}. تمت صيانة {$repair->device_name} بنجاح بتكلفة "
-                        . number_format($totalCost, 2) . ' شيكل. معك ضمان 24 ساعة على الصيانة من تاريخ الاستلام.';
-
-                    app(\App\Services\SmsService::class)->send($repair->phone, $smsMessage, 'repair_completed');
+                    app(\App\Services\SmsService::class)->send($repair->phone, $repair->completion_sms_text, 'repair_completed');
                 } catch (\Throwable $e) {
                     Log::warning('Repair completion SMS failed', ['repair_id' => $repair->id, 'error' => $e->getMessage()]);
                 }
@@ -156,6 +152,32 @@ class RepairsController extends Controller
 
             return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الصيانة: '.$e->getMessage())->withInput();
         }
+    }
+
+    /**
+     * إرسال رسالة يدوي من صفحة قائمة الصيانة — لحالات متل ما رقم الجوال المسجّل
+     * وقت الإضافة كان مؤقت/غلط (مثلاً "0")، فالموظف بيصحح الرقم هون ويبعت.
+     */
+    public function sendSms(Request $request, Repair $repair): RedirectResponse
+    {
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+            'message' => 'required|string|max:1000',
+        ], [
+            'phone.required' => 'اكتب رقم الجوال',
+            'message.required' => 'اكتب نص الرسالة',
+        ]);
+
+        try {
+            $sent = app(\App\Services\SmsService::class)->send($validated['phone'], $validated['message'], 'repair_manual');
+        } catch (\Throwable $e) {
+            Log::warning('Manual repair SMS failed', ['repair_id' => $repair->id, 'error' => $e->getMessage()]);
+            $sent = false;
+        }
+
+        return $sent
+            ? back()->with('success', 'تم إرسال الرسالة (أو تسجيلها بالوضع التجريبي)')
+            : back()->with('error', 'تعذر إرسال الرسالة');
     }
 
     public function edit(Repair $repair): View

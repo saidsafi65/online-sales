@@ -107,9 +107,15 @@
                                             <span class="badge bg-success">غير مرجع</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="text-nowrap">
                                         <a href="{{ route('repairs.edit', $repair) }}"
                                             class="btn btn-sm btn-outline-primary">تعديل</a>
+                                        <button type="button" class="btn btn-sm btn-outline-success send-sms-btn"
+                                            data-action="{{ route('repairs.send-sms', $repair) }}"
+                                            data-phone="{{ $repair->phone }}"
+                                            data-message="{{ $repair->completion_sms_text }}">
+                                            <i class="fas fa-comment-sms"></i> إرسال رسالة
+                                        </button>
                                         <form action="{{ route('repairs.destroy', $repair) }}" method="POST"
                                             class="d-inline" onsubmit="return confirm('تأكيد الحذف؟');">
                                             @csrf
@@ -131,4 +137,47 @@
             </div>
         </div>
     </div>
+
+    <!-- مودال إرسال رسالة نصية -->
+    <div class="modal fade" id="sendSmsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="sendSmsForm" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-comment-sms me-1"></i> إرسال رسالة نصية</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">رقم الجوال</label>
+                            <input type="text" name="phone" id="sendSmsPhone" class="form-control" required>
+                            <small class="text-muted">تأكد الرقم صحيح — أحياناً بينكتب رقم مؤقت (متل 0) وقت إضافة الصيانة.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">نص الرسالة</label>
+                            <textarea name="message" id="sendSmsMessage" class="form-control" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane me-1"></i> إرسال</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        document.querySelectorAll('.send-sms-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.getElementById('sendSmsForm').action = this.dataset.action;
+                document.getElementById('sendSmsPhone').value = this.dataset.phone === '0' ? '' : this.dataset.phone;
+                document.getElementById('sendSmsMessage').value = this.dataset.message;
+                new bootstrap.Modal(document.getElementById('sendSmsModal')).show();
+            });
+        });
+    </script>
+    @endpush
 @endsection
