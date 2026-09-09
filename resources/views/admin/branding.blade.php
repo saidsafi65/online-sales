@@ -126,6 +126,20 @@
                     <small style="color:#94a3b8;">رح يظهر بالضبط زي ما تكتبه هون بكل الفواتير وسندات القبض والمطالبات المالية.</small>
                 </div>
 
+                <hr style="margin: 1.75rem 0; border-color: #e2e8f0;">
+                <label class="form-label" style="font-weight: 700; margin-bottom: 1rem; display:block;">🌐 نفس البيانات بالإنجليزي</label>
+                <small style="color:#94a3b8; display:block; margin-bottom:1rem;">تستخدم بس بالمستندات اللي بتتعمل باللغة الإنجليزية (متل المطالبة المالية لما تختار English) — لو ما تعبيهم، بترجع تلقائياً للنص العربي.</small>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">اسم المعرض (English)</label>
+                    <input type="text" name="name_en" value="{{ old('name_en', $tenant->name_en) }}" placeholder="e.g. Online Sale Store" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.75rem;" dir="ltr">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">العنوان / الموقع (English)</label>
+                    <input type="text" name="contact_address_en" value="{{ old('contact_address_en', $tenant->contact_address_en) }}" placeholder="e.g. Khan Younis - North of Al-Nisf Junction" class="form-control" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.75rem;" dir="ltr">
+                </div>
+
                 <button type="submit" class="btn btn-primary" style="width:100%; padding: 0.875rem; border-radius: 10px; font-weight: 600; margin-top:1rem;">
                     💾 حفظ التعديلات
                 </button>

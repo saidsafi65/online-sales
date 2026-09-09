@@ -126,7 +126,12 @@
                 @if($tenant && $tenant->logo_path)
                     <img src="{{ asset('storage/'.$tenant->logo_path) }}" alt="Logo" style="max-height:34px; max-width:90px; object-fit:contain;">
                 @endif
-                <div class="brand-ar">{{ $tenant->name ?? 'أونلاين سيل' }}</div>
+                @php
+                    $brandName = $isAr
+                        ? ($tenant->name ?? 'أونلاين سيل')
+                        : ($tenant->name_en ?: ($tenant->name ?? 'Online Sale'));
+                @endphp
+                <div class="brand-ar">{{ $brandName }}</div>
             </div>
             <div class="brand-tag">{{ $labels['title'] }}</div>
         </div>
@@ -215,7 +220,12 @@
                 <tr>
                     <td>{{ $tenant->contact_phone ?? '0597848937' }}</td>
                     <td>{{ $tenant->contact_whatsapp ?? '00970592552702' }}</td>
-                    <td>{{ $tenant->contact_address ?? ($isAr ? 'خانيونس - شمال مفترق النص' : 'Khan Younis - North of Al-Nisf Junction') }}</td>
+                    @php
+                        $displayAddress = $isAr
+                            ? ($tenant->contact_address ?: 'خانيونس - شمال مفترق النص')
+                            : ($tenant->contact_address_en ?: ($tenant->contact_address ?: 'Khan Younis - North of Al-Nisf Junction'));
+                    @endphp
+                    <td>{{ $displayAddress }}</td>
                     @if($tenant && $tenant->contact_email)
                         <td>{{ $tenant->contact_email }}</td>
                     @endif
@@ -238,8 +248,14 @@
             </table>
         </div>
 
+        @php
+            $footerName = $isAr ? ($tenant->name ?? 'Online Sale') : ($tenant->name_en ?: ($tenant->name ?? 'Online Sale'));
+            $footerAddress = $isAr
+                ? ($tenant->contact_address ?? 'خانيونس - شمال مفترق النص')
+                : ($tenant->contact_address_en ?: ($tenant->contact_address ?? 'Khan Younis – 50 m north of Al-Nisf Junction'));
+        @endphp
         <div class="footer">
-            {{ $tenant->name ?? 'Online Sale' }} | {{ $tenant->contact_address ?? 'Khan Younis – 50 m north of Al-Nisf Junction' }}@if($tenant && $tenant->contact_email) | {{ $tenant->contact_email }}@endif
+            {{ $footerName }} | {{ $footerAddress }}@if($tenant && $tenant->contact_email) | {{ $tenant->contact_email }}@endif
         </div>
     </div>
 

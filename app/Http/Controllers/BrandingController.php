@@ -41,6 +41,8 @@ class BrandingController extends Controller
             'contact_whatsapp' => 'nullable|string|max:30|regex:/^[0-9+\-\s]*$/',
             'contact_email' => 'nullable|email|max:255',
             'contact_address' => 'nullable|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'contact_address_en' => 'nullable|string|max:255',
         ], [
             'brand_primary_color.regex' => 'صيغة اللون غير صحيحة',
             'brand_accent_color.regex' => 'صيغة اللون غير صحيحة',

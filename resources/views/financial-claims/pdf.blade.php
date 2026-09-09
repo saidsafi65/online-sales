@@ -86,7 +86,12 @@
                 </td>
             @endif
             <td style="width: {{ $tenant && $tenant->logo_path ? '46%' : '60%' }};">
-                <div class="brand">{{ $ar($tenant->name ?? 'أونلاين سيل') }}</div>
+                @php
+                    $brandName = $isAr
+                        ? ($tenant->name ?? 'أونلاين سيل')
+                        : ($tenant->name_en ?: ($tenant->name ?? 'Online Sale'));
+                @endphp
+                <div class="brand">{{ $ar($brandName) }}</div>
             </td>
             <td style="width: 40%; text-align: {{ $isAr ? 'left' : 'right' }};">
                 <span class="tag">{{ $labels['title'] }}</span>
@@ -171,7 +176,12 @@
         <tr>
             <td>{{ $tenant->contact_phone ?? '0597848937' }}</td>
             <td>{{ $tenant->contact_whatsapp ?? '00970592552702' }}</td>
-            <td>{{ $tenant->contact_address ? $ar($tenant->contact_address) : ($isAr ? $ar('خانيونس - شمال مفترق النص') : 'Khan Younis - North of Al-Nisf Junction') }}</td>
+            @php
+                $displayAddress = $isAr
+                    ? ($tenant->contact_address ?: 'خانيونس - شمال مفترق النص')
+                    : ($tenant->contact_address_en ?: ($tenant->contact_address ?: 'Khan Younis - North of Al-Nisf Junction'));
+            @endphp
+            <td>{{ $ar($displayAddress) }}</td>
             @if($tenant && $tenant->contact_email)
                 <td>{{ $tenant->contact_email }}</td>
             @endif
@@ -193,7 +203,13 @@
         </tr>
     </table>
 
-    <div class="footer">{{ $tenant->name ?? 'Online Sale' }}@if($tenant->contact_address ?? null) | {{ $ar($tenant->contact_address) }}@else | Khan Younis - 50 m north of Al-Nisf Junction @endif@if($tenant->contact_email ?? null) | {{ $tenant->contact_email }}@endif</div>
+    @php
+        $footerName = $isAr ? ($tenant->name ?? 'Online Sale') : ($tenant->name_en ?: ($tenant->name ?? 'Online Sale'));
+        $footerAddress = $isAr
+            ? ($tenant->contact_address ?? null)
+            : ($tenant->contact_address_en ?: ($tenant->contact_address ?? null));
+    @endphp
+    <div class="footer">{{ $ar($footerName) }}@if($footerAddress) | {{ $ar($footerAddress) }}@else | Khan Younis - 50 m north of Al-Nisf Junction @endif @if($tenant->contact_email ?? null) | {{ $tenant->contact_email }}@endif</div>
 
 </body>
 </html>
