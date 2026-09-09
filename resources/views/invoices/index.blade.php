@@ -46,6 +46,11 @@
                             <i class="fas fa-boxes-stacked me-2"></i>
                             فاتورة بيع بالجملة
                         </a>
+                        <a href="{{ route('price-quotes.index') }}" class="btn btn-lg"
+                            style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(109, 40, 217, 0.3); transition: all 0.3s ease;">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>
+                            عرض سعر
+                        </a>
                     </div>
                 </div>
             </div>

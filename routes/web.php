@@ -583,6 +583,14 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::delete('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'destroy'])->name('wholesale-invoices.destroy');
     Route::post('/wholesale-invoices/{wholesaleInvoice}/payments', [WholesaleInvoicePaymentController::class, 'store'])->name('wholesale-invoices.payments.store');
     Route::delete('/wholesale-invoices/{wholesaleInvoice}/payments/{payment}', [WholesaleInvoicePaymentController::class, 'destroy'])->name('wholesale-invoices.payments.destroy');
+
+    // عرض سعر (Price Quote) بالعربي أو الإنجليزي — نفس صلاحية الفواتير
+    Route::get('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'index'])->name('price-quotes.index');
+    Route::get('/price-quotes/create', [\App\Http\Controllers\PriceQuoteController::class, 'create'])->name('price-quotes.create');
+    Route::post('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'store'])->name('price-quotes.store');
+    Route::get('/price-quotes/{id}/print', [\App\Http\Controllers\PriceQuoteController::class, 'print'])->name('price-quotes.print');
+    Route::get('/price-quotes/{id}/download-pdf', [\App\Http\Controllers\PriceQuoteController::class, 'downloadPdf'])->name('price-quotes.download-pdf');
+    Route::delete('/price-quotes/{id}', [\App\Http\Controllers\PriceQuoteController::class, 'destroy'])->name('price-quotes.destroy');
     });
 
     // صفحة المتطابقات الرئيسية
