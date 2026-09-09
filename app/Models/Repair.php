@@ -48,13 +48,30 @@ class Repair extends Model
     /**
      * نص رسالة الشكر الجاهزة (تكلفة الصيانة + الضمان) — نفس النص المستخدم بالإرسال
      * التلقائي عند إضافة الصيانة، ومستخدم كمان كبداية جاهزة لزر "إرسال رسالة" اليدوي.
+     *
+     * رسالة SMS عربية بتتحول تلقائياً لتشفير UCS-2 (لوجود حروف عربية)، وهاد التشفير
+     * حده الأقصى لرسالة وحدة هو 70 حرف بس (مش 160 متل الإنجليزي) — لو تعدّت، بتنكسر
+     * لرسالتين أو أكتر وتتضاعف التكلفة. فالنص هون مختصر قصداً، ومع قصّ تلقائي لاسم
+     * الزبون لو لازم، حتى يضل دايماً رسالة وحدة بغض النظر عن طول الاسم أو المبلغ.
      */
     public function getCompletionSmsTextAttribute(): string
     {
-        $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
         $totalCost = (float) $this->cost_cash + (float) $this->cost_bank;
+        $costText = $totalCost == floor($totalCost)
+            ? number_format($totalCost, 0)
+            : number_format($totalCost, 2);
 
-        return "شكراً {$this->customer_name} لثقتك بـ{$storeName}. تمت صيانة {$this->device_name} بنجاح بتكلفة "
-            . number_format($totalCost, 2) . ' شيكل. معك ضمان 24 ساعة على الصيانة من تاريخ الاستلام.';
+        $build = fn (string $name) => "شكراً {$name}، تمت صيانتك بـ{$costText}₪. ضمان 24 ساعة.";
+
+        $name = (string) $this->customer_name;
+        $message = $build($name);
+
+        $overflow = mb_strlen($message) - 70;
+        if ($overflow > 0) {
+            $name = mb_substr($name, 0, max(1, mb_strlen($name) - $overflow));
+            $message = $build($name);
+        }
+
+        return $message;
     }
 }
