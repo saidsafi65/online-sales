@@ -28,16 +28,19 @@
                         <th>اسم العميل</th>
                         <th>الجوال</th>
                         <th>النوع</th>
-                        <th>نقدي</th>
-                        <th>بنكي</th>
                         <th>الإجمالي</th>
+                        <th>المسدد</th>
+                        <th>المتبقي</th>
+                        <th>الحالة</th>
                         <th>تاريخ الدين</th>
-                        <th>تاريخ السداد</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($debts as $debt)
+                        @php
+                            $statusColors = ['open' => 'danger', 'partial' => 'warning', 'paid' => 'success'];
+                        @endphp
                         <tr>
                             <td>{{ $debt->id }}</td>
                             <td>{{ $debt->customer_name }}</td>
@@ -47,17 +50,22 @@
                                     {{ $debt->type }}
                                 </span>
                             </td>
-                            <td>{{ number_format($debt->cash_amount, 2) }}</td>
-                            <td>{{ number_format($debt->bank_amount, 2) }}</td>
                             <td><strong>{{ number_format($debt->total_amount, 2) }}</strong></td>
-                            <td>{{ $debt->debt_date->format('Y-m-d') }}</td>
-                            <td>{{ $debt->payment_date ? $debt->payment_date->format('Y-m-d') : '-' }}</td>
+                            <td class="text-success">{{ number_format($debt->paid_amount, 2) }}</td>
+                            <td class="text-danger">{{ number_format($debt->remaining_amount, 2) }}</td>
                             <td>
+                                <span class="badge bg-{{ $statusColors[$debt->payment_status] }}">
+                                    {{ \App\Models\Debt::PAYMENT_STATUS_LABELS[$debt->payment_status] }}
+                                </span>
+                            </td>
+                            <td>{{ $debt->debt_date->format('Y-m-d') }}</td>
+                            <td>
+                                <a href="{{ route('debts.show', $debt) }}" class="btn btn-sm btn-info text-white">عرض</a>
                                 <a href="{{ route('debts.edit', $debt) }}" class="btn btn-sm btn-warning">تعديل</a>
                                 <form action="{{ route('debts.destroy', $debt) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                    <button type="submit" class="btn btn-sm btn-danger"
                                             onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف</button>
                                 </form>
                             </td>

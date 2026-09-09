@@ -43,41 +43,6 @@ class WholesaleInvoice extends Model
         return $this->belongsTo(Debt::class);
     }
 
-    /**
-     * يحدّث سجل الدين المرتبط (لو موجود) ليطابق المتبقي الفعلي على الفاتورة —
-     * بيتنادى بعد أي إضافة/حذف دفعة، حتى صفحة "الديون" تضل دقيقة بدون
-     * ما نحتاج نلمس DebtController نفسه.
-     */
-    public function syncDebtStatus(): void
-    {
-        if (! $this->debt_id) {
-            return;
-        }
-
-        $debt = $this->debt()->first();
-        if (! $debt) {
-            return;
-        }
-
-        $this->load('payments');
-        $remaining = $this->remaining_amount;
-
-        if ($remaining <= 0.01) {
-            if (! $debt->payment_date) {
-                $debt->payment_date = now();
-                $debt->save();
-            }
-            return;
-        }
-
-        $debt->cash_amount = $remaining;
-        $debt->bank_amount = 0;
-        if ($debt->payment_date) {
-            $debt->payment_date = null;
-        }
-        $debt->save();
-    }
-
     public function getPaidAmountAttribute(): float
     {
         return (float) $this->payments->sum(fn ($p) => (float) $p->cash_amount + (float) $p->bank_amount);

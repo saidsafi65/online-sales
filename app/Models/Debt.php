@@ -28,9 +28,72 @@ class Debt extends Model
         'bank_amount' => 'decimal:2',
     ];
 
-    // حساب المبلغ الإجمالي
+    // حساب المبلغ الإجمالي (الأصلي وقت إنشاء الدين)
     public function getTotalAmountAttribute()
     {
         return $this->cash_amount + $this->bank_amount;
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(DebtPayment::class);
+    }
+
+    /**
+     * لو الدين جاي أصلاً من فاتورة بيع بالجملة (آجلة/مختلطة) — دفعاتها بتنسجل
+     * من صفحة الفاتورة نفسها، مش من هون مباشرة، حتى يضل مصدر واحد للحقيقة.
+     */
+    public function wholesaleInvoice()
+    {
+        return $this->hasOne(WholesaleInvoice::class, 'debt_id');
+    }
+
+    public function getPaidAmountAttribute(): float
+    {
+        return (float) $this->payments->sum(fn ($p) => (float) $p->cash_amount + (float) $p->bank_amount);
+    }
+
+    public function getRemainingAmountAttribute(): float
+    {
+        return max(0, round((float) $this->total_amount - $this->paid_amount, 2));
+    }
+
+    /** open | partial | paid */
+    public function getPaymentStatusAttribute(): string
+    {
+        if ($this->paid_amount <= 0) {
+            return 'open';
+        }
+
+        return $this->remaining_amount <= 0 ? 'paid' : 'partial';
+    }
+
+    public const PAYMENT_STATUS_LABELS = [
+        'open' => 'غير مسدد',
+        'partial' => 'مسدد جزئياً',
+        'paid' => 'مسدد بالكامل',
+    ];
+
+    /**
+     * يحدّث تاريخ السداد تلقائياً حسب حالة الدفعات الفعلية — تنادى بعد أي
+     * إضافة/حذف دفعة، حتى الحقل القديم payment_date يضل متوافق مع
+     * حساب الديون الإجمالية بصفحة القائمة (اللي بيعتمد عليه أصلاً).
+     */
+    public function syncPaymentStatus(): void
+    {
+        $this->load('payments');
+
+        if ($this->remaining_amount <= 0.01) {
+            if (! $this->payment_date) {
+                $this->payment_date = now();
+                $this->save();
+            }
+            return;
+        }
+
+        if ($this->payment_date) {
+            $this->payment_date = null;
+            $this->save();
+        }
     }
 }

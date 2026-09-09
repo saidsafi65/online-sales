@@ -8,7 +8,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Debt;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DebtController extends Controller
 {
@@ -22,7 +21,7 @@ class DebtController extends Controller
         }
 
         // ✅ استخدام $query بدلاً من Debt::latest()
-        $debts = $query->latest()->paginate(10);
+        $debts = $query->with('payments')->latest()->paginate(10);
 
         $totalDebts = $this->calculateTotalDebts();
 
@@ -31,22 +30,18 @@ class DebtController extends Controller
 
     private function calculateTotalDebts()
     {
-        $query = Debt::query();
+        $query = Debt::with('payments')->query();
 
         if (!auth()->user()->isAdmin()) {
             \App\Support\BranchFilter::apply($query);
         }
 
         // دائن = "لي عنده" = دين لنا (receivable) | مدين = "عليّ له" = دين علينا (payable)
-        $receivables = (clone $query)
-            ->where('type', 'دائن')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        // بنحسب المتبقي الفعلي (بعد أي دفعات جزئية)، مش المبلغ الأصلي كامل.
+        $openDebts = $query->whereNull('payment_date')->get();
 
-        $payables = (clone $query)
-            ->where('type', 'مدين')
-            ->whereNull('payment_date')
-            ->sum(DB::raw('COALESCE(cash_amount, 0) + COALESCE(bank_amount, 0)'));
+        $receivables = $openDebts->where('type', 'دائن')->sum('remaining_amount');
+        $payables = $openDebts->where('type', 'مدين')->sum('remaining_amount');
 
         return $receivables - $payables;
     }
@@ -77,13 +72,26 @@ class DebtController extends Controller
         return redirect()->route('debts.index')->with('success', 'تم إضافة السجل بنجاح');
     }
 
+    public function show(Debt $debt)
+    {
+        $debt->load('payments', 'wholesaleInvoice');
+
+        return view('debt.show', compact('debt'));
+    }
+
     public function edit(Debt $debt)
     {
+        // الدين المرتبط بفاتورة جملة، مبلغه ومصدره محسوبين من الفاتورة نفسها —
+        // تعديله يدوياً هون بيكسر التزامن بينهم.
+        abort_if($debt->wholesaleInvoice()->exists(), 403, 'هذا الدين مرتبط بفاتورة بيع بالجملة — عدّله من صفحة الفاتورة نفسها.');
+
         return view('debt.edit', compact('debt'));
     }
 
     public function update(Request $request, Debt $debt)
     {
+        abort_if($debt->wholesaleInvoice()->exists(), 403, 'هذا الدين مرتبط بفاتورة بيع بالجملة — عدّله من صفحة الفاتورة نفسها.');
+
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'phone'         => 'required|string|max:20',
@@ -95,13 +103,24 @@ class DebtController extends Controller
             'payment_date'  => 'nullable|date|after_or_equal:debt_date',
         ]);
 
+        $debt->load('payments');
+        $newTotal = (float) ($validated['cash_amount'] ?? 0) + (float) ($validated['bank_amount'] ?? 0);
+        if ($newTotal < $debt->paid_amount - 0.01) {
+            return back()
+                ->withErrors(['cash_amount' => 'المبلغ الجديد أقل من اللي انسدد فعلاً (' . number_format($debt->paid_amount, 2) . ' شيكل) — عدّل الدفعات المسجّلة بدل ما تنقص المبلغ الأصلي.'])
+                ->withInput();
+        }
+
         $debt->update($validated);
+        $debt->syncPaymentStatus();
 
         return redirect()->route('debts.index')->with('success', 'تم تحديث السجل بنجاح');
     }
 
     public function destroy(Debt $debt)
     {
+        abort_if($debt->wholesaleInvoice()->exists(), 403, 'هذا الدين مرتبط بفاتورة بيع بالجملة — احذف الفاتورة نفسها لو بدك تشيل الدين.');
+
         $debt->delete();
         return redirect()->route('debts.index')->with('success', 'تم حذف السجل بنجاح');
     }

@@ -660,6 +660,9 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
         Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
         Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
+        Route::get('{debt}', [DebtController::class, 'show'])->name('show'); // تفاصيل الدين + الدفعات
+        Route::post('{debt}/payments', [\App\Http\Controllers\DebtPaymentController::class, 'store'])->name('payments.store');
+        Route::delete('{debt}/payments/{payment}', [\App\Http\Controllers\DebtPaymentController::class, 'destroy'])->name('payments.destroy');
     });
 
     // Backup routes
