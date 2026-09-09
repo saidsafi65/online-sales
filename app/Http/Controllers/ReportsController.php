@@ -81,7 +81,7 @@ class ReportsController extends Controller
                 ->whereBetween('sale_date', [$dateStart, $dateEnd]);
 
             if (!$isAdmin && $userBranchId) {
-                $salesQuery->where('branch_id', $userBranchId);
+                \App\Support\BranchFilter::apply($salesQuery);
             }
 
             // Sums
@@ -129,7 +129,7 @@ class ReportsController extends Controller
                 ->whereBetween('received_date', [$dateStart, $dateEnd]);
 
             if (!$isAdmin && $userBranchId) {
-                $repairsReceivedQuery->where('branch_id', $userBranchId);
+                \App\Support\BranchFilter::apply($repairsReceivedQuery);
             }
 
             $totalRepairs = (int) $repairsReceivedQuery->clone()->count();
@@ -154,7 +154,7 @@ class ReportsController extends Controller
                 ->whereBetween('delivery_date', [$dateStart, $dateEnd]);
 
             if (!$isAdmin && $userBranchId) {
-                $repairsDeliveredQuery->where('branch_id', $userBranchId);
+                \App\Support\BranchFilter::apply($repairsDeliveredQuery);
             }
 
             $monthlycost_cashRepair = (float) $repairsDeliveredQuery->clone()->sum('cost_cash');
@@ -187,7 +187,7 @@ class ReportsController extends Controller
                 ->whereBetween('purchase_date', [$dateStart, $dateEnd]);
 
             if (!$isAdmin && $userBranchId) {
-                $purchasesQuery->where('branch_id', $userBranchId);
+                \App\Support\BranchFilter::apply($purchasesQuery);
             }
 
             $cashTotal = (float) $purchasesQuery->clone()->sum('amount_cash');
@@ -233,7 +233,7 @@ class ReportsController extends Controller
         // OBLIGATIONS (رواتب، إيجار...) — دايمًا محسوبة (بغض النظر عن $type) لأنها لازمة لصافي الدخل
         $obligationsQuery = Obligation::query()->whereBetween('date', [$dateStart, $dateEnd]);
         if (!$isAdmin && $userBranchId) {
-            $obligationsQuery->where('branch_id', $userBranchId);
+            \App\Support\BranchFilter::apply($obligationsQuery);
         }
         $monthlyObligations = (float) $obligationsQuery->clone()->sum('cash_amount')
             + (float) $obligationsQuery->clone()->sum('bank_amount');
