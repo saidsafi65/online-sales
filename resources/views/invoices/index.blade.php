@@ -41,6 +41,11 @@
                             <i class="fas fa-file-invoice-dollar me-2"></i>
                             مطالبة مالية
                         </a>
+                        <a href="{{ route('wholesale-invoices.index') }}" class="btn btn-lg"
+                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 12px 30px; border-radius: 50px; border: none; font-weight: 600; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); transition: all 0.3s ease;">
+                            <i class="fas fa-boxes-stacked me-2"></i>
+                            فاتورة بيع بالجملة
+                        </a>
                     </div>
                 </div>
             </div>

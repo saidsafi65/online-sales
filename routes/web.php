@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BankOfPalestineController;
 use App\Http\Controllers\PalPayController;
+use App\Http\Controllers\WholesaleInvoiceController;
+use App\Http\Controllers\WholesaleInvoicePaymentController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
@@ -566,6 +568,17 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/financial-claims/{id}/print', [FinancialClaimController::class, 'print'])->name('financial-claims.print');
     Route::get('/financial-claims/{id}/download-pdf', [FinancialClaimController::class, 'downloadPdf'])->name('financial-claims.download-pdf');
     Route::delete('/financial-claims/{id}', [FinancialClaimController::class, 'destroy'])->name('financial-claims.destroy');
+
+    // فاتورة بيع بالجملة بين المعارض/المحلات (B2B) — نفس صلاحية الفواتير
+    Route::get('/wholesale-invoices', [WholesaleInvoiceController::class, 'index'])->name('wholesale-invoices.index');
+    Route::get('/wholesale-invoices/create', [WholesaleInvoiceController::class, 'create'])->name('wholesale-invoices.create');
+    Route::post('/wholesale-invoices', [WholesaleInvoiceController::class, 'store'])->name('wholesale-invoices.store');
+    Route::get('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'show'])->name('wholesale-invoices.show');
+    Route::get('/wholesale-invoices/{id}/print', [WholesaleInvoiceController::class, 'print'])->name('wholesale-invoices.print');
+    Route::get('/wholesale-invoices/{id}/download-pdf', [WholesaleInvoiceController::class, 'downloadPdf'])->name('wholesale-invoices.download-pdf');
+    Route::delete('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'destroy'])->name('wholesale-invoices.destroy');
+    Route::post('/wholesale-invoices/{wholesaleInvoice}/payments', [WholesaleInvoicePaymentController::class, 'store'])->name('wholesale-invoices.payments.store');
+    Route::delete('/wholesale-invoices/{wholesaleInvoice}/payments/{payment}', [WholesaleInvoicePaymentController::class, 'destroy'])->name('wholesale-invoices.payments.destroy');
     });
 
     // صفحة المتطابقات الرئيسية
