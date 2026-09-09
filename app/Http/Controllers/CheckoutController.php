@@ -37,6 +37,7 @@ class CheckoutController extends Controller
         'customer_phone'   => 'required|string|max:50',
         'shipping_address' => 'required|string|max:255',
         'shipping_city'    => 'nullable|string|max:255',
+        'payment_method'   => 'required|in:jawwalpay,bankofpalestine,palpay',
     ]);
 
     $order = DB::transaction(function () use ($cart, $customer, $validated) {
@@ -68,7 +69,7 @@ class CheckoutController extends Controller
             'coupon_code'      => $appliedCoupon?->code,
             'discount_amount'  => $discountAmount,
             'status'           => 'pending',
-            'payment_method'   => 'jawwalpay',
+            'payment_method'   => $validated['payment_method'],
             'customer_name'    => $validated['customer_name'],
             'customer_phone'   => $validated['customer_phone'],
             'shipping_address' => $validated['shipping_address'],
@@ -129,7 +130,13 @@ class CheckoutController extends Controller
         \Illuminate\Support\Facades\Log::warning('OrderConfirmedNotification webpush failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
     }
 
-    $paymentUrl = app(\App\Services\JawwalPayService::class)->initiatePayment($order);
+    $gatewayService = match ($order->payment_method) {
+        'bankofpalestine' => \App\Services\BankOfPalestineService::class,
+        'palpay'          => \App\Services\PalPayService::class,
+        default           => \App\Services\JawwalPayService::class,
+    };
+
+    $paymentUrl = app($gatewayService)->initiatePayment($order);
 
     return redirect($paymentUrl);
 }

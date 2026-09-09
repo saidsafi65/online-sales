@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Services\JawwalPayService;
+use App\Services\BankOfPalestineService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class JawwalPayController extends Controller
+class BankOfPalestineController extends Controller
 {
-    public function __construct(protected JawwalPayService $jawwalPay) {}
+    public function __construct(protected BankOfPalestineService $bankOfPalestine) {}
 
     /**
      * الصفحة يلي بيرجع لها الزبون بعد الدفع (سواء نجح أو فشل)
@@ -21,65 +21,65 @@ class JawwalPayController extends Controller
     }
 
     /**
-     * بوابة دفع وهمية مؤقتة — تُستخدم فقط لما بيانات جوال باي الحقيقية مش
+     * بوابة دفع وهمية مؤقتة — تُستخدم فقط لما بيانات بنك فلسطين الحقيقية مش
      * موجودة بعد، حتى نقدر نجرب مسار الدفع كامل. بتتوقف تلقائياً بمجرد ما
-     * تنضاف بيانات جوال باي الحقيقية (credentialsConfigured() بترجع true).
+     * تنضاف بيانات البنك الحقيقية (credentialsConfigured() بترجع true).
      */
     public function mockGateway(Order $order)
     {
-        abort_if($this->jawwalPay->credentialsConfigured(), 404);
+        abort_if($this->bankOfPalestine->credentialsConfigured(), 404);
         abort_unless($order->customer_id === Auth::guard('customer')->id(), 403);
 
         if ($order->status !== 'pending') {
-            return redirect()->route('jawwalpay.return', $order);
+            return redirect()->route('bankofpalestine.return', $order);
         }
 
         return view('checkout.mock-gateway', [
             'order' => $order,
-            'gatewayLabel' => 'جوال باي',
-            'gatewayIcon' => 'fa-mobile-alt',
-            'resolveRoute' => 'jawwalpay.mock.resolve',
+            'gatewayLabel' => 'بنك فلسطين',
+            'gatewayIcon' => 'fa-landmark',
+            'resolveRoute' => 'bankofpalestine.mock.resolve',
         ]);
     }
 
     /**
-     * محاكاة رد جوال باي (نجاح/فشل) — بتستدعي نفس منطق handleCallback()
+     * محاكاة رد بنك فلسطين (نجاح/فشل) — بتستدعي نفس منطق handleCallback()
      * الحقيقي يلي بيستخدمه الـ Webhook الفعلي، فقط بدون التحقق من التوقيع
      * (هون الثقة مصدرها auth:customer + التحقق من ملكية الطلب، مش توقيع خارجي).
      */
     public function mockResolve(Request $request, Order $order)
     {
-        abort_if($this->jawwalPay->credentialsConfigured(), 404);
+        abort_if($this->bankOfPalestine->credentialsConfigured(), 404);
         abort_unless($order->customer_id === Auth::guard('customer')->id(), 403);
 
         if ($order->status !== 'pending') {
-            return redirect()->route('jawwalpay.return', $order);
+            return redirect()->route('bankofpalestine.return', $order);
         }
 
         $validated = $request->validate(['result' => 'required|in:success,failed']);
 
-        $this->jawwalPay->handleCallback([
+        $this->bankOfPalestine->handleCallback([
             'order_id'       => $order->id,
             'status'         => $validated['result'],
             'transaction_id' => 'MOCK-' . Str::random(10),
             'amount'         => $order->total,
         ]);
 
-        return redirect()->route('jawwalpay.return', $order);
+        return redirect()->route('bankofpalestine.return', $order);
     }
 
     /**
-     * الـ Webhook يلي جوال باي بيبعثله تحديث الحالة (Server-to-server)
+     * الـ Webhook يلي بنك فلسطين بيبعثله تحديث الحالة (Server-to-server)
      */
     public function callback(Request $request)
     {
-        $signature = $request->header('X-JawwalPay-Signature', '');
+        $signature = $request->header('X-BOP-Signature', '');
 
-        if (!$this->jawwalPay->verifyCallbackSignature($request->all(), $signature)) {
+        if (!$this->bankOfPalestine->verifyCallbackSignature($request->all(), $signature)) {
             return response()->json(['error' => 'Invalid signature'], 403);
         }
 
-        $this->jawwalPay->handleCallback($request->all());
+        $this->bankOfPalestine->handleCallback($request->all());
 
         return response()->json(['status' => 'ok']);
     }

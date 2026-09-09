@@ -3,6 +3,8 @@
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\BankOfPalestineController;
+use App\Http\Controllers\PalPayController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\DailyHandoverController;
@@ -828,15 +830,31 @@ Route::middleware('auth:customer')->group(function () {
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
-    // بوابة دفع جوال باي الوهمية (مؤقتة لحد ما توصل بيانات الاعتماد الحقيقية)
+    // بوابات الدفع الوهمية (مؤقتة لحد ما توصل بيانات الاعتماد الحقيقية لكل بوابة)
     Route::prefix('payment/jawwalpay')->name('jawwalpay.')->group(function () {
         Route::get('/mock/{order}', [JawwalPayController::class, 'mockGateway'])->name('mock');
         Route::post('/mock/{order}/resolve', [JawwalPayController::class, 'mockResolve'])->name('mock.resolve');
     });
+    Route::prefix('payment/bankofpalestine')->name('bankofpalestine.')->group(function () {
+        Route::get('/mock/{order}', [BankOfPalestineController::class, 'mockGateway'])->name('mock');
+        Route::post('/mock/{order}/resolve', [BankOfPalestineController::class, 'mockResolve'])->name('mock.resolve');
+    });
+    Route::prefix('payment/palpay')->name('palpay.')->group(function () {
+        Route::get('/mock/{order}', [PalPayController::class, 'mockGateway'])->name('mock');
+        Route::post('/mock/{order}/resolve', [PalPayController::class, 'mockResolve'])->name('mock.resolve');
+    });
 });
 
-// صفحات دفع جوال باي (Callback يستقبل من خارج الموقع، بدون auth middleware)
+// صفحات بوابات الدفع (Callback يستقبل من خارج الموقع، بدون auth middleware)
 Route::prefix('payment/jawwalpay')->name('jawwalpay.')->group(function () {
     Route::get('/return/{order}', [JawwalPayController::class, 'return'])->name('return');
     Route::post('/callback', [JawwalPayController::class, 'callback'])->name('callback');
+});
+Route::prefix('payment/bankofpalestine')->name('bankofpalestine.')->group(function () {
+    Route::get('/return/{order}', [BankOfPalestineController::class, 'return'])->name('return');
+    Route::post('/callback', [BankOfPalestineController::class, 'callback'])->name('callback');
+});
+Route::prefix('payment/palpay')->name('palpay.')->group(function () {
+    Route::get('/return/{order}', [PalPayController::class, 'return'])->name('return');
+    Route::post('/callback', [PalPayController::class, 'callback'])->name('callback');
 });

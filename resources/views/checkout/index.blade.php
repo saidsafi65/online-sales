@@ -81,15 +81,20 @@
     }
     .payment-method-box {
         background: #f8fafc;
-        border: 2px solid var(--primary-color);
+        border: 2px solid #e2e8f0;
         border-radius: 12px;
         padding: 1rem 1.2rem;
         display: flex;
         align-items: center;
         gap: .8rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: .8rem;
+        cursor: pointer;
+        transition: border-color .15s, background .15s;
     }
+    .payment-method-box:hover { background: #f1f5f9; }
+    .payment-method-box.selected { border-color: var(--primary-color); background: #fef2f2; }
     .payment-method-box i { font-size: 1.5rem; color: var(--primary-color); }
+    .payment-method-box input[type="radio"] { width: 1.1rem; height: 1.1rem; accent-color: var(--primary-color); }
     .btn-place-order {
         width: 100%;
         padding: .95rem;
@@ -158,7 +163,9 @@
 
                 <div class="checkout-card">
                     <h5><i class="fas fa-credit-card"></i> طريقة الدفع</h5>
-                    <div class="payment-method-box">
+
+                    <label class="payment-method-box" data-payment-option>
+                        <input type="radio" name="payment_method" value="jawwalpay" checked>
                         <i class="fas fa-mobile-alt"></i>
                         <div>
                             <div class="fw-bold">جوال باي</div>
@@ -166,7 +173,29 @@
                                 رح تنتقل لصفحة جوال باي لإتمام الدفع بأمان
                             </div>
                         </div>
-                    </div>
+                    </label>
+
+                    <label class="payment-method-box" data-payment-option>
+                        <input type="radio" name="payment_method" value="bankofpalestine">
+                        <i class="fas fa-landmark"></i>
+                        <div>
+                            <div class="fw-bold">بنك فلسطين</div>
+                            <div class="text-secondary" style="font-size:.85rem;">
+                                رح تنتقل لصفحة بنك فلسطين لإتمام الدفع بأمان
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="payment-method-box" data-payment-option>
+                        <input type="radio" name="payment_method" value="palpay">
+                        <i class="fas fa-wallet"></i>
+                        <div>
+                            <div class="fw-bold">محفظة بال باي</div>
+                            <div class="text-secondary" style="font-size:.85rem;">
+                                رح تنتقل لتطبيق بال باي لإتمام الدفع بأمان
+                            </div>
+                        </div>
+                    </label>
                 </div>
             </div>
 
@@ -207,4 +236,19 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        function syncSelected() {
+            document.querySelectorAll('[data-payment-option]').forEach(function (box) {
+                const input = box.querySelector('input[type="radio"]');
+                box.classList.toggle('selected', input.checked);
+            });
+        }
+        document.querySelectorAll('[data-payment-option] input[type="radio"]').forEach(function (input) {
+            input.addEventListener('change', syncSelected);
+        });
+        syncSelected();
+    })();
+</script>
 @endsection

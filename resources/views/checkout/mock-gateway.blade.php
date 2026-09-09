@@ -1,6 +1,12 @@
 @extends('layout.gust')
 
-@section('title', 'الدفع - جوال باي')
+@php
+    $gatewayLabel = $gatewayLabel ?? 'جوال باي';
+    $gatewayIcon = $gatewayIcon ?? 'fa-mobile-alt';
+    $resolveRoute = $resolveRoute ?? 'jawwalpay.mock.resolve';
+@endphp
+
+@section('title', 'الدفع - ' . $gatewayLabel)
 
 @push('styles')
 <style>
@@ -68,11 +74,11 @@
 @section('content')
 <div class="result-wrapper">
     <div class="result-card">
-        <div class="mock-banner">🧪 وضع تجريبي — جوال باي الحقيقي غير مفعل بعد</div>
+        <div class="mock-banner">🧪 وضع تجريبي — {{ $gatewayLabel }} الحقيقي غير مفعل بعد</div>
 
-        <div class="result-icon"><i class="fas fa-credit-card"></i></div>
-        <div class="result-title">إتمام الدفع</div>
-        <div class="result-desc">هاي محاكاة لبوابة الدفع لحد ما تتفعل بوابة جوال باي الحقيقية</div>
+        <div class="result-icon"><i class="fas {{ $gatewayIcon }}"></i></div>
+        <div class="result-title">إتمام الدفع عبر {{ $gatewayLabel }}</div>
+        <div class="result-desc">هاي محاكاة لبوابة الدفع لحد ما تتفعل بوابة {{ $gatewayLabel }} الحقيقية</div>
 
         <div class="order-ref">
             رقم الطلب: #{{ $order->id }}<br>
@@ -80,14 +86,14 @@
         </div>
 
         <div class="mock-actions">
-            <form method="POST" action="{{ route('jawwalpay.mock.resolve', $order) }}">
+            <form method="POST" action="{{ route($resolveRoute, $order) }}">
                 @csrf
                 <input type="hidden" name="result" value="success">
                 <button type="submit" class="btn-mock btn-mock-success">
                     <i class="fas fa-check"></i> محاكاة دفع ناجح
                 </button>
             </form>
-            <form method="POST" action="{{ route('jawwalpay.mock.resolve', $order) }}">
+            <form method="POST" action="{{ route($resolveRoute, $order) }}">
                 @csrf
                 <input type="hidden" name="result" value="failed">
                 <button type="submit" class="btn-mock btn-mock-failed">
