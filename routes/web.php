@@ -188,6 +188,12 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
             Route::post('/icon', [BrandingController::class, 'updateIcon'])->name('icon');
         });
 
+        // 💳 طرق الدفع (تفعيل/تعطيل + بيانات API) - فقط لمدير المعرض
+        Route::prefix('payment-gateways')->name('payment-gateways.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'edit'])->name('edit');
+            Route::post('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'update'])->name('update');
+        });
+
         // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني — فقط لمدير المعرض
         Route::prefix('coupons')->name('coupons.')->group(function () {
             Route::get('/', [CouponController::class, 'index'])->name('index');

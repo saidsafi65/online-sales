@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
+    /**
+     * طرق الدفع المفعّلة حالياً لهذا المعرض — صاحب المعرض بيتحكم فيها من صفحة
+     * "طرق الدفع" (لا علاقة لتفعيلها بوجود بيانات API حقيقية؛ لو مفعّلة بدون
+     * بيانات، بتشتغل بوضع تجريبي لحد ما تنحط البيانات الحقيقية).
+     */
+    private function enabledGateways(): array
+    {
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        if (! $tenant) {
+            return [];
+        }
+
+        return collect(\App\Models\Tenant::PAYMENT_GATEWAYS)
+            ->filter(fn ($label, $key) => (bool) $tenant->{"{$key}_enabled"})
+            ->keys()
+            ->all();
+    }
+
     public function index()
     {
         $customer = Auth::guard('customer')->user();
@@ -20,7 +38,9 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'السلة فارغة');
         }
 
-        return view('checkout.index', compact('cart', 'customer'));
+        $enabledGateways = $this->enabledGateways();
+
+        return view('checkout.index', compact('cart', 'customer', 'enabledGateways'));
     }
 
     public function store(Request $request)
@@ -32,12 +52,14 @@ class CheckoutController extends Controller
         return redirect()->route('cart.index')->with('error', 'السلة فارغة');
     }
 
+    // بنتحقق من طريقة الدفع مقابل الطرق المفعّلة فعلياً (مش قائمة ثابتة بالكود) —
+    // حتى ما يقدر حدا يبعت طريقة معطّلة يدوياً عبر الفورم.
     $validated = $request->validate([
         'customer_name'    => 'required|string|max:255',
         'customer_phone'   => 'required|string|max:50',
         'shipping_address' => 'required|string|max:255',
         'shipping_city'    => 'nullable|string|max:255',
-        'payment_method'   => 'required|in:jawwalpay,bankofpalestine,palpay',
+        'payment_method'   => ['required', \Illuminate\Validation\Rule::in($this->enabledGateways())],
     ]);
 
     $order = DB::transaction(function () use ($cart, $customer, $validated) {

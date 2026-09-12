@@ -16,11 +16,14 @@ class BankOfPalestineService
 
     public function __construct()
     {
-        // القيم بتضل فاضية لحد ما توصل بيانات بنك فلسطين الحقيقية — لازم تبقى نوعها
-        // string (مش null) حتى ما تنهار عملية الدفع كاملة بخطأ TypeError.
-        $this->merchantId = (string) config('bankofpalestine.merchant_id');
-        $this->secretKey  = (string) config('bankofpalestine.secret_key');
-        $this->baseUrl    = (string) config('bankofpalestine.base_url');
+        // البيانات بتنقرا من إعدادات المعرض (Tenant) نفسه، مش من .env — كل معرض
+        // إله حساب بنك فلسطين خاص فيه، بيتحكم فيه من صفحة "طرق الدفع". القيم بتضل
+        // فاضية لحد ما يحطها صاحب المعرض — لازم تبقى string (مش null) حتى ما تنهار
+        // عملية الدفع كاملة بخطأ TypeError.
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $this->merchantId = (string) ($tenant->bankofpalestine_merchant_id ?? '');
+        $this->secretKey  = (string) ($tenant->bankofpalestine_secret_key ?? '');
+        $this->baseUrl    = (string) ($tenant->bankofpalestine_base_url ?? '');
     }
 
     /**
@@ -59,7 +62,7 @@ class BankOfPalestineService
         //     'order_id'     => $order->id,
         //     'amount'       => $order->total,
         //     'currency'     => 'ILS',
-        //     'callback_url' => config('bankofpalestine.callback_url'),
+        //     'callback_url' => route('bankofpalestine.callback'),
         //     'return_url'   => route('bankofpalestine.return', $order),
         // ]);
         //

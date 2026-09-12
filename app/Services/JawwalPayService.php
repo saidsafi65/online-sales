@@ -16,11 +16,14 @@ class JawwalPayService
 
     public function __construct()
     {
-        // القيم بتضل فاضية لحد ما توصل بيانات جوال باي الحقيقية — لازم تبقى نوعها
-        // string (مش null) حتى ما تنهار عملية الدفع كاملة بخطأ TypeError.
-        $this->merchantId = (string) config('jawwalpay.merchant_id');
-        $this->secretKey  = (string) config('jawwalpay.secret_key');
-        $this->baseUrl    = (string) config('jawwalpay.base_url');
+        // البيانات بتنقرا من إعدادات المعرض (Tenant) نفسه، مش من .env — كل معرض
+        // إله حساب جوال باي خاص فيه، بيتحكم فيه من صفحة "طرق الدفع". القيم بتضل
+        // فاضية لحد ما يحطها صاحب المعرض — لازم تبقى string (مش null) حتى ما تنهار
+        // عملية الدفع كاملة بخطأ TypeError.
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $this->merchantId = (string) ($tenant->jawwalpay_merchant_id ?? '');
+        $this->secretKey  = (string) ($tenant->jawwalpay_secret_key ?? '');
+        $this->baseUrl    = (string) ($tenant->jawwalpay_base_url ?? '');
     }
 
     /**
@@ -60,7 +63,7 @@ class JawwalPayService
         //     'order_id'     => $order->id,
         //     'amount'       => $order->total,
         //     'currency'     => 'ILS',
-        //     'callback_url' => config('jawwalpay.callback_url'),
+        //     'callback_url' => route('jawwalpay.callback'),
         //     'return_url'   => route('jawwalpay.return', $order),
         // ]);
         //

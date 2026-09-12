@@ -164,38 +164,30 @@
                 <div class="checkout-card">
                     <h5><i class="fas fa-credit-card"></i> طريقة الدفع</h5>
 
-                    <label class="payment-method-box" data-payment-option>
-                        <input type="radio" name="payment_method" value="jawwalpay" checked>
-                        <i class="fas fa-mobile-alt"></i>
-                        <div>
-                            <div class="fw-bold">جوال باي</div>
-                            <div class="text-secondary" style="font-size:.85rem;">
-                                رح تنتقل لصفحة جوال باي لإتمام الدفع بأمان
-                            </div>
-                        </div>
-                    </label>
+                    @php
+                        $gatewayInfo = [
+                            'jawwalpay' => ['icon' => 'fa-mobile-alt', 'label' => 'جوال باي', 'desc' => 'رح تنتقل لصفحة جوال باي لإتمام الدفع بأمان'],
+                            'bankofpalestine' => ['icon' => 'fa-landmark', 'label' => 'بنك فلسطين', 'desc' => 'رح تنتقل لصفحة بنك فلسطين لإتمام الدفع بأمان'],
+                            'palpay' => ['icon' => 'fa-wallet', 'label' => 'محفظة بال باي', 'desc' => 'رح تنتقل لتطبيق بال باي لإتمام الدفع بأمان'],
+                        ];
+                    @endphp
 
-                    <label class="payment-method-box" data-payment-option>
-                        <input type="radio" name="payment_method" value="bankofpalestine">
-                        <i class="fas fa-landmark"></i>
-                        <div>
-                            <div class="fw-bold">بنك فلسطين</div>
-                            <div class="text-secondary" style="font-size:.85rem;">
-                                رح تنتقل لصفحة بنك فلسطين لإتمام الدفع بأمان
-                            </div>
-                        </div>
-                    </label>
-
-                    <label class="payment-method-box" data-payment-option>
-                        <input type="radio" name="payment_method" value="palpay">
-                        <i class="fas fa-wallet"></i>
-                        <div>
-                            <div class="fw-bold">محفظة بال باي</div>
-                            <div class="text-secondary" style="font-size:.85rem;">
-                                رح تنتقل لتطبيق بال باي لإتمام الدفع بأمان
-                            </div>
-                        </div>
-                    </label>
+                    @if (empty($enabledGateways))
+                        <div class="alert alert-warning">لا توجد طريقة دفع مفعّلة حالياً — تواصل مع المعرض.</div>
+                    @else
+                        @foreach ($enabledGateways as $index => $gateway)
+                            <label class="payment-method-box" data-payment-option>
+                                <input type="radio" name="payment_method" value="{{ $gateway }}" {{ $index === 0 ? 'checked' : '' }}>
+                                <i class="fas {{ $gatewayInfo[$gateway]['icon'] }}"></i>
+                                <div>
+                                    <div class="fw-bold">{{ $gatewayInfo[$gateway]['label'] }}</div>
+                                    <div class="text-secondary" style="font-size:.85rem;">
+                                        {{ $gatewayInfo[$gateway]['desc'] }}
+                                    </div>
+                                </div>
+                            </label>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 

@@ -1011,6 +1011,13 @@
                                             </a>
                                         </li>
                                         <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('payment-gateways.edit') }}"
+                                                style="color: rgb(0 0 0 / 90%) !important;">
+                                                <i class="fas fa-credit-card" style="color: blue;"></i>
+                                                طرق الدفع
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
                                             <a class="nav-link" href="{{ route('coupons.index') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">
                                                 <i class="fas fa-tags" style="color: blue;"></i>
