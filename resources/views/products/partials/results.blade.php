@@ -1,5 +1,8 @@
 @php
     $hasFilters = request()->hasAny(['search','category','price_min','price_max','discount','in_stock']);
+    $__tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+    $__hasPaymentMethod = $__tenant && $__tenant->hasAnyPaymentGatewayEnabled();
+    $__whatsappNumber = $__tenant->contact_whatsapp ?? null;
 @endphp
 @if($hasFilters)
 <div class="active-filters">
@@ -123,19 +126,27 @@
                     @endif
                 </div>
 
-                @auth('customer')
-                    @if(!$product->is_out_of_stock)
-                        <button type="button" class="btn-add-cart"
-                                onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)">
-                            <i class="fas fa-cart-plus"></i> أضف للسلة
-                        </button>
-                    @endif
-                @else
-                    <a href="{{ route('customer.login') }}" class="btn-add-cart btn-add-cart-guest"
+                @if ($__hasPaymentMethod)
+                    @auth('customer')
+                        @if(!$product->is_out_of_stock)
+                            <button type="button" class="btn-add-cart"
+                                    onclick="event.stopPropagation(); addToCart({{ $product->id }}, this)">
+                                <i class="fas fa-cart-plus"></i> أضف للسلة
+                            </button>
+                        @endif
+                    @else
+                        <a href="{{ route('customer.login') }}" class="btn-add-cart btn-add-cart-guest"
+                           onclick="event.stopPropagation()">
+                            <i class="fas fa-sign-in-alt"></i> سجل دخول للشراء
+                        </a>
+                    @endauth
+                @elseif ($__whatsappNumber)
+                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $__whatsappNumber) }}?text={{ urlencode('مرحباً، أنا مهتم بمنتج: ' . $product->name) }}"
+                       target="_blank" class="btn-add-cart" style="background:#25d366;"
                        onclick="event.stopPropagation()">
-                        <i class="fas fa-sign-in-alt"></i> سجل دخول للشراء
+                        <i class="fab fa-whatsapp"></i> تواصل واتساب
                     </a>
-                @endauth
+                @endif
             </div>
         </div>
     @endforeach

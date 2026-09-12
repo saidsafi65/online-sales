@@ -410,6 +410,12 @@
     </div>
 @endpush
 
+@php
+    $__tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+    $__hasPaymentMethod = $__tenant && $__tenant->hasAnyPaymentGatewayEnabled();
+    $__whatsappNumber = $__tenant->contact_whatsapp ?? null;
+@endphp
+
 @section('content')
 <div class="container">
 
@@ -651,16 +657,22 @@
             <div id="modal-discount-badge"></div>
 
             <div id="modal-add-cart-wrap">
-                @auth('customer')
-                    <button type="button" class="btn-add-cart" id="modal-add-cart-btn"
-                            onclick="event.stopPropagation()">
-                        <i class="fas fa-cart-plus"></i> أضف للسلة
-                    </button>
-                @else
-                    <a href="{{ route('customer.login') }}" class="btn-add-cart btn-add-cart-guest">
-                        <i class="fas fa-sign-in-alt"></i> سجل دخول للشراء
+                @if ($__hasPaymentMethod)
+                    @auth('customer')
+                        <button type="button" class="btn-add-cart" id="modal-add-cart-btn"
+                                onclick="event.stopPropagation()">
+                            <i class="fas fa-cart-plus"></i> أضف للسلة
+                        </button>
+                    @else
+                        <a href="{{ route('customer.login') }}" class="btn-add-cart btn-add-cart-guest">
+                            <i class="fas fa-sign-in-alt"></i> سجل دخول للشراء
+                        </a>
+                    @endauth
+                @elseif ($__whatsappNumber)
+                    <a href="#" id="modal-whatsapp-btn" target="_blank" class="btn-add-cart" style="background:#25d366;">
+                        <i class="fab fa-whatsapp"></i> تواصل واتساب للطلب
                     </a>
-                @endauth
+                @endif
             </div>
         </div>
     </div>
@@ -761,6 +773,13 @@ function openModal(id, name, category, price, discount, image, description, isOO
             e.stopPropagation();
             addToCart(currentModalProductId, modalBtn);
         };
+    }
+
+    const modalWhatsappBtn = document.getElementById('modal-whatsapp-btn');
+    if (modalWhatsappBtn) {
+        const waNumber = @json(preg_replace('/\D/', '', $__whatsappNumber ?? ''));
+        const waText = encodeURIComponent('مرحباً، أنا مهتم بمنتج: ' + name);
+        modalWhatsappBtn.href = 'https://wa.me/' + waNumber + '?text=' + waText;
     }
 
     const img = document.getElementById('modal-img');

@@ -36,6 +36,21 @@ class Tenant extends Model
     ];
 
     /**
+     * إذا ما في ولا طريقة دفع مفعّلة، المتجر الإلكتروني بيرجع "تواصل واتساب"
+     * بدل "أضف للسلة" بكل مكان — شوف products/index و products/partials/results.
+     */
+    public function hasAnyPaymentGatewayEnabled(): bool
+    {
+        foreach (array_keys(self::PAYMENT_GATEWAYS) as $key) {
+            if ($this->{"{$key}_enabled"}) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * محادثة المجتمع بين المعارض (tenants) نفسها — كل معرض إله هوية محادثة واحدة
      * مشتركة بين كل موظفيه (شوف ChatController::currentMember). ننشئها فوراً لحظة
      * تسجيل المعرض حتى يظهر بقائمة "كل المعارض المسجلة" مباشرة، بدون ما ينتظر أول
