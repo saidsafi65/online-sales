@@ -11,10 +11,6 @@ class BrandingController extends Controller
 {
     public function edit()
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $tenant = app('currentTenant');
         $iconExists = Storage::disk('public')->exists('icons/'.$tenant->id.'/icon-192.png');
 
@@ -27,10 +23,6 @@ class BrandingController extends Controller
 
     public function update(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $validated = $request->validate([
             'brand_primary_color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
             'brand_accent_color' => 'nullable|regex:/^#[0-9a-fA-F]{6}$/',
@@ -80,10 +72,6 @@ class BrandingController extends Controller
 
     public function updateIcon(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $request->validate([
             'icon_source' => 'required|image|mimes:png,jpg,jpeg|max:2048',
         ]);

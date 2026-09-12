@@ -11,7 +11,7 @@ class CheckMobileShopUser
     {
         $user = auth()->user();
         
-        if ($user && $user->is_mobile_shop_only && $user->can_view_mobile_shop) {
+        if ($user && $user->is_mobile_shop_only && $user->canViewSection('mobile_shop')) {
             $routeName = $request->route()->getName();
             
             if (!str_starts_with($routeName, 'mobile-shop.') && $routeName !== 'logout') {

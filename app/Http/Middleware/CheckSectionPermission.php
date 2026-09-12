@@ -13,11 +13,11 @@ class CheckSectionPermission
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $section): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
         $user = $request->user();
-        if (!$user || !$user->canViewSection($section)) {
-            abort(403, 'ليس لديك صلاحية لعرض هذه الصفحة');
+        if (!$user || !$user->hasPermission($permission)) {
+            abort(403, 'ليس لديك صلاحية للقيام بهذا الإجراء');
         }
         return $next($request);
     }

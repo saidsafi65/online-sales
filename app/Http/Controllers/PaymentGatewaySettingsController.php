@@ -11,10 +11,6 @@ class PaymentGatewaySettingsController extends Controller
 
     public function edit()
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $tenant = app('currentTenant');
 
         return view('admin.payment-gateways', compact('tenant'));
@@ -22,10 +18,6 @@ class PaymentGatewaySettingsController extends Controller
 
     public function update(Request $request)
     {
-        if (! auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $validated = $request->validate([
             'jawwalpay_enabled' => 'nullable|boolean',
             'jawwalpay_merchant_id' => 'nullable|string|max:255',

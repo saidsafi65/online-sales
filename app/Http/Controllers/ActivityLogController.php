@@ -10,8 +10,6 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        abort_unless(auth()->user()->isAdmin(), 403);
-
         $query = ActivityLog::query()->orderByDesc('created_at');
 
         if ($request->filled('model_type')) {

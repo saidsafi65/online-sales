@@ -156,70 +156,89 @@ Route::get('/', function () {
 // All management routes (dashboard, sales, repairs, etc.) require authentication
 Route::middleware(['auth', 'ensure.active'])->group(function () {
 
-    // User and Branch Management (only for admins)
-    Route::middleware('section.permission:admin_only')->group(function () {
-        Route::resource('users', UserManagementController::class);
-        Route::resource('branches', BranchManagementController::class);
-
-          // 🔐 إدارة المستخدمين (فقط للمدير)
+    // 🔐 إدارة المستخدمين — عرض/إضافة/تعديل قابلين للتفويض، الحذف حصراً للمدير (مفروض بالكونترولر مش هون)
+    Route::middleware('section.permission:users.view')->group(function () {
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserManagementController::class, 'index'])->name('index');
-            Route::get('/create', [UserManagementController::class, 'create'])->name('create');
-            Route::post('/', [UserManagementController::class, 'store'])->name('store');
-            Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
-            Route::put('/{user}', [UserManagementController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
-        });
 
-        // 🏢 إدارة الفروع (فقط للمدير)
+            Route::middleware('section.permission:users.create')->group(function () {
+                Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+                Route::post('/', [UserManagementController::class, 'store'])->name('store');
+            });
+            Route::middleware('section.permission:users.edit')->group(function () {
+                Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
+                Route::put('/{user}', [UserManagementController::class, 'update'])->name('update');
+            });
+        });
+    });
+
+    // 🏢 إدارة الفروع
+    Route::middleware('section.permission:branches.view')->group(function () {
         Route::prefix('branches')->name('branches.')->group(function () {
             Route::get('/', [BranchManagementController::class, 'index'])->name('index');
-            Route::get('/create', [BranchManagementController::class, 'create'])->name('create');
-            Route::post('/', [BranchManagementController::class, 'store'])->name('store');
-            Route::get('/{branch}/edit', [BranchManagementController::class, 'edit'])->name('edit');
-            Route::put('/{branch}', [BranchManagementController::class, 'update'])->name('update');
-            Route::delete('/{branch}', [BranchManagementController::class, 'destroy'])->name('destroy');
-        });
 
-        // 🎨 هوية المعرض (شعار + ألوان) - فقط لمدير المعرض
-        Route::prefix('branding')->name('branding.')->group(function () {
-            Route::get('/', [BrandingController::class, 'edit'])->name('edit');
+            Route::middleware('section.permission:branches.create')->group(function () {
+                Route::get('/create', [BranchManagementController::class, 'create'])->name('create');
+                Route::post('/', [BranchManagementController::class, 'store'])->name('store');
+            });
+            Route::middleware('section.permission:branches.edit')->group(function () {
+                Route::get('/{branch}/edit', [BranchManagementController::class, 'edit'])->name('edit');
+                Route::put('/{branch}', [BranchManagementController::class, 'update'])->name('update');
+            });
+            Route::delete('/{branch}', [BranchManagementController::class, 'destroy'])
+                ->name('destroy')->middleware('section.permission:branches.delete');
+        });
+    });
+
+    // 🎨 هوية المعرض (شعار + ألوان)
+    Route::prefix('branding')->name('branding.')->middleware('section.permission:branding.view')->group(function () {
+        Route::get('/', [BrandingController::class, 'edit'])->name('edit');
+        Route::middleware('section.permission:branding.edit')->group(function () {
             Route::post('/', [BrandingController::class, 'update'])->name('update');
             Route::post('/icon', [BrandingController::class, 'updateIcon'])->name('icon');
         });
+    });
 
-        // 💳 طرق الدفع (تفعيل/تعطيل + بيانات API) - فقط لمدير المعرض
-        Route::prefix('payment-gateways')->name('payment-gateways.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'edit'])->name('edit');
-            Route::post('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'update'])->name('update');
-        });
+    // 💳 طرق الدفع (تفعيل/تعطيل + بيانات API)
+    Route::prefix('payment-gateways')->name('payment-gateways.')->middleware('section.permission:payment_gateways.view')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'edit'])->name('edit');
+        Route::post('/', [\App\Http\Controllers\PaymentGatewaySettingsController::class, 'update'])
+            ->name('update')->middleware('section.permission:payment_gateways.edit');
+    });
 
-        // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني — فقط لمدير المعرض
-        Route::prefix('coupons')->name('coupons.')->group(function () {
-            Route::get('/', [CouponController::class, 'index'])->name('index');
+    // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني
+    Route::prefix('coupons')->name('coupons.')->middleware('section.permission:coupons.view')->group(function () {
+        Route::get('/', [CouponController::class, 'index'])->name('index');
+
+        Route::middleware('section.permission:coupons.create')->group(function () {
             Route::get('/create', [CouponController::class, 'create'])->name('create');
             Route::post('/', [CouponController::class, 'store'])->name('store');
+        });
+        Route::middleware('section.permission:coupons.edit')->group(function () {
             Route::get('/{coupon}/edit', [CouponController::class, 'edit'])->name('edit');
             Route::put('/{coupon}', [CouponController::class, 'update'])->name('update');
             Route::post('/{coupon}/toggle', [CouponController::class, 'toggle'])->name('toggle');
-            Route::delete('/{coupon}', [CouponController::class, 'destroy'])->name('destroy');
         });
-
-        // الاشعارات
-        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-        Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
-        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+        Route::delete('/{coupon}', [CouponController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:coupons.delete');
     });
 
+    // الاشعارات — متاحة لأي موظف نشط، مش حكرة على المدير (كانت غلط جوا admin_only)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
     // إدارة الطلبات الإلكترونية (Online Orders) — صلاحية مستقلة، مش حكرة على الأدمن
-    Route::prefix('online-orders')->name('online-orders.')->middleware('section.permission:online_orders')->group(function () {
+    Route::prefix('online-orders')->name('online-orders.')->middleware('section.permission:online_orders.view')->group(function () {
         Route::get('/', [OnlineOrderController::class, 'index'])->name('index');
         Route::get('/{order}', [OnlineOrderController::class, 'show'])->name('show');
-        Route::patch('/{order}/status', [OnlineOrderController::class, 'updateStatus'])->name('update-status');
+        Route::patch('/{order}/status', [OnlineOrderController::class, 'updateStatus'])
+            ->name('update-status')->middleware('section.permission:online_orders.edit');
     });
 
     // 🗨️ مجتمع المعارض (محادثة عامة + محادثات خاصة بين المدراء والموظفين المصرّح لهم) — صلاحية مستقلة، مش حكرة على الأدمن
-    Route::prefix('community')->name('community.')->middleware('section.permission:community')->group(function () {
+    Route::prefix('community')->name('community.')->middleware('section.permission:community.view')->group(function () {
         Route::get('/', [ChatController::class, 'index'])->name('index');
         Route::get('/messages', [ChatController::class, 'publicMessages'])->name('messages');
         Route::post('/messages', [ChatController::class, 'sendPublicMessage'])->name('messages.send')->middleware('throttle:30,1');
@@ -422,187 +441,242 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         ]);
     })->name('dashboard');
 
-    // Mobile Shop (معرض الجوال)
+    // Mobile Shop (معرض الجوال) — mobile.shop.only يتحقق أصلاً من mobile_shop.view
     Route::middleware(['auth', 'mobile.shop.only'])->group(function () {
         Route::prefix('mobile-shop')->name('mobile-shop.')->group(function () {
             Route::get('/', [\App\Http\Controllers\MobileShopController::class, 'index'])->name('index');
 
-            // Maintenance
             Route::get('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceIndex'])->name('maintenance.index');
-            Route::get('/maintenance/create', [\App\Http\Controllers\MobileShopController::class, 'maintenanceCreate'])->name('maintenance.create');
-            Route::post('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceStore'])->name('maintenance.store');
-            Route::get('/maintenance/{maintenance}/edit', [\App\Http\Controllers\MobileShopController::class, 'maintenanceEdit'])->name('maintenance.edit');
-            Route::put('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceUpdate'])->name('maintenance.update');
-            Route::delete('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceDestroy'])->name('maintenance.destroy');
-
-            // Sales
             Route::get('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesIndex'])->name('sales.index');
-            Route::get('/sales/create', [\App\Http\Controllers\MobileShopController::class, 'salesCreate'])->name('sales.create');
-            Route::post('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesStore'])->name('sales.store');
-            Route::get('/sales/{sale}/edit', [\App\Http\Controllers\MobileShopController::class, 'salesEdit'])->name('sales.edit');
-            Route::put('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesUpdate'])->name('sales.update');
-            Route::delete('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesDestroy'])->name('sales.destroy');
-
-            // Inventory
             Route::get('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryIndex'])->name('inventory.index');
-            Route::get('/inventory/create', [\App\Http\Controllers\MobileShopController::class, 'inventoryCreate'])->name('inventory.create');
-            Route::post('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryStore'])->name('inventory.store');
-            Route::get('/inventory/{inventory}/edit', [\App\Http\Controllers\MobileShopController::class, 'inventoryEdit'])->name('inventory.edit');
-            Route::put('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryUpdate'])->name('inventory.update');
-            Route::delete('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryDestroy'])->name('inventory.destroy');
-
-            // Debts
             Route::get('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsIndex'])->name('debts.index');
-            Route::get('/debts/create', [\App\Http\Controllers\MobileShopController::class, 'debtsCreate'])->name('debts.create');
-            Route::post('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsStore'])->name('debts.store');
-            Route::get('/debts/{debt}/edit', [\App\Http\Controllers\MobileShopController::class, 'debtsEdit'])->name('debts.edit');
-            Route::put('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsUpdate'])->name('debts.update');
-            Route::delete('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsDestroy'])->name('debts.destroy');
-
-            // Expenses
             Route::get('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesIndex'])->name('expenses.index');
-            Route::get('/expenses/create', [\App\Http\Controllers\MobileShopController::class, 'expensesCreate'])->name('expenses.create');
-            Route::post('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesStore'])->name('expenses.store');
-            Route::get('/expenses/{expense}/edit', [\App\Http\Controllers\MobileShopController::class, 'expensesEdit'])->name('expenses.edit');
-            Route::put('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesUpdate'])->name('expenses.update');
-            Route::delete('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesDestroy'])->name('expenses.destroy');
+
+            Route::middleware('section.permission:mobile_shop.create')->group(function () {
+                Route::get('/maintenance/create', [\App\Http\Controllers\MobileShopController::class, 'maintenanceCreate'])->name('maintenance.create');
+                Route::post('/maintenance', [\App\Http\Controllers\MobileShopController::class, 'maintenanceStore'])->name('maintenance.store');
+                Route::get('/sales/create', [\App\Http\Controllers\MobileShopController::class, 'salesCreate'])->name('sales.create');
+                Route::post('/sales', [\App\Http\Controllers\MobileShopController::class, 'salesStore'])->name('sales.store');
+                Route::get('/inventory/create', [\App\Http\Controllers\MobileShopController::class, 'inventoryCreate'])->name('inventory.create');
+                Route::post('/inventory', [\App\Http\Controllers\MobileShopController::class, 'inventoryStore'])->name('inventory.store');
+                Route::get('/debts/create', [\App\Http\Controllers\MobileShopController::class, 'debtsCreate'])->name('debts.create');
+                Route::post('/debts', [\App\Http\Controllers\MobileShopController::class, 'debtsStore'])->name('debts.store');
+                Route::get('/expenses/create', [\App\Http\Controllers\MobileShopController::class, 'expensesCreate'])->name('expenses.create');
+                Route::post('/expenses', [\App\Http\Controllers\MobileShopController::class, 'expensesStore'])->name('expenses.store');
+            });
+
+            Route::middleware('section.permission:mobile_shop.edit')->group(function () {
+                Route::get('/maintenance/{maintenance}/edit', [\App\Http\Controllers\MobileShopController::class, 'maintenanceEdit'])->name('maintenance.edit');
+                Route::put('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceUpdate'])->name('maintenance.update');
+                Route::get('/sales/{sale}/edit', [\App\Http\Controllers\MobileShopController::class, 'salesEdit'])->name('sales.edit');
+                Route::put('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesUpdate'])->name('sales.update');
+                Route::get('/inventory/{inventory}/edit', [\App\Http\Controllers\MobileShopController::class, 'inventoryEdit'])->name('inventory.edit');
+                Route::put('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryUpdate'])->name('inventory.update');
+                Route::get('/debts/{debt}/edit', [\App\Http\Controllers\MobileShopController::class, 'debtsEdit'])->name('debts.edit');
+                Route::put('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsUpdate'])->name('debts.update');
+                Route::get('/expenses/{expense}/edit', [\App\Http\Controllers\MobileShopController::class, 'expensesEdit'])->name('expenses.edit');
+                Route::put('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesUpdate'])->name('expenses.update');
+            });
+
+            Route::middleware('section.permission:mobile_shop.delete')->group(function () {
+                Route::delete('/maintenance/{maintenance}', [\App\Http\Controllers\MobileShopController::class, 'maintenanceDestroy'])->name('maintenance.destroy');
+                Route::delete('/sales/{sale}', [\App\Http\Controllers\MobileShopController::class, 'salesDestroy'])->name('sales.destroy');
+                Route::delete('/inventory/{inventory}', [\App\Http\Controllers\MobileShopController::class, 'inventoryDestroy'])->name('inventory.destroy');
+                Route::delete('/debts/{debt}', [\App\Http\Controllers\MobileShopController::class, 'debtsDestroy'])->name('debts.destroy');
+                Route::delete('/expenses/{expense}', [\App\Http\Controllers\MobileShopController::class, 'expensesDestroy'])->name('expenses.destroy');
+            });
         });
     });
     // الصفحة الرئيسية (مبيعات اليوم)
-    Route::middleware('section.permission:sales')->group(function () {
+    Route::middleware('section.permission:sales.view')->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
 
-    // صفحة إضافة عملية بيع جديدة
-    Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
-    // حذف عملية بيع
-    Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
+    Route::middleware('section.permission:sales.create')->group(function () {
+        // لازم يبقى قبل /sales/{sale} تحت — وإلا Laravel بياخد "create" كـ {sale}
+        Route::get('/sales/create', [SalesController::class, 'create'])->name('sales.create');
+        Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
+    });
 
-    // تخزين عملية البيع
-    Route::post('/sales', [SalesController::class, 'store'])->name('sales.store');
-
-    // عرض تفاصيل عملية بيع
     Route::get('/sales/{sale}', [SalesController::class, 'show'])->name('sales.show');
 
-    // تعديل عملية بيع
-    Route::get('/sales/{sale}/edit', [SalesController::class, 'edit'])->name('sales.edit');
-    Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
+    Route::middleware('section.permission:sales.edit')->group(function () {
+        Route::get('/sales/{sale}/edit', [SalesController::class, 'edit'])->name('sales.edit');
+        Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
+    });
 
-    // إرجاع عملية بيع
-    Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
+    Route::middleware('section.permission:sales.delete')->group(function () {
+        Route::delete('/sales/{sale}', [SalesController::class, 'destroy']);
+        Route::post('/sales/{sale}/return', [SalesController::class, 'returnSale'])->name('sales.return');
+    });
     });
 
     // Repairs routes
-    Route::middleware('section.permission:repairs')->group(function () {
+    Route::middleware('section.permission:repairs.view')->group(function () {
     Route::get('/repairs', [RepairsController::class, 'index'])->name('repairs.index');
-    Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
-    Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
-    Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
-    Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
-    Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])->name('repairs.destroy');
-    Route::post('/repairs/{repair}/send-sms', [RepairsController::class, 'sendSms'])->name('repairs.send-sms');
+
+    Route::middleware('section.permission:repairs.create')->group(function () {
+        Route::get('/repairs/create', [RepairsController::class, 'create'])->name('repairs.create');
+        Route::post('/repairs', [RepairsController::class, 'store'])->name('repairs.store');
+    });
+    Route::middleware('section.permission:repairs.edit')->group(function () {
+        Route::get('/repairs/{repair}/edit', [RepairsController::class, 'edit'])->name('repairs.edit');
+        Route::put('/repairs/{repair}', [RepairsController::class, 'update'])->name('repairs.update');
+    });
+    Route::delete('/repairs/{repair}', [RepairsController::class, 'destroy'])
+        ->name('repairs.destroy')->middleware('section.permission:repairs.delete');
+    Route::post('/repairs/{repair}/send-sms', [RepairsController::class, 'sendSms'])
+        ->name('repairs.send-sms')->middleware('section.permission:repairs.send_sms');
     });
 
     // Purchases routes
-    Route::middleware('section.permission:purchases')->group(function () {
+    Route::middleware('section.permission:purchases.view')->group(function () {
     Route::get('/purchases', [PurchasesController::class, 'index'])->name('purchases.index');
-    Route::get('/purchases/create', [PurchasesController::class, 'create'])->name('purchases.create');
-    Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
-    Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
-    Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
-    Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
-    Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
-    Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
+
+    Route::middleware('section.permission:purchases.create')->group(function () {
+        Route::get('/purchases/create', [PurchasesController::class, 'create'])->name('purchases.create');
+        Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
+        Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
+        Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
+    });
+    Route::middleware('section.permission:purchases.edit')->group(function () {
+        Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
+        Route::put('/purchases/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
+    });
+    Route::delete('/purchases/{purchase}', [PurchasesController::class, 'destroy'])
+        ->name('purchases.destroy')->middleware('section.permission:purchases.delete');
     });
 
     // Catalog routes
-    Route::middleware('section.permission:catalog')->group(function () {
+    Route::middleware('section.permission:catalog.view')->group(function () {
     Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
-    Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
-    Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
-    Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])->name('catalog.destroy');
-    Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
-    Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
     Route::get('/catalog/generate-barcode', [CatalogController::class, 'generateBarcode'])->name('catalog.generate-barcode');
     Route::get('/catalog/{item}/barcode-label', [CatalogController::class, 'barcodeLabel'])->name('catalog.barcode-label');
+
+    Route::middleware('section.permission:catalog.create')->group(function () {
+        Route::get('/catalog/create', [CatalogController::class, 'create'])->name('catalog.create');
+        Route::post('/catalog', [CatalogController::class, 'store'])->name('catalog.store');
+    });
+    Route::middleware('section.permission:catalog.edit')->group(function () {
+        Route::get('/catalog/{item}/edit', [CatalogController::class, 'edit'])->name('catalog.edit');
+        Route::put('/catalog/{item}', [CatalogController::class, 'update'])->name('catalog.update');
+    });
+    Route::delete('/catalog/{item}', [CatalogController::class, 'destroy'])
+        ->name('catalog.destroy')->middleware('section.permission:catalog.delete');
     });
 
     // Maintenance Deposit routes
-    Route::middleware('section.permission:deposits')->group(function () {
+    Route::middleware('section.permission:deposits.view')->group(function () {
     Route::get('/deposits', [MaintenanceDepositController::class, 'index'])->name('deposits.index');
-    Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
-    Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
-    Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])->name('deposits.destroy');
-    Route::get('/deposits/{id}/edit', [MaintenanceDepositController::class, 'edit'])->name('deposits.edit');
-    Route::put('/deposits/{id}', [MaintenanceDepositController::class, 'update'])->name('deposits.update');
+
+    Route::middleware('section.permission:deposits.create')->group(function () {
+        Route::get('/deposits/create', [MaintenanceDepositController::class, 'create'])->name('deposits.create');
+        Route::post('/deposits', [MaintenanceDepositController::class, 'store'])->name('deposits.store');
+    });
+    Route::middleware('section.permission:deposits.edit')->group(function () {
+        Route::get('/deposits/{id}/edit', [MaintenanceDepositController::class, 'edit'])->name('deposits.edit');
+        Route::put('/deposits/{id}', [MaintenanceDepositController::class, 'update'])->name('deposits.update');
+    });
+    Route::delete('/deposits/{id}', [MaintenanceDepositController::class, 'destroy'])
+        ->name('deposits.destroy')->middleware('section.permission:deposits.delete');
     });
 
     // Reports routes
-    Route::middleware('section.permission:reports')->group(function () {
+    Route::middleware('section.permission:reports.view')->group(function () {
     Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-pdf', [ReportsController::class, 'exportPdf'])->name('reports.export-pdf');
     });
 
-    // سجل النشاطات — لمسؤول النظام بس (تتبع كل إضافة/تعديل/حذف بالنظام مين عملها ومتى)
-    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    // سجل النشاطات (تتبع كل إضافة/تعديل/حذف بالنظام مين عملها ومتى) — صلاحية مستقلة قابلة للتفويض
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])
+        ->name('activity-log.index')->middleware('section.permission:activity_log.view');
 
-    // سجل الرسائل المرسلة (SMS) — لمسؤول النظام بس
-    Route::get('/sms-logs', [\App\Http\Controllers\SmsLogController::class, 'index'])->name('sms-logs.index');
+    // سجل الرسائل المرسلة (SMS) — صلاحية مستقلة قابلة للتفويض
+    Route::get('/sms-logs', [\App\Http\Controllers\SmsLogController::class, 'index'])
+        ->name('sms-logs.index')->middleware('section.permission:sms_log.view');
 
     // Obligation routes
-    Route::middleware('section.permission:obligations')->group(function () {
+    Route::middleware('section.permission:obligations.view')->group(function () {
     Route::get('/obligations', [ObligationController::class, 'index'])->name('obligations.index');
-    Route::get('/obligations/create', [ObligationController::class, 'create'])->name('obligations.create');
-    Route::post('/obligations', [ObligationController::class, 'store'])->name('obligations.store');
-    Route::get('/obligations/{obligation}/edit', [ObligationController::class, 'edit'])->name('obligations.edit');
-    Route::put('/obligations/{obligation}', [ObligationController::class, 'update'])->name('obligations.update');
-    Route::delete('/obligations/{obligation}', [ObligationController::class, 'destroy'])->name('obligations.destroy');
+
+    Route::middleware('section.permission:obligations.create')->group(function () {
+        Route::get('/obligations/create', [ObligationController::class, 'create'])->name('obligations.create');
+        Route::post('/obligations', [ObligationController::class, 'store'])->name('obligations.store');
+    });
+    Route::middleware('section.permission:obligations.edit')->group(function () {
+        Route::get('/obligations/{obligation}/edit', [ObligationController::class, 'edit'])->name('obligations.edit');
+        Route::put('/obligations/{obligation}', [ObligationController::class, 'update'])->name('obligations.update');
+    });
+    Route::delete('/obligations/{obligation}', [ObligationController::class, 'destroy'])
+        ->name('obligations.destroy')->middleware('section.permission:obligations.delete');
     });
 
     // Invoices routes
-    Route::middleware('section.permission:invoices')->group(function () {
+    Route::middleware('section.permission:invoices.view')->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
-    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::middleware('section.permission:invoices.create')->group(function () {
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::post('/invoices/{invoice}/payments', [InvoicePaymentController::class, 'store'])->name('invoices.payments.store');
+    });
     Route::get('/invoices/{id}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/invoices/{id}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('/invoices/{id}/download-pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
-    Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::get('/invoices/{id}/receipt', [InvoiceController::class, 'receipt'])->name('invoices.receipt');
-    Route::post('/invoices/{invoice}/payments', [InvoicePaymentController::class, 'store'])->name('invoices.payments.store');
-    Route::delete('/invoices/{invoice}/payments/{payment}', [InvoicePaymentController::class, 'destroy'])->name('invoices.payments.destroy');
+    Route::middleware('section.permission:invoices.delete')->group(function () {
+        Route::delete('/invoices/{id}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+        Route::delete('/invoices/{invoice}/payments/{payment}', [InvoicePaymentController::class, 'destroy'])->name('invoices.payments.destroy');
+    });
+    });
 
-    // مطالبة مالية (Financial Claim) — نفس صلاحية الفواتير
+    // مطالبة مالية (Financial Claim) — صلاحية مستقلة عن الفواتير
+    Route::middleware('section.permission:financial_claims.view')->group(function () {
     Route::get('/financial-claims', [FinancialClaimController::class, 'index'])->name('financial-claims.index');
-    Route::get('/financial-claims/create', [FinancialClaimController::class, 'create'])->name('financial-claims.create');
-    Route::post('/financial-claims', [FinancialClaimController::class, 'store'])->name('financial-claims.store');
+    Route::middleware('section.permission:financial_claims.create')->group(function () {
+        Route::get('/financial-claims/create', [FinancialClaimController::class, 'create'])->name('financial-claims.create');
+        Route::post('/financial-claims', [FinancialClaimController::class, 'store'])->name('financial-claims.store');
+    });
     Route::get('/financial-claims/{id}/print', [FinancialClaimController::class, 'print'])->name('financial-claims.print');
     Route::get('/financial-claims/{id}/download-pdf', [FinancialClaimController::class, 'downloadPdf'])->name('financial-claims.download-pdf');
-    Route::delete('/financial-claims/{id}', [FinancialClaimController::class, 'destroy'])->name('financial-claims.destroy');
+    Route::delete('/financial-claims/{id}', [FinancialClaimController::class, 'destroy'])
+        ->name('financial-claims.destroy')->middleware('section.permission:financial_claims.delete');
+    });
 
-    // فاتورة بيع بالجملة بين المعارض/المحلات (B2B) — نفس صلاحية الفواتير
+    // فاتورة بيع بالجملة بين المعارض/المحلات (B2B) — صلاحية مستقلة عن الفواتير
+    Route::middleware('section.permission:wholesale_invoices.view')->group(function () {
     Route::get('/wholesale-invoices', [WholesaleInvoiceController::class, 'index'])->name('wholesale-invoices.index');
-    Route::get('/wholesale-invoices/create', [WholesaleInvoiceController::class, 'create'])->name('wholesale-invoices.create');
-    Route::post('/wholesale-invoices', [WholesaleInvoiceController::class, 'store'])->name('wholesale-invoices.store');
+    Route::middleware('section.permission:wholesale_invoices.create')->group(function () {
+        Route::get('/wholesale-invoices/create', [WholesaleInvoiceController::class, 'create'])->name('wholesale-invoices.create');
+        Route::post('/wholesale-invoices', [WholesaleInvoiceController::class, 'store'])->name('wholesale-invoices.store');
+        Route::post('/wholesale-invoices/{wholesaleInvoice}/payments', [WholesaleInvoicePaymentController::class, 'store'])->name('wholesale-invoices.payments.store');
+    });
     Route::get('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'show'])->name('wholesale-invoices.show');
     Route::get('/wholesale-invoices/{id}/print', [WholesaleInvoiceController::class, 'print'])->name('wholesale-invoices.print');
     Route::get('/wholesale-invoices/{id}/download-pdf', [WholesaleInvoiceController::class, 'downloadPdf'])->name('wholesale-invoices.download-pdf');
-    Route::delete('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'destroy'])->name('wholesale-invoices.destroy');
-    Route::post('/wholesale-invoices/{wholesaleInvoice}/payments', [WholesaleInvoicePaymentController::class, 'store'])->name('wholesale-invoices.payments.store');
-    Route::delete('/wholesale-invoices/{wholesaleInvoice}/payments/{payment}', [WholesaleInvoicePaymentController::class, 'destroy'])->name('wholesale-invoices.payments.destroy');
-    Route::post('/wholesale-invoices/{id}/send-reminder', [WholesaleInvoiceController::class, 'sendReminder'])->name('wholesale-invoices.send-reminder');
+    Route::middleware('section.permission:wholesale_invoices.delete')->group(function () {
+        Route::delete('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'destroy'])->name('wholesale-invoices.destroy');
+        Route::delete('/wholesale-invoices/{wholesaleInvoice}/payments/{payment}', [WholesaleInvoicePaymentController::class, 'destroy'])->name('wholesale-invoices.payments.destroy');
+    });
+    Route::post('/wholesale-invoices/{id}/send-reminder', [WholesaleInvoiceController::class, 'sendReminder'])
+        ->name('wholesale-invoices.send-reminder')->middleware('section.permission:wholesale_invoices.send_reminder');
+    });
 
-    // عرض سعر (Price Quote) بالعربي أو الإنجليزي — نفس صلاحية الفواتير
+    // عرض سعر (Price Quote) بالعربي أو الإنجليزي — صلاحية مستقلة عن الفواتير
+    Route::middleware('section.permission:price_quotes.view')->group(function () {
     Route::get('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'index'])->name('price-quotes.index');
-    Route::get('/price-quotes/create', [\App\Http\Controllers\PriceQuoteController::class, 'create'])->name('price-quotes.create');
-    Route::post('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'store'])->name('price-quotes.store');
+    Route::middleware('section.permission:price_quotes.create')->group(function () {
+        Route::get('/price-quotes/create', [\App\Http\Controllers\PriceQuoteController::class, 'create'])->name('price-quotes.create');
+        Route::post('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'store'])->name('price-quotes.store');
+    });
     Route::get('/price-quotes/{id}/print', [\App\Http\Controllers\PriceQuoteController::class, 'print'])->name('price-quotes.print');
     Route::get('/price-quotes/{id}/download-pdf', [\App\Http\Controllers\PriceQuoteController::class, 'downloadPdf'])->name('price-quotes.download-pdf');
-    Route::delete('/price-quotes/{id}', [\App\Http\Controllers\PriceQuoteController::class, 'destroy'])->name('price-quotes.destroy');
-    Route::post('/price-quotes/{id}/convert-to-invoice', [\App\Http\Controllers\PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice');
+    Route::delete('/price-quotes/{id}', [\App\Http\Controllers\PriceQuoteController::class, 'destroy'])
+        ->name('price-quotes.destroy')->middleware('section.permission:price_quotes.delete');
+    Route::post('/price-quotes/{id}/convert-to-invoice', [\App\Http\Controllers\PriceQuoteController::class, 'convertToInvoice'])
+        ->name('price-quotes.convert-to-invoice')->middleware('section.permission:price_quotes.convert_to_invoice');
     });
 
     // صفحة المتطابقات الرئيسية
-    Route::middleware('section.permission:compatibility')->group(function () {
+    Route::middleware('section.permission:compatibility.view')->group(function () {
     Route::get('/compatibility', [LaptopCompatibilityController::class, 'index'])
         ->name('compatibility.index');
 
@@ -617,127 +691,181 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/compatibility/manage', [LaptopCompatibilityController::class, 'manageLaptops'])
         ->name('compatibility.manage');
 
-    Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
-        ->name('compatibility.store-laptop');
+    Route::middleware('section.permission:compatibility.create')->group(function () {
+        Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
+            ->name('compatibility.store-laptop');
 
-    // ربط قطعة بجهاز
-    Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
-        ->name('compatibility.attach-part');
+        // ربط قطعة بجهاز
+        Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
+            ->name('compatibility.attach-part');
 
-    // إضافة/حذف توافق
-    Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
-        ->name('compatibility.add');
+        // إضافة/حذف توافق
+        Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
+            ->name('compatibility.add');
+    });
 
     Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
-        ->name('compatibility.remove');
+        ->name('compatibility.remove')->middleware('section.permission:compatibility.delete');
     });
 
     // Customer Orders routes
-    Route::prefix('customer-orders')->name('customer-orders.')->middleware('section.permission:customer_orders')->group(function () {
+    Route::prefix('customer-orders')->name('customer-orders.')->middleware('section.permission:customer_orders.view')->group(function () {
         Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
-        Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
-        Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
+        Route::middleware('section.permission:customer_orders.create')->group(function () {
+            Route::get('/create', [CustomerOrderController::class, 'create'])->name('create');
+            Route::post('/', [CustomerOrderController::class, 'store'])->name('store');
+        });
         Route::get('/{customerOrder}', [CustomerOrderController::class, 'show'])->name('show');
-        Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
-        Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
-        Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])->name('destroy');
+        Route::middleware('section.permission:customer_orders.edit')->group(function () {
+            Route::get('/{customerOrder}/edit', [CustomerOrderController::class, 'edit'])->name('edit');
+            Route::put('/{customerOrder}', [CustomerOrderController::class, 'update'])->name('update');
+        });
+        Route::delete('/{customerOrder}', [CustomerOrderController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:customer_orders.delete');
     });
 
     // Daily Handovers routes
-    Route::prefix('daily-handovers')->name('daily-handovers.')->middleware('section.permission:daily_handovers')->group(function () {
+    Route::prefix('daily-handovers')->name('daily-handovers.')->middleware('section.permission:daily_handovers.view')->group(function () {
         Route::get('/', [DailyHandoverController::class, 'index'])->name('index');
-        Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
-        Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
-        Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
-        Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
-        Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])->name('destroy');
         Route::get('/reports', [DailyHandoverController::class, 'reports'])->name('reports');
+        Route::middleware('section.permission:daily_handovers.create')->group(function () {
+            Route::get('/create', [DailyHandoverController::class, 'create'])->name('create');
+            Route::post('/', [DailyHandoverController::class, 'store'])->name('store');
+        });
+        Route::middleware('section.permission:daily_handovers.edit')->group(function () {
+            Route::get('/{dailyHandover}/edit', [DailyHandoverController::class, 'edit'])->name('edit');
+            Route::put('/{dailyHandover}', [DailyHandoverController::class, 'update'])->name('update');
+        });
+        Route::delete('/{dailyHandover}', [DailyHandoverController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:daily_handovers.delete');
     });
 
-    Route::prefix('returned-goods')->name('returned-goods.')->middleware('section.permission:returned_goods')->group(function () {
+    Route::prefix('returned-goods')->name('returned-goods.')->middleware('section.permission:returned_goods.view')->group(function () {
         Route::get('/', [ReturnedGoodController::class, 'index'])->name('index');
-        Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
-        Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
+        Route::middleware('section.permission:returned_goods.create')->group(function () {
+            Route::get('/create', [ReturnedGoodController::class, 'create'])->name('create');
+            Route::post('/', [ReturnedGoodController::class, 'store'])->name('store');
+        });
         Route::get('/{returnedGood}', [ReturnedGoodController::class, 'show'])->name('show');
-        Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
-        Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
-        Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])->name('destroy');
+        Route::middleware('section.permission:returned_goods.edit')->group(function () {
+            Route::get('/{returnedGood}/edit', [ReturnedGoodController::class, 'edit'])->name('edit');
+            Route::put('/{returnedGood}', [ReturnedGoodController::class, 'update'])->name('update');
+        });
+        Route::delete('/{returnedGood}', [ReturnedGoodController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:returned_goods.delete');
     });
 
-    Route::prefix('store')->middleware('section.permission:store')->group(function () {
+    Route::prefix('store')->middleware('section.permission:store.view')->group(function () {
         Route::get('/', [StoreController::class, 'index'])->name('store.index');
-        Route::get('/create', [StoreController::class, 'create'])->name('store.create');
-        Route::post('/', [StoreController::class, 'store'])->name('store.store');
-        Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
-        Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
-        Route::delete('/{id}', [StoreController::class, 'destroy'])->name('store.destroy');
+        Route::middleware('section.permission:store.create')->group(function () {
+            Route::get('/create', [StoreController::class, 'create'])->name('store.create');
+            Route::post('/', [StoreController::class, 'store'])->name('store.store');
+        });
+        Route::middleware('section.permission:store.edit')->group(function () {
+            Route::get('/{id}/edit', [StoreController::class, 'edit'])->name('store.edit');
+            Route::put('/{id}', [StoreController::class, 'update'])->name('store.update');
+        });
+        Route::delete('/{id}', [StoreController::class, 'destroy'])
+            ->name('store.destroy')->middleware('section.permission:store.delete');
     });
     // Debts routes
-    Route::prefix('debts')->name('debts.')->middleware('section.permission:debts')->group(function () {
+    Route::prefix('debts')->name('debts.')->middleware('section.permission:debts.view')->group(function () {
         Route::get('/', [DebtController::class, 'index'])->name('index');    // عرض جميع الديون
-        Route::get('/create', [DebtController::class, 'create'])->name('create');  // عرض نموذج إضافة دين جديد
-        Route::post('/', [DebtController::class, 'store'])->name('store');   // حفظ دين جديد
-        Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
-        Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
-        Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
+        Route::middleware('section.permission:debts.create')->group(function () {
+            Route::get('/create', [DebtController::class, 'create'])->name('create');  // عرض نموذج إضافة دين جديد
+            Route::post('/', [DebtController::class, 'store'])->name('store');   // حفظ دين جديد
+            Route::post('{debt}/payments', [\App\Http\Controllers\DebtPaymentController::class, 'store'])->name('payments.store');
+        });
+        Route::middleware('section.permission:debts.edit')->group(function () {
+            Route::get('{debt}/edit', [DebtController::class, 'edit'])->name('edit'); // عرض نموذج تعديل دين
+            Route::put('{debt}', [DebtController::class, 'update'])->name('update'); // تحديث دين
+        });
+        Route::middleware('section.permission:debts.delete')->group(function () {
+            Route::delete('{debt}', [DebtController::class, 'destroy'])->name('destroy'); // حذف دين
+            Route::delete('{debt}/payments/{payment}', [\App\Http\Controllers\DebtPaymentController::class, 'destroy'])->name('payments.destroy');
+        });
         Route::get('{debt}', [DebtController::class, 'show'])->name('show'); // تفاصيل الدين + الدفعات
-        Route::post('{debt}/payments', [\App\Http\Controllers\DebtPaymentController::class, 'store'])->name('payments.store');
-        Route::delete('{debt}/payments/{payment}', [\App\Http\Controllers\DebtPaymentController::class, 'destroy'])->name('payments.destroy');
-        Route::post('{debt}/send-reminder', [DebtController::class, 'sendReminder'])->name('send-reminder');
+        Route::post('{debt}/send-reminder', [DebtController::class, 'sendReminder'])
+            ->name('send-reminder')->middleware('section.permission:debts.send_reminder');
     });
 
     // Backup routes
-    Route::prefix('backup')->name('backup.')->middleware('section.permission:backup')->group(function () {
+    Route::prefix('backup')->name('backup.')->middleware('section.permission:backup.view')->group(function () {
         Route::get('/', [BackupController::class, 'index'])->name('index');
-        Route::get('/create', [BackupController::class, 'create'])->name('create');
-        Route::post('/store', [BackupController::class, 'store'])->name('store');
-        Route::get('/upload', [BackupController::class, 'upload'])->name('upload');
-        Route::post('/upload', [BackupController::class, 'storeUpload'])->name('storeUpload');
         Route::get('/download/{filename}', [BackupController::class, 'download'])->name('download');
-        Route::post('/restore/{filename}', [BackupController::class, 'restore'])->name('restore');
-        Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])->name('destroy');
+        Route::middleware('section.permission:backup.create')->group(function () {
+            Route::get('/create', [BackupController::class, 'create'])->name('create');
+            Route::post('/store', [BackupController::class, 'store'])->name('store');
+            Route::get('/upload', [BackupController::class, 'upload'])->name('upload');
+            Route::post('/upload', [BackupController::class, 'storeUpload'])->name('storeUpload');
+        });
+        Route::post('/restore/{filename}', [BackupController::class, 'restore'])
+            ->name('restore')->middleware('section.permission:backup.restore');
+        Route::delete('/destroy/{filename}', [BackupController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:backup.delete');
     });
 
     // Maintenance Parts routes
-    Route::prefix('maintenance_parts')->name('maintenance_parts.')->middleware('section.permission:maintenance_parts')->group(function () {
+    Route::prefix('maintenance_parts')->name('maintenance_parts.')->middleware('section.permission:maintenance_parts.view')->group(function () {
         Route::get('/', [MaintenancePartController::class, 'index'])->name('index');
-        Route::get('/create', [MaintenancePartController::class, 'create'])->name('create');
-        Route::post('/', [MaintenancePartController::class, 'store'])->name('store');
+        Route::middleware('section.permission:maintenance_parts.create')->group(function () {
+            Route::get('/create', [MaintenancePartController::class, 'create'])->name('create');
+            Route::post('/', [MaintenancePartController::class, 'store'])->name('store');
+        });
         Route::get('/{maintenancePart}', [MaintenancePartController::class, 'show'])->name('show');
-        Route::get('/{maintenancePart}/edit', [MaintenancePartController::class, 'edit'])->name('edit');
-        Route::put('/{maintenancePart}', [MaintenancePartController::class, 'update'])->name('update');
-        Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])->name('destroy');
+        Route::middleware('section.permission:maintenance_parts.edit')->group(function () {
+            Route::get('/{maintenancePart}/edit', [MaintenancePartController::class, 'edit'])->name('edit');
+            Route::put('/{maintenancePart}', [MaintenancePartController::class, 'update'])->name('update');
+        });
+        Route::delete('/{maintenancePart}', [MaintenancePartController::class, 'destroy'])
+            ->name('destroy')->middleware('section.permission:maintenance_parts.delete');
     });
 
-Route::middleware('section.permission:products')->group(function () {
+Route::middleware('section.permission:products.view')->group(function () {
 
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/admin', [ProductController::class, 'index_admin'])->name('index-admin'); // ← اسم ومسار مختلف
-    Route::get('/create', [ProductController::class, 'create'])->name('create');
-    Route::post('/', [ProductController::class, 'store'])->name('store');
+    Route::middleware('section.permission:products.create')->group(function () {
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/', [ProductController::class, 'store'])->name('store');
+    });
     Route::get('/{product}', [ProductController::class, 'show'])->name('show');
-    Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
-    Route::put('/{product}', [ProductController::class, 'update'])->name('update');
-    Route::delete('/{product}', [ProductController::class, 'destroy'])->name('destroy');
+    Route::middleware('section.permission:products.edit')->group(function () {
+        Route::get('/{product}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{product}', [ProductController::class, 'update'])->name('update');
+    });
+    Route::delete('/{product}', [ProductController::class, 'destroy'])
+        ->name('destroy')->middleware('section.permission:products.delete');
 });
 
-// ===== Laptops Management (Admin Only) =====
+// ===== Laptops Management =====
 Route::get('/laptops-admin', [SaleLaptopController::class, 'index_admin'])->name('laptops.index-admin');
-Route::get('/laptops/create', [SaleLaptopController::class, 'create'])->name('laptops.create');
-Route::post('/laptops', [SaleLaptopController::class, 'store'])->name('laptops.store');
-Route::get('/laptops/{laptop}/edit', [SaleLaptopController::class, 'edit'])->name('laptops.edit');
-Route::put('/laptops/{laptop}', [SaleLaptopController::class, 'update'])->name('laptops.update');
-Route::delete('/laptops/{laptop}', [SaleLaptopController::class, 'destroy'])->name('laptops.destroy');
-Route::delete('/laptop-images/{image}', [SaleLaptopController::class, 'destroyImage'])->name('laptops.images.destroy');
+Route::middleware('section.permission:products.create')->group(function () {
+    Route::get('/laptops/create', [SaleLaptopController::class, 'create'])->name('laptops.create');
+    Route::post('/laptops', [SaleLaptopController::class, 'store'])->name('laptops.store');
+});
+Route::middleware('section.permission:products.edit')->group(function () {
+    Route::get('/laptops/{laptop}/edit', [SaleLaptopController::class, 'edit'])->name('laptops.edit');
+    Route::put('/laptops/{laptop}', [SaleLaptopController::class, 'update'])->name('laptops.update');
+});
+Route::middleware('section.permission:products.delete')->group(function () {
+    Route::delete('/laptops/{laptop}', [SaleLaptopController::class, 'destroy'])->name('laptops.destroy');
+    Route::delete('/laptop-images/{image}', [SaleLaptopController::class, 'destroyImage'])->name('laptops.images.destroy');
+});
 
 
-// ===== Software Management (Admin Only) =====
+// ===== Software Management =====
 Route::get('/software-admin', [SoftwareController::class, 'index_admin'])->name('software.index-admin');
-Route::get('/software/create', [SoftwareController::class, 'create'])->name('software.create');
-Route::post('/software', [SoftwareController::class, 'store'])->name('software.store');
-Route::get('/software/{software}/edit', [SoftwareController::class, 'edit'])->name('software.edit');
-Route::put('/software/{software}', [SoftwareController::class, 'update'])->name('software.update');
-Route::delete('/software/{software}', [SoftwareController::class, 'destroy'])->name('software.destroy');
+Route::middleware('section.permission:products.create')->group(function () {
+    Route::get('/software/create', [SoftwareController::class, 'create'])->name('software.create');
+    Route::post('/software', [SoftwareController::class, 'store'])->name('software.store');
+});
+Route::middleware('section.permission:products.edit')->group(function () {
+    Route::get('/software/{software}/edit', [SoftwareController::class, 'edit'])->name('software.edit');
+    Route::put('/software/{software}', [SoftwareController::class, 'update'])->name('software.update');
+});
+Route::delete('/software/{software}', [SoftwareController::class, 'destroy'])
+    ->name('software.destroy')->middleware('section.permission:products.delete');
 
 }); // نهاية حماية قسم المنتجات/اللابتوبات/البرامج
 

@@ -88,19 +88,11 @@ class ObligationController extends Controller
 
     public function edit(Obligation $obligation)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         return view('obligations.edit', compact('obligation'));
     }
 
     public function update(Request $request, Obligation $obligation)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $request->validate([
             'expense_type' => 'required|string',
             'payment_type' => 'required|string',
@@ -129,10 +121,6 @@ class ObligationController extends Controller
 
     public function destroy(Obligation $obligation)
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
-
         $obligation->delete();
 
         return redirect()->route('obligations.index')->with('success', 'تم حذف الالتزام بنجاح');

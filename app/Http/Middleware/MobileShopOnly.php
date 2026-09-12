@@ -18,7 +18,7 @@ class MobileShopOnly
         }
 
         // إذا كان هناك شرط معين للسماح بالوصول (مثلاً دور معين)
-        if (!auth()->user()->can_view_mobile_shop) {
+        if (!auth()->user()->canViewSection('mobile_shop')) {
             abort(403, 'غير مصرح لك بالوصول لمعرض الجوال');
         }
 

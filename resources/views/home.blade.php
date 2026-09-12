@@ -11,7 +11,7 @@
 
     @php
         $__sections = ['sales','repairs','purchases','catalog','deposits','reports','obligations','invoices','compatibility','customer_orders','online_orders','daily_handovers','returned_goods','store','debts','backup','maintenance_parts','products'];
-        $__hasAnySection = auth()->user()->isAdmin() || auth()->user()->can_view_mobile_shop || collect($__sections)->contains(fn ($s) => auth()->user()->canViewSection($s));
+        $__hasAnySection = auth()->user()->isAdmin() || auth()->user()->canViewSection('mobile_shop') || collect($__sections)->contains(fn ($s) => auth()->user()->canViewSection($s));
     @endphp
 
     @unless ($__hasAnySection)
@@ -84,7 +84,7 @@
         @endif
 
         <!-- معرض الجوال -->
-        @if (auth()->user()->isAdmin() || auth()->user()->can_view_mobile_shop)
+        @if (auth()->user()->isAdmin() || auth()->user()->canViewSection('mobile_shop'))
         <div class="col-12 col-sm-6 col-lg-4">
             <a href="{{ route('mobile-shop.index') }}" class="text-decoration-none">
                 <div class="service-card card-primary">

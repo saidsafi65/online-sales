@@ -12,7 +12,7 @@ class RestrictMobileShopUser
     {
         $user = auth()->user();
         
-        if ($user && $user->is_mobile_shop_only && $user->can_view_mobile_shop) {
+        if ($user && $user->is_mobile_shop_only && $user->canViewSection('mobile_shop')) {
             return redirect()->route('mobile-shop.index')
                 ->with('error', 'ليس لديك صلاحية الوصول لهذه الصفحة');
         }

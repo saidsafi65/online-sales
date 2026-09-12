@@ -42,6 +42,7 @@
                     @error('branch_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
+                @if($isActorAdmin)
                 <div class="mb-3">
                     <label class="form-label" style="font-weight: 600; margin-bottom: 0.75rem;">الدور / الصلاحيات</label>
                     <select name="role" class="form-control @error('role') is-invalid @enderror" style="border-radius: 10px; border: 2px solid #e2e8f0; padding: 0.875rem;" required>
@@ -66,25 +67,14 @@
                     </div>
                 </div>
 
-                <h3 style="font-size: 1.25rem; font-weight: 800; color: #334155; margin-bottom: 1rem;">صلاحيات الصفحة الرئيسية</h3>
-                <div class="row">
-                    @php($perms = [
-                        'sales' => 'المبيعات','repairs' => 'الصيانة','purchases' => 'المشتريات','catalog' => 'كتالوج المنتجات',
-                        'deposits' => 'أمانات الصيانة','reports' => 'التقارير','obligations' => 'التزامات المحل الشهرية','invoices' => 'الفواتير',
-                        'compatibility' => 'التوافقات','customer_orders' => 'طلبات الزبائن','daily_handovers' => 'التسليمات اليومية','returned_goods' => 'البضائع المرجعة',
-                        'store' => 'المخزن الخارجي','debts' => 'الديون','backup' => 'النسخ الاحتياطي','maintenance_parts' => 'قطع الصيانة','products' => 'إدارة المنتجات',
-                        'online_orders' => 'الطلبات الإلكترونية','community' => 'مجتمع المعارض',
-                    ])
-                    @foreach($perms as $key => $label)
-                        @php($field = 'can_view_' . $key)
-                        <div class="col-12 col-sm-6 col-lg-4 mb-2">
-                            <label style="display:flex; gap:.5rem; align-items:center;">
-                                <input type="checkbox" name="{{ $field }}" value="1" {{ old($field) ? 'checked' : '' }}>
-                                <span>{{ $label }}</span>
-                            </label>
-                        </div>
-                    @endforeach
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: #334155; margin-bottom: 1rem;">الصلاحيات التفصيلية</h3>
+                @include('users._permissions-matrix')
+                @else
+                <hr style="margin: 2rem 0;">
+                <div class="alert alert-info" style="border-radius: 10px;">
+                    سيُنشأ الموظف بدون أي صلاحيات مبدئياً — لازم يرجع مدير النظام يحدد صلاحياته من شاشة التعديل.
                 </div>
+                @endif
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="submit" class="btn btn-primary" style="flex: 1; padding: 0.875rem; border-radius: 10px; font-weight: 600; font-size: 1rem;">

@@ -929,15 +929,21 @@
                             <div id="notifContent">
                                 <div class="notif-empty">جاري التحميل...</div>
                             </div>
-                            @if ($isAdmin)
+                            @if (auth()->user()->canViewSection('activity_log') || auth()->user()->canViewSection('sms_log'))
                                 <div class="notif-dropdown-footer">
-                                    <a href="{{ route('activity-log.index') }}" class="notif-view-all">
-                                        <i class="fas fa-list-ul me-1"></i>عرض جميع السجلات
-                                    </a>
-                                    <span class="text-muted">·</span>
-                                    <a href="{{ route('sms-logs.index') }}" class="notif-view-all">
-                                        <i class="fas fa-comment-sms me-1"></i>سجل الرسائل المرسلة
-                                    </a>
+                                    @if (auth()->user()->canViewSection('activity_log'))
+                                        <a href="{{ route('activity-log.index') }}" class="notif-view-all">
+                                            <i class="fas fa-list-ul me-1"></i>عرض جميع السجلات
+                                        </a>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('activity_log') && auth()->user()->canViewSection('sms_log'))
+                                        <span class="text-muted">·</span>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('sms_log'))
+                                        <a href="{{ route('sms-logs.index') }}" class="notif-view-all">
+                                            <i class="fas fa-comment-sms me-1"></i>سجل الرسائل المرسلة
+                                        </a>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -988,7 +994,7 @@
                                         <span>الإعدادات</span>
                                     </a>
                                 </li> --}}
-                                    @if (auth()->user()->isAdmin())
+                                    @if (auth()->user()->canViewSection('users'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('users.index') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">
@@ -996,6 +1002,8 @@
                                                 إدارة المستخدمين
                                             </a>
                                         </li>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('branches'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('branches.index') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">
@@ -1003,6 +1011,8 @@
                                                 إدارة الفروع
                                             </a>
                                         </li>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('branding'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('branding.edit') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">
@@ -1010,6 +1020,8 @@
                                                 هوية المعرض
                                             </a>
                                         </li>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('payment_gateways'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('payment-gateways.edit') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">
@@ -1017,6 +1029,8 @@
                                                 طرق الدفع
                                             </a>
                                         </li>
+                                    @endif
+                                    @if (auth()->user()->canViewSection('coupons'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('coupons.index') }}"
                                                 style="color: rgb(0 0 0 / 90%) !important;">

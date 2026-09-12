@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\ChatMember;
 use App\Models\User;
+use App\Support\PermissionRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -12,11 +13,10 @@ class UserManagementController extends Controller {
 
     // عرض جميع المستخدمين
     public function index(Request $request) {
-        // ✅ ضع الفحص هنا مباشرة
-        if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->canViewSection('users')) {
             abort(403, 'غير مصرح لك بالوصول لهذه الصفحة');
         }
-        
+
         $query = User::query();
 
         // البحث
@@ -51,29 +51,39 @@ class UserManagementController extends Controller {
 
     // عرض صفحة إضافة مستخدم جديد
     public function create() {
-        if (!auth()->user()->isAdmin()) {
+        if (!auth()->user()->hasPermission('users.create')) {
             abort(403);
         }
 
         $branches = Branch::all();
         $roles = ['admin' => 'مدير النظام', 'manager' => 'مدير الفرع', 'employee' => 'موظف'];
+        $registry = PermissionRegistry::all();
+        $isActorAdmin = auth()->user()->isAdmin();
 
-        return view('users.create', compact('branches', 'roles'));
+        return view('users.create', compact('branches', 'roles', 'registry', 'isActorAdmin'));
     }
 
     // حفظ المستخدم الجديد
     public function store(Request $request) {
-        if (!auth()->user()->isAdmin()) {
+        $actor = auth()->user();
+        if (!$actor->hasPermission('users.create')) {
             abort(403);
         }
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => ['required', Password::min(8)],
             'branch_id' => 'required|exists:branches,id',
-            'role' => 'required|in:admin,manager,employee',
-        ], [
+        ];
+        // الدور والصلاحيات وتصنيف "معرض جوال فقط" ما بينحددوا إلا من قبل المدير
+        if ($actor->isAdmin()) {
+            $rules['role'] = 'required|in:admin,manager,employee';
+            $rules['permissions'] = 'nullable|array';
+            $rules['permissions.*'] = 'string';
+        }
+
+        $validated = $request->validate($rules, [
             'name.required' => 'الاسم مطلوب',
             'email.required' => 'البريد الإلكتروني مطلوب',
             'email.unique' => 'هذا البريد مسجل مسبقاً',
@@ -82,37 +92,30 @@ class UserManagementController extends Controller {
             'role.required' => 'يجب اختيار دور',
         ]);
 
-        $isMobileOnly = $request->boolean('is_mobile_shop_only');
+        if ($actor->isAdmin()) {
+            $isMobileOnly = $request->boolean('is_mobile_shop_only');
+            $role = $validated['role'];
+            $permissions = $isMobileOnly
+                ? PermissionRegistry::fullGrantFor('mobile_shop')
+                : collect($validated['permissions'] ?? [])
+                    ->filter(fn ($key) => PermissionRegistry::isValidKey($key))
+                    ->values()->all();
+        } else {
+            // موظف غير مدير يملك صلاحية "users.create" فقط: ينشئ موظف عادي بلا صلاحيات،
+            // والمدير هو اللي بيرجع يحدد صلاحياته لاحقاً من شاشة التعديل
+            $isMobileOnly = false;
+            $role = 'employee';
+            $permissions = [];
+        }
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'branch_id' => $validated['branch_id'],
-            'role' => $validated['role'],
+            'role' => $role,
             'status' => 'active',
-            // إن كان معرض فقط: فعّل تصريح معرض الجوال فقط وألغِ بقية الصلاحيات
-            'can_view_sales' => $isMobileOnly ? false : $request->boolean('can_view_sales'),
-            'can_view_repairs' => $isMobileOnly ? false : $request->boolean('can_view_repairs'),
-            'can_view_purchases' => $isMobileOnly ? false : $request->boolean('can_view_purchases'),
-            'can_view_catalog' => $isMobileOnly ? false : $request->boolean('can_view_catalog'),
-            'can_view_deposits' => $isMobileOnly ? false : $request->boolean('can_view_deposits'),
-            'can_view_reports' => $isMobileOnly ? false : $request->boolean('can_view_reports'),
-            'can_view_obligations' => $isMobileOnly ? false : $request->boolean('can_view_obligations'),
-            'can_view_invoices' => $isMobileOnly ? false : $request->boolean('can_view_invoices'),
-            'can_view_compatibility' => $isMobileOnly ? false : $request->boolean('can_view_compatibility'),
-            'can_view_customer_orders' => $isMobileOnly ? false : $request->boolean('can_view_customer_orders'),
-            'can_view_daily_handovers' => $isMobileOnly ? false : $request->boolean('can_view_daily_handovers'),
-            'can_view_returned_goods' => $isMobileOnly ? false : $request->boolean('can_view_returned_goods'),
-            'can_view_store' => $isMobileOnly ? false : $request->boolean('can_view_store'),
-            'can_view_debts' => $isMobileOnly ? false : $request->boolean('can_view_debts'),
-            'can_view_backup' => $isMobileOnly ? false : $request->boolean('can_view_backup'),
-            'can_view_maintenance_parts' => $isMobileOnly ? false : $request->boolean('can_view_maintenance_parts'),
-            'can_view_products' => $isMobileOnly ? false : $request->boolean('can_view_products'),
-            'can_view_online_orders' => $isMobileOnly ? false : $request->boolean('can_view_online_orders'),
-            'can_view_community' => $isMobileOnly ? false : $request->boolean('can_view_community'),
-            // حقول معرض الجوال
-            'can_view_mobile_shop' => $isMobileOnly ? true : ($request->boolean('can_view_mobile_shop') ?? false),
+            'permissions' => $permissions,
             'is_mobile_shop_only' => $isMobileOnly,
         ]);
 
@@ -121,62 +124,69 @@ class UserManagementController extends Controller {
 
     // عرض صفحة تعديل المستخدم
     public function edit(User $user) {
-        if (!auth()->user()->isAdmin()) {
+        $actor = auth()->user();
+        if (!$actor->hasPermission('users.edit')) {
             abort(403);
+        }
+        if (!$actor->isAdmin() && $user->isAdmin()) {
+            abort(403, 'لا يمكنك تعديل حساب مسؤول النظام');
         }
 
         $branches = Branch::all();
         $roles = ['admin' => 'مدير النظام', 'manager' => 'مدير الفرع', 'employee' => 'موظف'];
         $statuses = ['active' => 'نشط', 'inactive' => 'غير نشط'];
+        $registry = PermissionRegistry::all();
+        $isActorAdmin = $actor->isAdmin();
 
-        return view('users.edit', compact('user', 'branches', 'roles', 'statuses'));
+        return view('users.edit', compact('user', 'branches', 'roles', 'statuses', 'registry', 'isActorAdmin'));
     }
 
     // تحديث المستخدم
     public function update(Request $request, User $user) {
-        if (!auth()->user()->isAdmin()) {
+        $actor = auth()->user();
+        if (!$actor->hasPermission('users.edit')) {
             abort(403);
         }
+        if (!$actor->isAdmin() && $user->isAdmin()) {
+            abort(403, 'لا يمكنك تعديل حساب مسؤول النظام');
+        }
 
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => "required|email|unique:users,email,{$user->id}",
             'branch_id' => 'required|exists:branches,id',
-            'role' => 'required|in:admin,manager,employee',
             'status' => 'required|in:active,inactive',
             'password' => 'nullable|min:8|confirmed',
-        ]);
+        ];
+        if ($actor->isAdmin()) {
+            $rules['role'] = 'required|in:admin,manager,employee';
+            $rules['permissions'] = 'nullable|array';
+            $rules['permissions.*'] = 'string';
+        }
 
-        $isMobileOnly = $request->boolean('is_mobile_shop_only');
+        $validated = $request->validate($rules);
 
-        $user->update([
+        $update = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'branch_id' => $validated['branch_id'],
-            'role' => $validated['role'],
             'status' => $validated['status'],
-            'can_view_sales' => $isMobileOnly ? false : $request->boolean('can_view_sales'),
-            'can_view_repairs' => $isMobileOnly ? false : $request->boolean('can_view_repairs'),
-            'can_view_purchases' => $isMobileOnly ? false : $request->boolean('can_view_purchases'),
-            'can_view_catalog' => $isMobileOnly ? false : $request->boolean('can_view_catalog'),
-            'can_view_deposits' => $isMobileOnly ? false : $request->boolean('can_view_deposits'),
-            'can_view_reports' => $isMobileOnly ? false : $request->boolean('can_view_reports'),
-            'can_view_obligations' => $isMobileOnly ? false : $request->boolean('can_view_obligations'),
-            'can_view_invoices' => $isMobileOnly ? false : $request->boolean('can_view_invoices'),
-            'can_view_compatibility' => $isMobileOnly ? false : $request->boolean('can_view_compatibility'),
-            'can_view_customer_orders' => $isMobileOnly ? false : $request->boolean('can_view_customer_orders'),
-            'can_view_daily_handovers' => $isMobileOnly ? false : $request->boolean('can_view_daily_handovers'),
-            'can_view_returned_goods' => $isMobileOnly ? false : $request->boolean('can_view_returned_goods'),
-            'can_view_store' => $isMobileOnly ? false : $request->boolean('can_view_store'),
-            'can_view_debts' => $isMobileOnly ? false : $request->boolean('can_view_debts'),
-            'can_view_backup' => $isMobileOnly ? false : $request->boolean('can_view_backup'),
-            'can_view_maintenance_parts' => $isMobileOnly ? false : $request->boolean('can_view_maintenance_parts'),
-            'can_view_products' => $isMobileOnly ? false : $request->boolean('can_view_products'),
-            'can_view_online_orders' => $isMobileOnly ? false : $request->boolean('can_view_online_orders'),
-            'can_view_community' => $isMobileOnly ? false : $request->boolean('can_view_community'),
-            'can_view_mobile_shop' => $isMobileOnly ? true : ($request->boolean('can_view_mobile_shop') ?? false),
-            'is_mobile_shop_only' => $isMobileOnly,
-        ]);
+        ];
+
+        // الدور والصلاحيات وتصنيف "معرض جوال فقط" ما بيتغيروا إلا من قبل المدير،
+        // بغض النظر عمّا تم إرساله بالطلب — تبقى كما هي لغير المدير
+        if ($actor->isAdmin()) {
+            $isMobileOnly = $request->boolean('is_mobile_shop_only');
+            $update['role'] = $validated['role'];
+            $update['is_mobile_shop_only'] = $isMobileOnly;
+            $update['permissions'] = $isMobileOnly
+                ? PermissionRegistry::fullGrantFor('mobile_shop')
+                : collect($validated['permissions'] ?? [])
+                    ->filter(fn ($key) => PermissionRegistry::isValidKey($key))
+                    ->values()->all();
+        }
+
+        $user->update($update);
 
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($validated['password'])]);
@@ -185,7 +195,7 @@ class UserManagementController extends Controller {
         return redirect()->route('users.index')->with('success', 'تم تحديث المستخدم بنجاح');
     }
 
-    // حذف المستخدم
+    // حذف المستخدم — حصراً للمدير، مش صلاحية قابلة للتفويض
     public function destroy(User $user) {
         if (!auth()->user()->isAdmin()) {
             abort(403);
