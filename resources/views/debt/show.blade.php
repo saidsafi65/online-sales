@@ -4,9 +4,19 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>تفاصيل الدين #{{ $debt->id }}</h2>
-        <a href="{{ route('debts.index') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-right me-1"></i> رجوع للقائمة
-        </a>
+        <div class="d-flex gap-2">
+            @if ($debt->type === 'دائن' && $debt->remaining_amount > 0)
+                <form action="{{ route('debts.send-reminder', $debt) }}" method="POST" onsubmit="return confirm('إرسال تذكير SMS بالمبلغ المتبقي؟')">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-comment-sms me-1"></i> تذكير SMS
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('debts.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right me-1"></i> رجوع للقائمة
+            </a>
+        </div>
     </div>
 
     @if (session('success'))

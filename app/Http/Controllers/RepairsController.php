@@ -251,6 +251,14 @@ class RepairsController extends Controller
                 }
             }
 
+            if ($justBecameReady && $repair->phone) {
+                try {
+                    app(\App\Services\SmsService::class)->send($repair->phone, $repair->ready_sms_text, 'repair_ready');
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Repair ready SMS failed', ['repair_id' => $repair->id, 'error' => $e->getMessage()]);
+                }
+            }
+
             return redirect()->route('repairs.index')->with('success', 'تم تحديث بيانات الصيانة بنجاح');
         } catch (\Exception $e) {
             DB::rollBack();

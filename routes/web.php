@@ -583,6 +583,7 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::delete('/wholesale-invoices/{id}', [WholesaleInvoiceController::class, 'destroy'])->name('wholesale-invoices.destroy');
     Route::post('/wholesale-invoices/{wholesaleInvoice}/payments', [WholesaleInvoicePaymentController::class, 'store'])->name('wholesale-invoices.payments.store');
     Route::delete('/wholesale-invoices/{wholesaleInvoice}/payments/{payment}', [WholesaleInvoicePaymentController::class, 'destroy'])->name('wholesale-invoices.payments.destroy');
+    Route::post('/wholesale-invoices/{id}/send-reminder', [WholesaleInvoiceController::class, 'sendReminder'])->name('wholesale-invoices.send-reminder');
 
     // عرض سعر (Price Quote) بالعربي أو الإنجليزي — نفس صلاحية الفواتير
     Route::get('/price-quotes', [\App\Http\Controllers\PriceQuoteController::class, 'index'])->name('price-quotes.index');
@@ -591,6 +592,7 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::get('/price-quotes/{id}/print', [\App\Http\Controllers\PriceQuoteController::class, 'print'])->name('price-quotes.print');
     Route::get('/price-quotes/{id}/download-pdf', [\App\Http\Controllers\PriceQuoteController::class, 'downloadPdf'])->name('price-quotes.download-pdf');
     Route::delete('/price-quotes/{id}', [\App\Http\Controllers\PriceQuoteController::class, 'destroy'])->name('price-quotes.destroy');
+    Route::post('/price-quotes/{id}/convert-to-invoice', [\App\Http\Controllers\PriceQuoteController::class, 'convertToInvoice'])->name('price-quotes.convert-to-invoice');
     });
 
     // صفحة المتطابقات الرئيسية
@@ -675,6 +677,7 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         Route::get('{debt}', [DebtController::class, 'show'])->name('show'); // تفاصيل الدين + الدفعات
         Route::post('{debt}/payments', [\App\Http\Controllers\DebtPaymentController::class, 'store'])->name('payments.store');
         Route::delete('{debt}/payments/{payment}', [\App\Http\Controllers\DebtPaymentController::class, 'destroy'])->name('payments.destroy');
+        Route::post('{debt}/send-reminder', [DebtController::class, 'sendReminder'])->name('send-reminder');
     });
 
     // Backup routes

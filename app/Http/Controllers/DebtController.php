@@ -155,4 +155,40 @@ class DebtController extends Controller
         $debt->delete();
         return redirect()->route('debts.index')->with('success', 'تم حذف السجل بنجاح');
     }
+
+    /**
+     * تذكير SMS بمبلغ الدين المتبقي — بس لنوع "دائن" (هو المدين لنا)، منطقياً
+     * ما في داعي نذكّر حدا إننا نحن مدينين له.
+     */
+    public function sendReminder(Debt $debt)
+    {
+        $debt->load('payments');
+
+        abort_if($debt->type !== 'دائن', 403, 'التذكير متاح بس للديون اللي مستحقة لنا (دائن).');
+
+        if ($debt->remaining_amount <= 0) {
+            return back()->with('error', 'هذا الدين مسدد بالكامل، ما في داعي لتذكير');
+        }
+
+        $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
+        $remainingText = $debt->remaining_amount == floor($debt->remaining_amount)
+            ? number_format($debt->remaining_amount, 0)
+            : number_format($debt->remaining_amount, 2);
+
+        $message = \App\Support\SmsTextBuilder::build(
+            fn (string $store) => "تذكير من {$store}: عليك {$remainingText}₪. يرجى التسديد.",
+            $storeName
+        );
+
+        try {
+            $sent = app(\App\Services\SmsService::class)->send($debt->phone, $message, 'debt_reminder');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Debt reminder SMS failed', ['debt_id' => $debt->id, 'error' => $e->getMessage()]);
+            $sent = false;
+        }
+
+        return $sent
+            ? back()->with('success', 'تم إرسال التذكير (أو تسجيله بالوضع التجريبي)')
+            : back()->with('error', 'تعذر إرسال التذكير');
+    }
 }

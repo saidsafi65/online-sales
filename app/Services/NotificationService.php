@@ -51,6 +51,30 @@ class NotificationService
         }
     }
 
+    /**
+     * تنبيه SMS لصاحب المعرض (رقم هاتف المعرض المسجّل بهوية المعرض) — بينبعت
+     * بنفس شروط بث push بالضبط (تنبيه جديد أو تفاقم للأسوأ)، حتى ما يصير سبام.
+     */
+    private static function smsStockAlert(string $body): void
+    {
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $phone = $tenant->contact_phone ?? null;
+
+        if (! $phone) {
+            return;
+        }
+
+        try {
+            $message = \App\Support\SmsTextBuilder::build(
+                fn (string $b) => "تنبيه مخزون: {$b}",
+                $body
+            );
+            app(\App\Services\SmsService::class)->send($phone, $message, 'stock_alert');
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
     public static function syncStock(Product|SaleLaptop $model): void
     {
         $isOut = $model->is_out_of_stock || $model->quantity <= 0;
@@ -89,6 +113,7 @@ class NotificationService
                 'read_at'        => null,
             ]);
             self::pushAlert($notification, 'products');
+            self::smsStockAlert($body);
             return;
         }
 
@@ -103,6 +128,7 @@ class NotificationService
 
         if ($becameWorse) {
             self::pushAlert($existing, 'products');
+            self::smsStockAlert($body);
         }
     }
 
@@ -143,6 +169,7 @@ class NotificationService
                 'read_at'        => null,
             ]);
             self::pushAlert($notification, 'products');
+            self::smsStockAlert($body);
             return;
         }
 
@@ -157,6 +184,7 @@ class NotificationService
 
         if ($becameWorse) {
             self::pushAlert($existing, 'products');
+            self::smsStockAlert($body);
         }
     }
 

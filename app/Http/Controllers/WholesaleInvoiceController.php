@@ -179,4 +179,44 @@ class WholesaleInvoiceController extends Controller
         return redirect()->route('wholesale-invoices.index')
             ->with('success', 'تم حذف فاتورة الجملة بنجاح');
     }
+
+    /**
+     * تذكير SMS بالمبلغ المتبقي على فاتورة جملة آجلة/مختلطة.
+     */
+    public function sendReminder($id)
+    {
+        $invoice = WholesaleInvoice::with('payments')->findOrFail($id);
+
+        if (! $invoice->buyer_phone) {
+            return back()->with('error', 'ما في رقم جوال مسجّل لهاد المحل — عدّل الفاتورة وضيفه أول');
+        }
+
+        if ($invoice->remaining_amount <= 0) {
+            return back()->with('error', 'هاي الفاتورة مسددة بالكامل، ما في داعي لتذكير');
+        }
+
+        $storeName = app()->bound('currentTenant') ? app('currentTenant')->name : 'Online Sale';
+        $remainingText = $invoice->remaining_amount == floor($invoice->remaining_amount)
+            ? number_format($invoice->remaining_amount, 0)
+            : number_format($invoice->remaining_amount, 2);
+
+        // ما بنحط رقم الفاتورة بالرسالة قصداً — رقم الفاتورة متغيّر الطول وممكن
+        // يدفع الرسالة فوق حد الرسالة الوحدة، وقتها القص التلقائي بيقص اسم
+        // المعرض (الجزء الثابت والمهم) بدل ما يقص رقم الفاتورة (الأقل أهمية هون).
+        $message = \App\Support\SmsTextBuilder::build(
+            fn (string $store) => "تذكير من {$store}: عليكم {$remainingText}₪ لطلبية سابقة. يرجى التسديد.",
+            $storeName
+        );
+
+        try {
+            $sent = app(\App\Services\SmsService::class)->send($invoice->buyer_phone, $message, 'wholesale_invoice_reminder');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Wholesale invoice reminder SMS failed', ['invoice_id' => $invoice->id, 'error' => $e->getMessage()]);
+            $sent = false;
+        }
+
+        return $sent
+            ? back()->with('success', 'تم إرسال التذكير (أو تسجيله بالوضع التجريبي)')
+            : back()->with('error', 'تعذر إرسال التذكير');
+    }
 }

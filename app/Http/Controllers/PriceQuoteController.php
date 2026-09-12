@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
 use App\Models\PriceQuote;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -124,6 +125,49 @@ class PriceQuoteController extends Controller
 
         return redirect()->route('price-quotes.index')
             ->with('success', 'تم حذف عرض السعر بنجاح');
+    }
+
+    /**
+     * تحويل عرض سعر لفاتورة عادية جاهزة — بدل ما نعيد كتابة نفس البنود يدوياً
+     * لما الزبون يوافق على العرض.
+     */
+    public function convertToInvoice($id)
+    {
+        $quote = PriceQuote::with('items')->findOrFail($id);
+
+        $invoiceNumber = 'INV-'.date('Ymd').rand(1000, 9999);
+
+        $invoice = DB::transaction(function () use ($quote, $invoiceNumber) {
+            $notes = 'محوّلة من عرض سعر رقم '.$quote->quote_number;
+            if ($quote->notes) {
+                $notes .= "\n".$quote->notes;
+            }
+
+            $invoice = Invoice::create([
+                'customer_name' => $quote->client_name,
+                'invoice_date' => now()->format('Y-m-d'),
+                'invoice_number' => $invoiceNumber,
+                'notes' => $notes,
+                'total_amount' => $quote->total_amount,
+                'discount_amount' => $quote->discount_amount,
+                'afterDiscount_amount' => $quote->afterDiscount_amount,
+            ]);
+
+            foreach ($quote->items as $item) {
+                $invoice->items()->create([
+                    'item_number' => $item->item_number,
+                    'description' => $item->description,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'total_price' => $item->total_price,
+                ]);
+            }
+
+            return $invoice;
+        });
+
+        return redirect()->route('invoices.show', $invoice->id)
+            ->with('success', 'تم تحويل عرض السعر لفاتورة بنجاح');
     }
 
     /**

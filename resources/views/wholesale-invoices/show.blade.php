@@ -18,6 +18,14 @@
                     <i class="fas fa-arrow-right me-1"></i> العودة للقائمة
                 </a>
                 <div class="d-flex gap-2 flex-wrap">
+                    @if ($invoice->buyer_phone && $invoice->remaining_amount > 0)
+                        <form action="{{ route('wholesale-invoices.send-reminder', $invoice->id) }}" method="POST" onsubmit="return confirm('إرسال تذكير SMS للمحل بالمبلغ المتبقي؟')">
+                            @csrf
+                            <button type="submit" class="btn" style="background: #22c55e; color: white; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600; border: none;">
+                                <i class="fas fa-comment-sms me-1"></i> تذكير SMS
+                            </button>
+                        </form>
+                    @endif
                     <a href="{{ route('wholesale-invoices.print', $invoice->id) }}" target="_blank" class="btn" style="background: #10b981; color: white; padding: 0.6rem 1.25rem; border-radius: 10px; font-weight: 600;">
                         <i class="fas fa-print me-1"></i> طباعة
                     </a>

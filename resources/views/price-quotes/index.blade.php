@@ -103,7 +103,7 @@
                                 <span style="font-size: 1.6rem; font-weight: 700; color: #0ea5e9;">{{ number_format($quote->afterDiscount_amount, 2) }} {{ $quote->currency }}</span>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
                                 <a href="{{ route('price-quotes.print', $quote->id) }}" class="btn btn-sm" target="_blank"
                                     style="background: #10b981; color: white; border: none; padding: 0.6rem; border-radius: 8px; display: flex; align-items: center; justify-content: center;" title="طباعة">
                                     <i class="fas fa-print"></i>
@@ -112,6 +112,13 @@
                                     style="background: #f59e0b; color: white; border: none; padding: 0.6rem; border-radius: 8px; display: flex; align-items: center; justify-content: center;" title="تحميل PDF">
                                     <i class="fas fa-download"></i>
                                 </a>
+                                <form action="{{ route('price-quotes.convert-to-invoice', $quote->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('تحويل هذا العرض لفاتورة عادية؟')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm w-100"
+                                        style="background: #6d28d9; color: white; border: none; padding: 0.6rem; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="تحويل لفاتورة">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </button>
+                                </form>
                                 <form action="{{ route('price-quotes.destroy', $quote->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('هل أنت متأكد من حذف هذا العرض؟')">
                                     @csrf
                                     @method('DELETE')
