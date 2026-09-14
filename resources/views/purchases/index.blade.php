@@ -87,7 +87,7 @@
                                     <td>{{ $purchase->phone }}</td>
                                     <td>
                                         @if ($purchase->id_image)
-                                            <a href="/{{ $purchase->id_image }}" target="_blank"
+                                            <a href="{{ asset($purchase->id_image) }}" target="_blank"
                                                 class="btn btn-sm btn-outline-info">عرض</a>
                                         @else
                                             -

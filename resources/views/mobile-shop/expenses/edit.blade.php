@@ -78,7 +78,7 @@
                             <label>صورة الهوية (اختياري)</label>
                             <input type="file" name="id_photo" class="form-control">
                             @if($expense->id_photo)
-                                <div class="mt-2"><a href="/{{ $expense->id_photo }}" target="_blank" class="btn btn-sm btn-outline-info">عرض الصورة الحالية</a></div>
+                                <div class="mt-2"><a href="{{ asset($expense->id_photo) }}" target="_blank" class="btn btn-sm btn-outline-info">عرض الصورة الحالية</a></div>
                             @endif
                         </div>
                         <div class="col-md-6">

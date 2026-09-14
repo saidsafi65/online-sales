@@ -71,7 +71,7 @@
                         <input type="file" name="id_image" class="form-control">
                         @if($purchase->id_image)
                             <div class="mt-2">
-                                <a href="/{{ $purchase->id_image }}" target="_blank" class="btn btn-sm btn-outline-info">عرض الصورة الحالية</a>
+                                <a href="{{ asset($purchase->id_image) }}" target="_blank" class="btn btn-sm btn-outline-info">عرض الصورة الحالية</a>
                             </div>
                         @endif
                     </div>
