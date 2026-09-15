@@ -9,13 +9,69 @@ use Illuminate\Http\Request;
 
 class LaptopCompatibilityController extends Controller
 {
-    // عرض صفحة المتطابقات
+    // الماركات الرئيسية اللي بدنا الشجرة تظهرها دايماً، حتى لو ما فيها أجهزة مضافة لسا
+    public const MAIN_BRANDS = ['HP', 'Lenovo', 'MSI', 'Acer', 'Asus'];
+
+    // عرض صفحة المتطابقات، مقسّمة كشجرة حسب الماركة
     public function index()
     {
         $laptops = Laptop::with('parts.partType')->get();
         $partTypes = PartType::all();
 
-        return view('compatibility.index', compact('laptops', 'partTypes'));
+        $grouped = $laptops->groupBy(function ($laptop) {
+            return static::normalizeBrand($laptop->brand);
+        });
+
+        // نضمن ظهور الماركات الخمس دايماً كأقسام بالشجرة، حتى لو فاضية
+        $brandTree = [];
+        foreach (self::MAIN_BRANDS as $brand) {
+            $brandTree[$brand] = $grouped->get($brand, collect());
+        }
+        // أي ماركة تانية (Dell، أو غير مصنّفة) تترتب بعد الخمسة الرئيسية
+        foreach ($grouped as $brand => $items) {
+            if (! in_array($brand, self::MAIN_BRANDS, true)) {
+                $brandTree[$brand] = $items;
+            }
+        }
+
+        return view('compatibility.index', compact('brandTree', 'partTypes'));
+    }
+
+    // توحيد كتابة اسم الماركة (hp / Hp / HP -> HP) حتى تتجمع صح بالشجرة
+    public static function normalizeBrand(?string $brand): string
+    {
+        $brand = trim((string) $brand);
+        foreach (self::MAIN_BRANDS as $mainBrand) {
+            if (strcasecmp($brand, $mainBrand) === 0) {
+                return $mainBrand;
+            }
+        }
+
+        return $brand !== '' ? $brand : 'أخرى';
+    }
+
+    // بحث سريع بالموديل/الماركة — يرجع الأجهزة المطابقة وقطعها مباشرة (AJAX)
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if ($q === '') {
+            return response()->json(['success' => true, 'laptops' => []]);
+        }
+
+        $laptops = Laptop::with('parts.partType')
+            ->where(function ($query) use ($q) {
+                $query->where('brand', 'like', "%{$q}%")
+                    ->orWhere('model', 'like', "%{$q}%")
+                    ->orWhere('description', 'like', "%{$q}%");
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'html' => view('compatibility.partials.search-results', compact('laptops'))->render(),
+        ]);
     }
 
     // عرض تفاصيل جهاز معين
@@ -158,6 +214,79 @@ class LaptopCompatibilityController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم ربط القطعة بالجهاز بنجاح',
+        ]);
+    }
+
+    // فك ربط قطعة عن جهاز (بدون حذف القطعة نفسها)
+    public function detachPart(Request $request)
+    {
+        $request->validate([
+            'laptop_id' => 'required|exists:laptops,id',
+            'part_id' => 'required|exists:parts,id',
+        ]);
+
+        $laptop = Laptop::findOrFail($request->laptop_id);
+        $laptop->parts()->detach($request->part_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم فك ربط القطعة عن الجهاز',
+        ]);
+    }
+
+    // إنشاء قطعة جديدة (SKU) — القطعة ممكن تنربط فوراً بجهاز إذا انبعث laptop_id معها
+    public function storePart(Request $request)
+    {
+        $request->validate([
+            'part_type_id' => 'required|exists:part_types,id',
+            'part_number' => 'required|string|max:255|unique:parts,part_number',
+            'price' => 'nullable|numeric|min:0',
+            'laptop_id' => 'nullable|exists:laptops,id',
+            'spec_keys' => 'nullable|array',
+            'spec_keys.*' => 'nullable|string|max:100',
+            'spec_values' => 'nullable|array',
+            'spec_values.*' => 'nullable|string|max:255',
+        ]);
+
+        $specifications = [];
+        foreach ($request->input('spec_keys', []) as $index => $key) {
+            $key = trim((string) $key);
+            $value = trim((string) ($request->input('spec_values')[$index] ?? ''));
+            if ($key !== '' && $value !== '') {
+                $specifications[$key] = $value;
+            }
+        }
+
+        $part = Part::create([
+            'part_type_id' => $request->part_type_id,
+            'part_number' => $request->part_number,
+            'price' => $request->price,
+            'specifications' => $specifications,
+        ]);
+
+        if ($request->filled('laptop_id')) {
+            $laptop = Laptop::findOrFail($request->laptop_id);
+            $laptop->parts()->syncWithoutDetaching([
+                $part->id => ['is_original' => true, 'notes' => null],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إضافة القطعة بنجاح',
+            'part' => $part->load('partType'),
+        ]);
+    }
+
+    // بيانات لوحة "إدارة القطع" لجهاز معيّن (AJAX) — قطعه الحالية + نماذج ربط/إضافة قطعة
+    public function partsPanel($id)
+    {
+        $laptop = Laptop::with('parts.partType')->findOrFail($id);
+        $partTypes = PartType::all();
+
+        return response()->json([
+            'success' => true,
+            'html' => view('compatibility.partials.parts-panel', compact('laptop', 'partTypes'))->render(),
         ]);
     }
 }

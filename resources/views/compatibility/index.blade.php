@@ -451,6 +451,16 @@
     </div>
 </div>
 
+<!-- بحث سريع بالموديل/الماركة -->
+<div class="filter-section">
+    <label class="filter-label">
+        <i class="fas fa-search ms-2"></i>
+        بحث سريع (اكتب اسم الموديل أو الماركة)
+    </label>
+    <input type="text" id="modelSearchInput" class="filter-select" placeholder="مثال: 250 G6، أو HP، أو Ideapad...">
+    <div id="modelSearchResults" class="mt-3"></div>
+</div>
+
 <!-- Filter Section -->
 <div class="filter-section">
     <label class="filter-label">
@@ -469,72 +479,91 @@
     </div>
 </div>
 
-<!-- Table Section -->
-<div class="table-container">
-    <div class="table-responsive">
-        <table class="compatibility-table">
-            <thead>
-                <tr>
-                    <th>الجهاز</th>
-                    @foreach($partTypes as $type)
-                        <th class="part-type-col" data-part-type="{{ $type->id }}">
-                            {{ $type->name }}
-                        </th>
-                    @endforeach
-                    <th>التفاصيل</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($laptops as $laptop)
-                <tr>
-                    <td>
-                        <div class="laptop-cell">
-                            @if($laptop->image)
-                                <img src="{{ asset('storage/'.$laptop->image) }}" 
-                                     alt="{{ $laptop->full_name }}" 
-                                     class="laptop-image">
-                            @endif
-                            <div class="laptop-info">
-                                <div class="laptop-brand">{{ $laptop->brand }}</div>
-                                <div class="laptop-model">{{ $laptop->model }}</div>
+<!-- شجرة الأجهزة حسب الماركة -->
+@foreach($brandTree as $brand => $items)
+<div class="table-container mb-3">
+    <details {{ $items->isNotEmpty() ? 'open' : '' }}>
+        <summary style="cursor:pointer; font-weight:800; font-size:1.15rem; padding:.5rem 0;">
+            {{ $brand }}
+            <span class="badge bg-secondary">{{ $items->count() }}</span>
+        </summary>
+
+        @if($items->isEmpty())
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="fas fa-laptop"></i></div>
+                <p class="empty-state-text">لا يوجد أجهزة مضافة بعد لهذه الشركة</p>
+                <a href="{{ route('compatibility.manage') }}" class="details-link">
+                    <i class="fas fa-plus"></i> أضف أول جهاز
+                </a>
+            </div>
+        @else
+        <div class="table-responsive mt-2">
+            <table class="compatibility-table">
+                <thead>
+                    <tr>
+                        <th>الجهاز</th>
+                        @foreach($partTypes as $type)
+                            <th class="part-type-col" data-part-type="{{ $type->id }}">
+                                {{ $type->name }}
+                            </th>
+                        @endforeach
+                        <th>التفاصيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($items as $laptop)
+                    <tr>
+                        <td>
+                            <div class="laptop-cell">
+                                @if($laptop->image)
+                                    <img src="{{ asset('storage/'.$laptop->image) }}"
+                                         alt="{{ $laptop->full_name }}"
+                                         class="laptop-image">
+                                @endif
+                                <div class="laptop-info">
+                                    <div class="laptop-brand">{{ $laptop->brand }}</div>
+                                    <div class="laptop-model">{{ $laptop->model }}</div>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                    
-                    @foreach($partTypes as $type)
-                        @php
-                            $part = $laptop->parts->where('part_type_id', $type->id)->first();
-                        @endphp
-                        <td class="text-center part-type-col" data-part-type="{{ $type->id }}">
-                            @if($part)
-                                <button 
-                                    class="part-available-btn view-compatible-btn"
-                                    data-laptop-id="{{ $laptop->id }}"
-                                    data-part-type-id="{{ $type->id }}"
-                                    data-part-number="{{ $part->part_number }}">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span>{{ $part->part_number }}</span>
-                                </button>
-                            @else
-                                <span class="part-not-available">
-                                    <i class="fas fa-minus-circle"></i>
-                                </span>
-                            @endif
                         </td>
+
+                        @foreach($partTypes as $type)
+                            @php
+                                $part = $laptop->parts->where('part_type_id', $type->id)->first();
+                            @endphp
+                            <td class="text-center part-type-col" data-part-type="{{ $type->id }}">
+                                @if($part)
+                                    <button
+                                        class="part-available-btn view-compatible-btn"
+                                        data-laptop-id="{{ $laptop->id }}"
+                                        data-part-type-id="{{ $type->id }}"
+                                        data-part-number="{{ $part->part_number }}">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>{{ $part->part_number }}</span>
+                                    </button>
+                                @else
+                                    <span class="part-not-available">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </span>
+                                @endif
+                            </td>
+                        @endforeach
+
+                        <td class="text-center">
+                            <a href="{{ route('compatibility.show', $laptop->id) }}" class="details-link">
+                                <span>عرض التفاصيل</span>
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                        </td>
+                    </tr>
                     @endforeach
-                    
-                    <td class="text-center">
-                        <a href="{{ route('compatibility.show', $laptop->id) }}" class="details-link">
-                            <span>عرض التفاصيل</span>
-                            <i class="fas fa-arrow-left"></i>
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
+        @endif
+    </details>
 </div>
+@endforeach
 
 <!-- Modal -->
 <div id="compatibleModal" class="modal-overlay">
@@ -567,6 +596,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalContent = document.getElementById('modalContent');
     const modalPartInfo = document.getElementById('modalPartInfo');
     const partTypeFilter = document.getElementById('partTypeFilter');
+
+    // بحث سريع بالموديل/الماركة (مع تأخير بسيط قبل الإرسال)
+    const modelSearchInput = document.getElementById('modelSearchInput');
+    const modelSearchResults = document.getElementById('modelSearchResults');
+    let searchTimeout = null;
+
+    modelSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const q = this.value.trim();
+
+        if (q === '') {
+            modelSearchResults.innerHTML = '';
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch('{{ route("compatibility.search") }}?q=' + encodeURIComponent(q))
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        modelSearchResults.innerHTML = data.html;
+                    }
+                });
+        }, 350);
+    });
 
     // Filter functionality
     partTypeFilter.addEventListener('change', function() {

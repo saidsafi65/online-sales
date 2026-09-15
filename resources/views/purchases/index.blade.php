@@ -9,6 +9,7 @@
             <div class="btn-group">
                 <a href="{{ route('purchases.create') }}" class="btn btn-primary">إضافة عملية شراء</a>
                 <a href="{{ route('purchases.create-catalog') }}" class="btn btn-success">إضافة + كتالوج</a>
+                <a href="{{ route('purchases.create-laptop') }}" class="btn btn-info text-white">شراء لابتوب</a>
             </div>
         </div>
 
@@ -104,6 +105,13 @@
                                     <td>{{ optional($purchase->return_date)->format('Y-m-d H:i') }}</td>
                                     <td>{{ $purchase->notes ? Str::limit($purchase->notes, 25) : '-' }}</td>
                                     <td>
+                                        @if ($purchase->saleLaptop)
+                                            <a href="{{ route('laptops.edit', $purchase->saleLaptop) }}"
+                                                class="btn btn-sm btn-outline-success">عرض في الكتالوج</a>
+                                        @elseif ($purchase->maintenancePart)
+                                            <a href="{{ route('maintenance_parts.show', $purchase->maintenancePart) }}"
+                                                class="btn btn-sm btn-outline-warning">عرض في قطع الصيانة</a>
+                                        @endif
                                         <a href="{{ route('purchases.edit', $purchase) }}"
                                             class="btn btn-sm btn-outline-primary">تعديل</a>
                                         <form action="{{ route('purchases.destroy', $purchase) }}" method="POST"

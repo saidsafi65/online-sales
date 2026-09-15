@@ -47,4 +47,14 @@ class Purchase extends Model
     {
         return $this->belongsTo(CatalogItem::class);
     }
+
+    public function saleLaptop()
+    {
+        return $this->hasOne(SaleLaptop::class);
+    }
+
+    public function maintenancePart()
+    {
+        return $this->hasOne(MaintenancePart::class);
+    }
 }

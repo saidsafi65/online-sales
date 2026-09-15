@@ -25,8 +25,15 @@ class MaintenancePart extends Model
         'fan',
         'other_parts',
         'notes',
-        'status'
+        'status',
+        'branch_id',
+        'purchase_id',
     ];
+
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class);
+    }
 
     // الحصول على جميع القطع المتوفرة
     public function getAvailablePartsAttribute()

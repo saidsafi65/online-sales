@@ -2,6 +2,10 @@
 
 @section('title', 'إدارة الأجهزة')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 @section('content')
 <div class="container mx-auto px-4 py-8" dir="rtl">
     <div class="bg-white rounded-lg shadow-lg p-6">
@@ -109,7 +113,14 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-gray-700 font-semibold mb-2">الشركة المصنعة *</label>
-                    <input type="text" name="brand" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="مثال: HP, Lenovo, Dell">
+                    <select id="brandSelect" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">اختر...</option>
+                        @foreach (\App\Http\Controllers\LaptopCompatibilityController::MAIN_BRANDS as $mainBrand)
+                            <option value="{{ $mainBrand }}">{{ $mainBrand }}</option>
+                        @endforeach
+                        <option value="__other__">أخرى...</option>
+                    </select>
+                    <input type="text" name="brand" id="brandOtherInput" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 mt-2 hidden" placeholder="اسم الشركة المصنعة">
                 </div>
 
                 <div>
@@ -211,17 +222,47 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // تحميل قطع الجهاز
+    // تحميل قطع الجهاز فعلياً عبر AJAX
     function loadLaptopParts(laptopId) {
         const partsContent = document.getElementById('partsContent');
-        // هنا يمكن إضافة AJAX لتحميل القطع الفعلية
         partsContent.innerHTML = `
-            <div class="text-center py-8 text-gray-500">
-                <i class="fas fa-info-circle text-4xl mb-3"></i>
-                <p>يمكنك إضافة وظيفة إدارة القطع هنا</p>
-                <p class="text-sm mt-2">استخدم صفحة التفاصيل لعرض القطع المرتبطة</p>
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             </div>
         `;
+
+        fetch(`/compatibility/laptop/${laptopId}/parts-panel`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    partsContent.innerHTML = data.html;
+                } else {
+                    partsContent.innerHTML = '<div class="text-center py-8 text-red-600">تعذّر تحميل القطع</div>';
+                }
+            })
+            .catch(() => {
+                partsContent.innerHTML = '<div class="text-center py-8 text-red-600">تعذّر تحميل القطع</div>';
+            });
+    }
+
+    window.reloadPartsPanel = loadLaptopParts;
+
+    // اختيار ماركة رئيسية أو "أخرى" لجهاز جديد
+    const brandSelect = document.getElementById('brandSelect');
+    const brandOtherInput = document.getElementById('brandOtherInput');
+    if (brandSelect) {
+        brandSelect.addEventListener('change', function() {
+            if (this.value === '__other__') {
+                brandOtherInput.value = '';
+                brandOtherInput.classList.remove('hidden');
+                brandOtherInput.required = true;
+                brandOtherInput.focus();
+            } else {
+                brandOtherInput.value = this.value;
+                brandOtherInput.classList.add('hidden');
+                brandOtherInput.required = false;
+            }
+        });
     }
 });
 </script>

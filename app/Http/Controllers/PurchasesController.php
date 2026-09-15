@@ -14,7 +14,7 @@ class PurchasesController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Purchase::query();
+        $query = Purchase::query()->with(['saleLaptop', 'maintenancePart']);
 
         // إذا كان المستخدم ليس مدير نظام، اعرض فقط مشتريات فرعه
         if (!auth()->user()->isAdmin()) {
@@ -286,6 +286,189 @@ class PurchasesController extends Controller
     public function createCatalog(): View
     {
         return view('purchases.create_catalog');
+    }
+
+    public function createLaptop(): View
+    {
+        $catalogItems = \App\Models\CatalogItem::orderBy('product')->orderBy('type')->get();
+
+        return view('purchases.create_laptop', compact('catalogItems'));
+    }
+
+    public function storeLaptop(Request $request): RedirectResponse
+    {
+        $rules = [
+            // بيانات الشراء (مشتركة بغض النظر عن وجهة اللابتوب)
+            'quantity' => 'required|integer|min:1',
+            'payment_method' => 'required|in:cash,app,mixed',
+            'amount_cash' => 'required|numeric|min:0',
+            'amount_bank' => 'required|numeric|min:0',
+            'purchase_date' => 'required|date',
+            'supplier_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'id_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:4096',
+            'notes' => 'nullable|string|max:1000',
+            'for_sale' => 'required|in:0,1',
+        ];
+
+        $forSale = $request->boolean('for_sale');
+
+        if ($forSale) {
+            $rules += [
+                'name' => 'required|string|max:255',
+                'brand' => 'required|string|max:100',
+                'model' => 'nullable|string|max:100',
+                'processor' => 'required|string|max:150',
+                'ram' => 'required|string|max:50',
+                'storage' => 'required|string|max:50',
+                'gpu' => 'nullable|string|max:150',
+                'battery_life' => 'nullable|string|max:100',
+                'price' => 'required|numeric|min:0',
+                'discount' => 'nullable|numeric|min:0|max:100',
+                'description' => 'nullable|string',
+                'images' => 'nullable|array',
+                'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+                'catalog_item_id' => 'nullable|exists:catalog_items,id',
+            ];
+        } else {
+            $rules += [
+                'device_name' => 'required|string|max:255',
+                'part_brand' => 'required|string|max:255',
+                'part_model' => 'required|string|max:255',
+                'screen' => 'nullable|string|max:255',
+                'motherboard' => 'nullable|string|max:255',
+                'screen_cover' => 'nullable|string|max:255',
+                'battery' => 'nullable|string|max:255',
+                'keyboard' => 'nullable|string|max:255',
+                'wifi_card' => 'nullable|string|max:255',
+                'hard_drive' => 'nullable|string|max:255',
+                'part_ram' => 'nullable|string|max:255',
+                'charger' => 'nullable|string|max:255',
+                'fan' => 'nullable|string|max:255',
+                'other_parts' => 'nullable|string',
+                'part_notes' => 'nullable|string',
+                'status' => 'required|in:متوفر,غير متوفر,قيد الطلب',
+            ];
+        }
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        if ((float) $request->amount_cash <= 0 && (float) $request->amount_bank <= 0) {
+            return redirect()->back()
+                ->withErrors(['amount_cash' => 'يجب إدخال مبلغ أكبر من صفر (نقدي أو بنكي)'])
+                ->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $idImagePath = null;
+            if ($request->hasFile('id_image')) {
+                $file = $request->file('id_image');
+                $destinationPath = public_path('uploads/purchases');
+                if (! is_dir($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                $filename = Str::random(20).'.'.$file->getClientOriginalExtension();
+                $file->move($destinationPath, $filename);
+                $idImagePath = 'uploads/purchases/'.$filename;
+            }
+
+            $purchase = Purchase::create([
+                'item' => $forSale ? $request->name : $request->device_name,
+                'type' => 'لابتوب',
+                'quantity' => (int) $request->quantity,
+                'payment_method' => $request->payment_method,
+                'amount_cash' => $request->amount_cash,
+                'amount_bank' => $request->amount_bank,
+                'purchase_date' => $request->purchase_date,
+                'supplier_name' => $request->supplier_name,
+                'phone' => $request->phone,
+                'id_image' => $idImagePath,
+                'is_returned' => false,
+                'notes' => $request->notes,
+                'branch_id' => auth()->user()->branch_id,
+                // ما بيربط بأي صف كتالوج عام — اللابتوب بيروح إما لـ SaleLaptop أو MaintenancePart، شوف تحت.
+            ]);
+
+            if ($forSale) {
+                $laptopData = [
+                    'name' => $request->name,
+                    'brand' => $request->brand,
+                    'model' => $request->model,
+                    'processor' => $request->processor,
+                    'ram' => $request->ram,
+                    'storage' => $request->storage,
+                    'gpu' => $request->gpu,
+                    'battery_life' => $request->battery_life,
+                    'price' => $request->price,
+                    'discount' => $request->discount ?? 0,
+                    'description' => $request->description,
+                    'quantity' => (int) $request->quantity,
+                    'catalog_item_id' => $request->catalog_item_id,
+                    'branch_id' => auth()->user()->branch_id,
+                    'purchase_id' => $purchase->id,
+                ];
+
+                if (! empty($laptopData['catalog_item_id'])) {
+                    $catalogItem = \App\Models\CatalogItem::find($laptopData['catalog_item_id']);
+                    $laptopData['is_out_of_stock'] = $catalogItem ? ((int) $catalogItem->quantity) <= 0 : false;
+                } else {
+                    $laptopData['is_out_of_stock'] = $laptopData['quantity'] <= 0;
+                }
+
+                $laptop = \App\Models\SaleLaptop::create($laptopData);
+
+                if ($request->hasFile('images')) {
+                    foreach ($request->file('images') as $image) {
+                        $imageName = Str::random(20).'.'.$image->getClientOriginalExtension();
+                        $image->storeAs('laptops', $imageName, 'public');
+                        \App\Models\SaleLaptopImage::create([
+                            'sale_laptop_id' => $laptop->id,
+                            'image' => 'laptops/'.$imageName,
+                        ]);
+                    }
+                }
+
+                \App\Services\NotificationService::syncStock($laptop);
+
+                $destinationMessage = 'أُضيف لكتالوج اللابتوبات للبيع';
+            } else {
+                \App\Models\MaintenancePart::create([
+                    'device_name' => $request->device_name,
+                    'brand' => $request->part_brand,
+                    'model' => $request->part_model,
+                    'screen' => $request->screen,
+                    'motherboard' => $request->motherboard,
+                    'screen_cover' => $request->screen_cover,
+                    'battery' => $request->battery,
+                    'keyboard' => $request->keyboard,
+                    'wifi_card' => $request->wifi_card,
+                    'hard_drive' => $request->hard_drive,
+                    'ram' => $request->part_ram,
+                    'charger' => $request->charger,
+                    'fan' => $request->fan,
+                    'other_parts' => $request->other_parts,
+                    'notes' => $request->part_notes,
+                    'status' => $request->status,
+                    'branch_id' => auth()->user()->branch_id,
+                    'purchase_id' => $purchase->id,
+                ]);
+
+                $destinationMessage = 'أُضيف لإدارة قطع الصيانة';
+            }
+
+            DB::commit();
+
+            return redirect()->route('purchases.index')->with('success', 'تم إضافة عملية الشراء بنجاح — '.$destinationMessage);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('error', 'حدث خطأ أثناء إضافة الشراء: '.$e->getMessage())->withInput();
+        }
     }
 
     public function storeCatalog(Request $request): RedirectResponse

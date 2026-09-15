@@ -537,6 +537,8 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         Route::post('/purchases', [PurchasesController::class, 'store'])->name('purchases.store');
         Route::get('/purchases/create-catalog', [PurchasesController::class, 'createCatalog'])->name('purchases.create-catalog');
         Route::post('/purchases/store-catalog', [PurchasesController::class, 'storeCatalog'])->name('purchases.store-catalog');
+        Route::get('/purchases/create-laptop', [PurchasesController::class, 'createLaptop'])->name('purchases.create-laptop');
+        Route::post('/purchases/store-laptop', [PurchasesController::class, 'storeLaptop'])->name('purchases.store-laptop');
     });
     Route::middleware('section.permission:purchases.edit')->group(function () {
         Route::get('/purchases/{purchase}/edit', [PurchasesController::class, 'edit'])->name('purchases.edit');
@@ -690,6 +692,12 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     // إدارة الأجهزة
     Route::get('/compatibility/manage', [LaptopCompatibilityController::class, 'manageLaptops'])
         ->name('compatibility.manage');
+    // بحث سريع بالموديل/الماركة (AJAX)
+    Route::get('/compatibility/search', [LaptopCompatibilityController::class, 'search'])
+        ->name('compatibility.search');
+    // لوحة "إدارة القطع" لجهاز معيّن (AJAX)
+    Route::get('/compatibility/laptop/{id}/parts-panel', [LaptopCompatibilityController::class, 'partsPanel'])
+        ->name('compatibility.parts-panel');
 
     Route::middleware('section.permission:compatibility.create')->group(function () {
         Route::post('/compatibility/laptop', [LaptopCompatibilityController::class, 'storeLaptop'])
@@ -699,6 +707,10 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
         Route::post('/compatibility/attach-part', [LaptopCompatibilityController::class, 'attachPart'])
             ->name('compatibility.attach-part');
 
+        // إنشاء قطعة جديدة (SKU)
+        Route::post('/compatibility/parts', [LaptopCompatibilityController::class, 'storePart'])
+            ->name('compatibility.store-part');
+
         // إضافة/حذف توافق
         Route::post('/compatibility/add', [LaptopCompatibilityController::class, 'addCompatibility'])
             ->name('compatibility.add');
@@ -706,6 +718,8 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
 
     Route::delete('/compatibility/remove', [LaptopCompatibilityController::class, 'removeCompatibility'])
         ->name('compatibility.remove')->middleware('section.permission:compatibility.delete');
+    Route::delete('/compatibility/detach-part', [LaptopCompatibilityController::class, 'detachPart'])
+        ->name('compatibility.detach-part')->middleware('section.permission:compatibility.delete');
     });
 
     // Customer Orders routes

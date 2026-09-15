@@ -23,6 +23,7 @@ class SaleLaptop extends Model
         'quantity',
         'catalog_item_id',
         'branch_id',
+        'purchase_id',
     ];
     protected $casts = [
         'price'            => 'decimal:2',
@@ -92,6 +93,10 @@ class SaleLaptop extends Model
     public function branch()
     {
         return $this->belongsTo(Branch::class);
+    }
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class);
     }
     public function getFinalPriceAttribute()
     {
