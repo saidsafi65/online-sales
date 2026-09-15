@@ -133,17 +133,6 @@
                                 <label class="form-label">نسبة الخصم (%)</label>
                                 <input type="number" step="0.01" name="discount" class="form-control" value="{{ old('discount', 0) }}" min="0" max="100">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">ربط بعنصر كتالوج عام (اختياري)</label>
-                                <select name="catalog_item_id" class="form-select">
-                                    <option value="">بدون ربط</option>
-                                    @foreach($catalogItems as $item)
-                                        <option value="{{ $item->id }}" {{ old('catalog_item_id') == $item->id ? 'selected' : '' }}>
-                                            {{ $item->product }} @if($item->type) — {{ $item->type }} @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
                             <div class="col-12">
                                 <label class="form-label">الوصف</label>
                                 <textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea>

@@ -290,9 +290,7 @@ class PurchasesController extends Controller
 
     public function createLaptop(): View
     {
-        $catalogItems = \App\Models\CatalogItem::orderBy('product')->orderBy('type')->get();
-
-        return view('purchases.create_laptop', compact('catalogItems'));
+        return view('purchases.create_laptop');
     }
 
     public function storeLaptop(Request $request): RedirectResponse
@@ -328,7 +326,6 @@ class PurchasesController extends Controller
                 'description' => 'nullable|string',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-                'catalog_item_id' => 'nullable|exists:catalog_items,id',
             ];
         } else {
             $rules += [
@@ -408,17 +405,12 @@ class PurchasesController extends Controller
                     'discount' => $request->discount ?? 0,
                     'description' => $request->description,
                     'quantity' => (int) $request->quantity,
-                    'catalog_item_id' => $request->catalog_item_id,
                     'branch_id' => auth()->user()->branch_id,
                     'purchase_id' => $purchase->id,
+                    // اللابتوب هون بند مستقل بذاته بالكتالوج — ما بيتربط بعنصر كتالوج عام،
+                    // وكميته المتوفرة هي كمية الشراء نفسها مباشرة.
+                    'is_out_of_stock' => (int) $request->quantity <= 0,
                 ];
-
-                if (! empty($laptopData['catalog_item_id'])) {
-                    $catalogItem = \App\Models\CatalogItem::find($laptopData['catalog_item_id']);
-                    $laptopData['is_out_of_stock'] = $catalogItem ? ((int) $catalogItem->quantity) <= 0 : false;
-                } else {
-                    $laptopData['is_out_of_stock'] = $laptopData['quantity'] <= 0;
-                }
 
                 $laptop = \App\Models\SaleLaptop::create($laptopData);
 
