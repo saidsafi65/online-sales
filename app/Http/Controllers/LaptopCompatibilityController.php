@@ -74,6 +74,20 @@ class LaptopCompatibilityController extends Controller
         ]);
     }
 
+    // بحث حقيقي بالإنترنت (Google Custom Search) — نتائج مرجعية للموظف، بدون تعبئة تلقائية لأي حقل
+    public function searchOnline(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        if ($q === '') {
+            return response()->json(['success' => false, 'message' => 'اكتب اسم الموديل أولاً']);
+        }
+
+        $result = (new \App\Services\GoogleSearchService())->search($q);
+
+        return response()->json($result);
+    }
+
     // عرض تفاصيل جهاز معين
     public function show($id)
     {

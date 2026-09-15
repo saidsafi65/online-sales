@@ -51,11 +51,11 @@ class LaptopCompatibilitySeeder extends Seeder
         $screen1 = Part::create([
             'part_type_id' => 1, // شاشة
             'part_number' => 'LCD-15.6-HD-001',
-            'specifications' => json_encode([
+            'specifications' => [
                 'size' => '15.6 inch',
                 'resolution' => '1366x768',
                 'type' => 'LED',
-            ]),
+            ],
             'price' => 150.00,
         ]);
 
@@ -75,11 +75,11 @@ class LaptopCompatibilitySeeder extends Seeder
         $battery1 = Part::create([
             'part_type_id' => 2, // بطارية
             'part_number' => 'BAT-HP-41Wh',
-            'specifications' => json_encode([
+            'specifications' => [
                 'capacity' => '41Wh',
                 'voltage' => '14.6V',
                 'cells' => '4-cell',
-            ]),
+            ],
             'price' => 80.00,
         ]);
 
@@ -93,11 +93,11 @@ class LaptopCompatibilitySeeder extends Seeder
         $wifi1 = Part::create([
             'part_type_id' => 4, // WiFi
             'part_number' => 'WIFI-RTL8821CE',
-            'specifications' => json_encode([
+            'specifications' => [
                 'chipset' => 'Realtek RTL8821CE',
                 'speed' => '433Mbps',
                 'bands' => 'Dual Band',
-            ]),
+            ],
             'price' => 25.00,
         ]);
 
@@ -109,10 +109,10 @@ class LaptopCompatibilitySeeder extends Seeder
         $keyboard1 = Part::create([
             'part_type_id' => 6, // لوحة مفاتيح
             'part_number' => 'KB-HP-250-AR',
-            'specifications' => json_encode([
+            'specifications' => [
                 'layout' => 'Arabic/English',
                 'backlight' => 'No',
-            ]),
+            ],
             'price' => 35.00,
         ]);
 
@@ -122,11 +122,11 @@ class LaptopCompatibilitySeeder extends Seeder
         $ram1 = Part::create([
             'part_type_id' => 8, // RAM
             'part_number' => 'RAM-DDR4-8GB-2400',
-            'specifications' => json_encode([
+            'specifications' => [
                 'type' => 'DDR4',
                 'capacity' => '8GB',
                 'speed' => '2400MHz',
-            ]),
+            ],
             'price' => 60.00,
         ]);
 
@@ -138,11 +138,11 @@ class LaptopCompatibilitySeeder extends Seeder
         $hdd1 = Part::create([
             'part_type_id' => 7, // قرص صلب
             'part_number' => 'HDD-1TB-5400RPM',
-            'specifications' => json_encode([
+            'specifications' => [
                 'capacity' => '1TB',
                 'speed' => '5400RPM',
                 'interface' => 'SATA III',
-            ]),
+            ],
             'price' => 90.00,
         ]);
 
@@ -153,10 +153,10 @@ class LaptopCompatibilitySeeder extends Seeder
         $motherboard1 = Part::create([
             'part_type_id' => 3, // لوحة أم
             'part_number' => 'MB-HP-250-G6-i5',
-            'specifications' => json_encode([
+            'specifications' => [
                 'cpu_socket' => 'Intel i5-7200U',
                 'chipset' => 'Intel HM175',
-            ]),
+            ],
             'price' => 200.00,
         ]);
 
@@ -166,10 +166,10 @@ class LaptopCompatibilitySeeder extends Seeder
         $case1 = Part::create([
             'part_type_id' => 5, // هيكل
             'part_number' => 'CASE-HP-250-G6-BOTTOM',
-            'specifications' => json_encode([
+            'specifications' => [
                 'color' => 'Black',
                 'material' => 'Plastic',
-            ]),
+            ],
             'price' => 45.00,
         ]);
 

@@ -207,6 +207,13 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
             ->name('update')->middleware('section.permission:payment_gateways.edit');
     });
 
+    // 🔍 بحث الإنترنت (Google Custom Search) — مساعد التوافقات
+    Route::prefix('google-search-settings')->name('google-search-settings.')->middleware('section.permission:google_search.view')->group(function () {
+        Route::get('/', [\App\Http\Controllers\GoogleSearchSettingsController::class, 'edit'])->name('edit');
+        Route::post('/', [\App\Http\Controllers\GoogleSearchSettingsController::class, 'update'])
+            ->name('update')->middleware('section.permission:google_search.edit');
+    });
+
     // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني
     Route::prefix('coupons')->name('coupons.')->middleware('section.permission:coupons.view')->group(function () {
         Route::get('/', [CouponController::class, 'index'])->name('index');
@@ -695,6 +702,9 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
     // بحث سريع بالموديل/الماركة (AJAX)
     Route::get('/compatibility/search', [LaptopCompatibilityController::class, 'search'])
         ->name('compatibility.search');
+    // بحث حقيقي بالإنترنت عن موديل معيّن (Google Custom Search) — مرجع للموظف فقط
+    Route::get('/compatibility/search-online', [LaptopCompatibilityController::class, 'searchOnline'])
+        ->name('compatibility.search-online');
     // لوحة "إدارة القطع" لجهاز معيّن (AJAX)
     Route::get('/compatibility/laptop/{id}/parts-panel', [LaptopCompatibilityController::class, 'partsPanel'])
         ->name('compatibility.parts-panel');

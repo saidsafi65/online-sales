@@ -16,6 +16,7 @@ class Tenant extends Model
         'jawwalpay_enabled', 'jawwalpay_merchant_id', 'jawwalpay_secret_key', 'jawwalpay_base_url',
         'bankofpalestine_enabled', 'bankofpalestine_merchant_id', 'bankofpalestine_secret_key', 'bankofpalestine_base_url',
         'palpay_enabled', 'palpay_merchant_id', 'palpay_secret_key', 'palpay_base_url',
+        'google_search_api_key', 'google_search_cx',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class Tenant extends Model
         'bankofpalestine_secret_key' => 'encrypted',
         'palpay_enabled' => 'boolean',
         'palpay_secret_key' => 'encrypted',
+        'google_search_api_key' => 'encrypted',
     ];
 
     public const PAYMENT_GATEWAYS = [

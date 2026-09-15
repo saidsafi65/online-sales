@@ -457,8 +457,21 @@
         <i class="fas fa-search ms-2"></i>
         بحث سريع (اكتب اسم الموديل أو الماركة)
     </label>
-    <input type="text" id="modelSearchInput" class="filter-select" placeholder="مثال: 250 G6، أو HP، أو Ideapad...">
+    <div class="d-flex gap-2 align-items-start flex-wrap">
+        <input type="text" id="modelSearchInput" class="filter-select" style="flex:1; min-width:250px;" placeholder="مثال: 250 G6، أو HP، أو Ideapad...">
+        <button type="button" id="searchOnlineBtn" class="btn btn-outline-primary" style="white-space:nowrap;">
+            <i class="fas fa-globe"></i> ابحث على الإنترنت
+        </button>
+    </div>
     <div id="modelSearchResults" class="mt-3"></div>
+
+    <div id="onlineSearchPanel" class="mt-3" style="display:none;">
+        <div class="alert alert-warning py-2 px-3 mb-2" style="font-size:0.9rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+            نتائج من الإنترنت — تأكد منها قبل إدخال أي مواصفة، خصوصاً تفاصيل القطع الدقيقة (نوع الكونكتور، عدد الأطراف).
+        </div>
+        <div id="onlineSearchResults"></div>
+    </div>
 </div>
 
 <!-- Filter Section -->
@@ -620,6 +633,44 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
         }, 350);
+    });
+
+    // بحث حقيقي بالإنترنت (Google Custom Search) — نتائج مرجعية فقط
+    const searchOnlineBtn = document.getElementById('searchOnlineBtn');
+    const onlineSearchPanel = document.getElementById('onlineSearchPanel');
+    const onlineSearchResults = document.getElementById('onlineSearchResults');
+
+    searchOnlineBtn.addEventListener('click', function() {
+        const q = modelSearchInput.value.trim();
+        if (q === '') {
+            modelSearchInput.focus();
+            return;
+        }
+
+        onlineSearchPanel.style.display = 'block';
+        onlineSearchResults.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm"></div></div>';
+
+        fetch('{{ route("compatibility.search-online") }}?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    onlineSearchResults.innerHTML = `<div class="text-muted small">${data.message || 'تعذّر البحث'}</div>`;
+                    return;
+                }
+                if (!data.results || data.results.length === 0) {
+                    onlineSearchResults.innerHTML = '<div class="text-muted small">ما في نتائج</div>';
+                    return;
+                }
+                onlineSearchResults.innerHTML = data.results.map(r => `
+                    <div class="border rounded-3 p-2 mb-2">
+                        <a href="${r.link}" target="_blank" rel="noopener" class="fw-bold d-block mb-1">${r.title}</a>
+                        <div class="text-muted small">${r.snippet}</div>
+                    </div>
+                `).join('');
+            })
+            .catch(() => {
+                onlineSearchResults.innerHTML = '<div class="text-danger small">حدث خطأ أثناء البحث</div>';
+            });
     });
 
     // Filter functionality

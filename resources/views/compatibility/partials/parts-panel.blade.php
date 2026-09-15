@@ -57,6 +57,18 @@
     <div class="col-md-6">
         <div class="border rounded-3 p-3 h-100">
             <h6 class="fw-bold mb-2">إضافة قطعة جديدة وربطها</h6>
+
+            <button type="button" class="btn btn-sm btn-outline-primary search-online-for-laptop-btn w-100 mb-2"
+                data-query="{{ $laptop->brand }} {{ $laptop->model }}">
+                <i class="fas fa-globe"></i> ابحث عن مواصفات {{ $laptop->brand }} {{ $laptop->model }} على الإنترنت
+            </button>
+            <div class="online-search-panel mb-2" style="display:none;">
+                <div class="alert alert-warning py-2 px-2 mb-2" style="font-size:0.8rem;">
+                    نتائج مرجعية من الإنترنت — تأكد منها قبل تعبئة الحقول تحت.
+                </div>
+                <div class="online-search-results" style="max-height:220px; overflow-y:auto;"></div>
+            </div>
+
             <form class="add-new-part-form" data-laptop-id="{{ $laptop->id }}">
                 <div class="mb-2">
                     <label class="form-label small">نوع القطعة</label>
@@ -89,6 +101,40 @@
 <script>
 (function() {
     const panel = document.currentScript.closest('#partsContent') || document;
+
+    document.querySelectorAll('.search-online-for-laptop-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const query = this.dataset.query;
+            const wrap = this.closest('.border');
+            const searchPanel = wrap.querySelector('.online-search-panel');
+            const resultsEl = wrap.querySelector('.online-search-results');
+
+            searchPanel.style.display = 'block';
+            resultsEl.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm"></div></div>';
+
+            fetch('{{ route('compatibility.search-online') }}?q=' + encodeURIComponent(query))
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        resultsEl.innerHTML = `<div class="text-muted small">${data.message || 'تعذّر البحث'}</div>`;
+                        return;
+                    }
+                    if (!data.results || data.results.length === 0) {
+                        resultsEl.innerHTML = '<div class="text-muted small">ما في نتائج</div>';
+                        return;
+                    }
+                    resultsEl.innerHTML = data.results.map(r => `
+                        <div class="border rounded-2 p-2 mb-1" style="font-size:0.85rem;">
+                            <a href="${r.link}" target="_blank" rel="noopener" class="fw-bold d-block">${r.title}</a>
+                            <div class="text-muted">${r.snippet}</div>
+                        </div>
+                    `).join('');
+                })
+                .catch(() => {
+                    resultsEl.innerHTML = '<div class="text-danger small">حدث خطأ أثناء البحث</div>';
+                });
+        });
+    });
 
     function addSpecRow(container) {
         const row = document.createElement('div');

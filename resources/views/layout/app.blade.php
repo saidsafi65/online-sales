@@ -1030,6 +1030,15 @@
                                             </a>
                                         </li>
                                     @endif
+                                    @if (auth()->user()->canViewSection('google_search'))
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ route('google-search-settings.edit') }}"
+                                                style="color: rgb(0 0 0 / 90%) !important;">
+                                                <i class="fas fa-globe" style="color: blue;"></i>
+                                                بحث الإنترنت (للتوافقات)
+                                            </a>
+                                        </li>
+                                    @endif
                                     @if (auth()->user()->canViewSection('coupons'))
                                         <li class="nav-item">
                                             <a class="nav-link" href="{{ route('coupons.index') }}"
