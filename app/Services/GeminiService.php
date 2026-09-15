@@ -9,7 +9,8 @@ class GeminiService
 {
     protected string $apiKey;
 
-    private const MODEL = 'gemini-2.0-flash';
+    // "latest" بدل رقم نسخة ثابت — عشان ما تنكسر لما Google تسحب نسخة قديمة (صار هيك فعلاً مع gemini-2.0-flash)
+    private const MODEL = 'gemini-flash-latest';
     private const SYSTEM_INSTRUCTION = <<<'TEXT'
 أنت مساعد ذكي لموظفي محل صيانة وبيع أجهزة (هواتف، لابتوبات، إلكترونيات). جاوب بالعربي بشكل مختصر ومفيد.
 إذا سُئلت عن مواصفات قطعة غيار دقيقة (نوع الكونكتور، عدد الأطراف، رقم القطعة الأصلي) لجهاز معيّن، أعط أفضل إجابة
@@ -52,39 +53,62 @@ TEXT;
         }
         $contents[] = ['role' => 'user', 'parts' => [['text' => $newMessage]]];
 
-        try {
-            $response = Http::timeout(20)
-                ->withHeaders(['X-goog-api-key' => $this->apiKey])
-                ->post('https://generativelanguage.googleapis.com/v1beta/models/'.self::MODEL.':generateContent', [
-                    'contents' => $contents,
-                    'systemInstruction' => ['parts' => [['text' => self::SYSTEM_INSTRUCTION]]],
-                    'generationConfig' => ['maxOutputTokens' => 1024, 'temperature' => 0.7],
-                ]);
+        // Gemini's free tier يرجّع 503 "high demand" أو تايم آوت شبكة أحياناً بشكل عابر —
+        // Google نفسها بتنصح بإعادة محاولة قصيرة بدل ما نفشل من أول مرة.
+        $maxAttempts = 3;
+        $lastMessage = 'تعذّر الاتصال بالمساعد الذكي حالياً، تأكد من صحة بيانات الإعدادات.';
 
-            if (! $response->successful()) {
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::timeout(15)
+                    ->withHeaders(['X-goog-api-key' => $this->apiKey])
+                    ->post('https://generativelanguage.googleapis.com/v1beta/models/'.self::MODEL.':generateContent', [
+                        'contents' => $contents,
+                        'systemInstruction' => ['parts' => [['text' => self::SYSTEM_INSTRUCTION]]],
+                        'generationConfig' => ['maxOutputTokens' => 1024, 'temperature' => 0.7],
+                    ]);
+
+                if ($response->successful()) {
+                    $text = $response->json('candidates.0.content.parts.0.text');
+
+                    if (! $text) {
+                        return ['success' => false, 'message' => 'ما وصل رد من المساعد، جرب مرة ثانية.'];
+                    }
+
+                    return ['success' => true, 'reply' => $text];
+                }
+
                 Log::warning('GeminiService: request failed', [
+                    'attempt' => $attempt,
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
 
                 if ($response->status() === 429) {
+                    // حد الحصة اليومية — إعادة المحاولة فوراً ما رح تفيد.
                     return ['success' => false, 'message' => 'تم الوصول للحد اليومي المجاني للمساعد الذكي. جرب مرة ثانية بكرا.'];
                 }
 
-                return ['success' => false, 'message' => 'تعذّر الاتصال بالمساعد الذكي حالياً، تأكد من صحة بيانات الإعدادات.'];
+                if ($response->status() === 503) {
+                    $lastMessage = 'المساعد الذكي مشغول حالياً (ضغط طلبات على خدمة Google)، جرب كمان شوي.';
+                    if ($attempt < $maxAttempts) {
+                        usleep(400_000 * $attempt);
+                        continue;
+                    }
+                }
+
+                return ['success' => false, 'message' => $lastMessage];
+            } catch (\Throwable $e) {
+                Log::error('GeminiService: reply failed', ['attempt' => $attempt, 'error' => $e->getMessage()]);
+                $lastMessage = 'حدث خطأ أثناء التواصل مع المساعد الذكي، جرب مرة ثانية.';
+
+                if ($attempt < $maxAttempts) {
+                    usleep(400_000 * $attempt);
+                    continue;
+                }
             }
-
-            $text = $response->json('candidates.0.content.parts.0.text');
-
-            if (! $text) {
-                return ['success' => false, 'message' => 'ما وصل رد من المساعد، جرب مرة ثانية.'];
-            }
-
-            return ['success' => true, 'reply' => $text];
-        } catch (\Throwable $e) {
-            Log::error('GeminiService: reply failed', ['error' => $e->getMessage()]);
-
-            return ['success' => false, 'message' => 'حدث خطأ أثناء التواصل مع المساعد الذكي.'];
         }
+
+        return ['success' => false, 'message' => $lastMessage];
     }
 }
