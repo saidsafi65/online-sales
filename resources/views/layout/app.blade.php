@@ -1316,6 +1316,7 @@
 
     @include('partials.global-search')
     @include('partials.chat-widget')
+    @include('partials.ai-assistant-widget')
 
     @stack('scripts')
 </body>

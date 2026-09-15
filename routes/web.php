@@ -214,6 +214,13 @@ Route::middleware(['auth', 'ensure.active'])->group(function () {
             ->name('update')->middleware('section.permission:google_search.edit');
     });
 
+    // 🤖 المساعد الذكي (Gemini) — ودجت عائمة بكل الصفحات
+    Route::prefix('ai-assistant')->name('ai-assistant.')->middleware('section.permission:ai_assistant.view')->group(function () {
+        Route::get('/history', [\App\Http\Controllers\AiAssistantController::class, 'history'])->name('history');
+        Route::post('/send', [\App\Http\Controllers\AiAssistantController::class, 'send'])->name('send');
+        Route::post('/clear', [\App\Http\Controllers\AiAssistantController::class, 'clear'])->name('clear');
+    });
+
     // 🏷️ أكواد الخصم (كوبونات) للمتجر الإلكتروني
     Route::prefix('coupons')->name('coupons.')->middleware('section.permission:coupons.view')->group(function () {
         Route::get('/', [CouponController::class, 'index'])->name('index');

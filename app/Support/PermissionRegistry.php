@@ -49,6 +49,7 @@ class PermissionRegistry
             'branding' => ['label' => 'هوية المعرض', 'actions' => ['view' => 'عرض', 'edit' => 'تعديل']],
             'payment_gateways' => ['label' => 'طرق الدفع', 'actions' => ['view' => 'عرض', 'edit' => 'تعديل']],
             'google_search' => ['label' => 'بحث الإنترنت (للتوافقات)', 'actions' => ['view' => 'عرض', 'edit' => 'تعديل']],
+            'ai_assistant' => ['label' => 'المساعد الذكي', 'actions' => ['view' => 'عرض']],
             'coupons' => ['label' => 'أكواد الخصم', 'actions' => self::STANDARD],
         ];
     }
